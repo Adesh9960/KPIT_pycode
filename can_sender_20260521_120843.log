@@ -1,0 +1,49 @@
+2026-05-21 12:08:43,277 [INFO] Initialising PCAN-USB interface…
+2026-05-21 12:08:43,312 [WARNING] uptime library not available, timestamps are relative to boot time and not to Epoch UTC
+2026-05-21 12:08:43,408 [INFO] CAN bus open — PCAN_USBBUS1 @ 500 kbps
+2026-05-21 12:08:43,408 [INFO] Sending continuous ECU simulation frames. Press Ctrl+C to stop.
+
+2026-05-21 12:08:44,444 [INFO] [HB #0001] speed=   2.5 km/h  rpm=  848  temp= 25.0°C  vbat=13.83V
+2026-05-21 12:08:45,493 [INFO] [HB #0002] speed=   5.0 km/h  rpm=  901  temp= 30.0°C  vbat=13.82V
+2026-05-21 12:08:46,537 [INFO] [HB #0003] speed=   7.5 km/h  rpm=  990  temp= 35.0°C  vbat=13.77V
+2026-05-21 12:08:47,581 [INFO] [HB #0004] speed=  10.0 km/h  rpm= 1138  temp= 40.0°C  vbat=13.82V
+2026-05-21 12:08:48,627 [INFO] [HB #0005] speed=  12.5 km/h  rpm= 1140  temp= 45.0°C  vbat=13.78V
+2026-05-21 12:08:48,627 [INFO] [DIAG] Sent OBD-II RPM request (Mode 01 PID 0C)
+2026-05-21 12:08:49,670 [INFO] [HB #0006] speed=  15.0 km/h  rpm= 1249  temp= 50.0°C  vbat=13.72V
+2026-05-21 12:08:50,716 [INFO] [HB #0007] speed=  17.5 km/h  rpm= 1280  temp= 55.0°C  vbat=13.81V
+2026-05-21 12:08:51,758 [INFO] [HB #0008] speed=  20.0 km/h  rpm= 1395  temp= 60.0°C  vbat=13.79V
+2026-05-21 12:08:52,799 [INFO] [HB #0009] speed=  22.5 km/h  rpm= 1445  temp= 65.0°C  vbat=13.73V
+2026-05-21 12:08:53,840 [INFO] [HB #0010] speed=  25.0 km/h  rpm= 1538  temp= 70.0°C  vbat=13.73V
+2026-05-21 12:08:53,840 [INFO] [DIAG] Sent OBD-II RPM request (Mode 01 PID 0C)
+2026-05-21 12:08:54,887 [INFO] [HB #0011] speed=  27.5 km/h  rpm= 1674  temp= 75.0°C  vbat=13.75V
+2026-05-21 12:08:55,928 [INFO] [HB #0012] speed=  30.0 km/h  rpm= 1715  temp= 80.0°C  vbat=13.80V
+2026-05-21 12:08:56,977 [INFO] [HB #0013] speed=  32.5 km/h  rpm= 1748  temp= 85.0°C  vbat=13.80V
+2026-05-21 12:08:58,017 [INFO] [HB #0014] speed=  35.0 km/h  rpm= 1880  temp= 90.0°C  vbat=13.82V
+2026-05-21 12:08:59,060 [INFO] [HB #0015] speed=  37.5 km/h  rpm= 1958  temp= 90.0°C  vbat=13.85V
+2026-05-21 12:08:59,060 [INFO] [DIAG] Sent OBD-II RPM request (Mode 01 PID 0C)
+2026-05-21 12:09:00,102 [INFO] [HB #0016] speed=  40.0 km/h  rpm= 1998  temp= 90.0°C  vbat=13.75V
+2026-05-21 12:09:01,143 [INFO] [HB #0017] speed=  42.5 km/h  rpm= 2069  temp= 90.0°C  vbat=13.83V
+2026-05-21 12:09:02,185 [INFO] [HB #0018] speed=  45.0 km/h  rpm= 2160  temp= 90.0°C  vbat=13.80V
+2026-05-21 12:09:03,232 [INFO] [HB #0019] speed=  47.5 km/h  rpm= 2227  temp= 90.0°C  vbat=13.83V
+2026-05-21 12:09:04,280 [INFO] [HB #0020] speed=  50.0 km/h  rpm= 2348  temp= 90.0°C  vbat=13.80V
+2026-05-21 12:09:04,280 [INFO] [DIAG] Sent OBD-II RPM request (Mode 01 PID 0C)
+2026-05-21 12:09:05,324 [INFO] [HB #0021] speed=  50.0 km/h  rpm= 2305  temp= 90.0°C  vbat=13.79V
+2026-05-21 12:09:06,371 [INFO] [HB #0022] speed=  50.0 km/h  rpm= 2330  temp= 90.0°C  vbat=13.78V
+2026-05-21 12:09:07,418 [INFO] [HB #0023] speed=  50.0 km/h  rpm= 2335  temp= 90.0°C  vbat=13.85V
+2026-05-21 12:09:08,461 [INFO] [HB #0024] speed=  50.0 km/h  rpm= 2296  temp= 90.0°C  vbat=13.79V
+2026-05-21 12:09:09,503 [INFO] [HB #0025] speed=  50.0 km/h  rpm= 2309  temp= 90.0°C  vbat=13.76V
+2026-05-21 12:09:09,504 [INFO] [DIAG] Sent OBD-II RPM request (Mode 01 PID 0C)
+2026-05-21 12:09:10,544 [INFO] [HB #0026] speed=  50.0 km/h  rpm= 2280  temp= 90.0°C  vbat=13.82V
+2026-05-21 12:09:11,587 [INFO] [HB #0027] speed=  50.0 km/h  rpm= 2314  temp= 90.0°C  vbat=13.76V
+2026-05-21 12:09:12,631 [INFO] [HB #0028] speed=  50.0 km/h  rpm= 2302  temp= 90.0°C  vbat=13.72V
+2026-05-21 12:09:13,677 [INFO] [HB #0029] speed=  50.0 km/h  rpm= 2277  temp= 90.0°C  vbat=13.83V
+2026-05-21 12:09:14,721 [INFO] [HB #0030] speed=  50.0 km/h  rpm= 2321  temp= 90.0°C  vbat=13.78V
+2026-05-21 12:09:14,721 [INFO] [DIAG] Sent OBD-II RPM request (Mode 01 PID 0C)
+2026-05-21 12:09:15,766 [INFO] [HB #0031] speed=  50.0 km/h  rpm= 2291  temp= 90.0°C  vbat=13.77V
+2026-05-21 12:09:16,811 [INFO] [HB #0032] speed=  50.0 km/h  rpm= 2262  temp= 90.0°C  vbat=13.82V
+2026-05-21 12:09:17,860 [INFO] [HB #0033] speed=  50.0 km/h  rpm= 2251  temp= 90.0°C  vbat=13.75V
+2026-05-21 12:09:18,900 [INFO] [HB #0034] speed=  50.0 km/h  rpm= 2347  temp= 90.0°C  vbat=13.84V
+2026-05-21 12:09:19,945 [INFO] [HB #0035] speed=  50.0 km/h  rpm= 2325  temp= 90.0°C  vbat=13.81V
+2026-05-21 12:09:19,945 [INFO] [DIAG] Sent OBD-II RPM request (Mode 01 PID 0C)
+2026-05-21 12:09:20,993 [INFO] [HB #0036] speed=  48.0 km/h  rpm= 2283  temp= 90.0°C  vbat=13.77V
+2026-05-21 12:09:22,036 [INFO] [HB #0037] speed=  46.0 km/h  rpm= 2171  temp= 90.0°C  vbat=13.78V
