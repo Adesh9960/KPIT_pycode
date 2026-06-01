@@ -1,0 +1,35 @@
+sequenceDiagram
+
+participant App
+
+participant UDS
+
+participant ISO-TP
+
+participant CAN
+
+participant ECU
+
+
+App->>UDS: Send Request
+
+UDS->>ISO-TP: Forward
+
+ISO-TP->>CAN: Send Frame
+
+CAN->>ECU: Request
+
+
+ECU->>CAN: Negative Response (0x7F)
+
+CAN->>ISO-TP: Receive
+
+ISO-TP->>UDS: Forward Payload
+
+UDS->>App: Error Code (e.g., 0x11 Service Not Supported)
+
+
+
+
+
+
