@@ -3,7 +3,7 @@ import os
 import numpy as np
 from drawTrap import draw_trap
 from laneExtraction import extractLane
-cap = cv2.VideoCapture("data/videos/nD_11.mp4")
+cap = cv2.VideoCapture("data/videos/nD_18.mp4")
 print(cap)
 print(os.path.exists("data/videos/nD_11.mp4"))
 src = np.float32([
