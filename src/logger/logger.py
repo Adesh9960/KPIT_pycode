@@ -19,8 +19,12 @@ def start():
     main.write_thread = threading.Thread(target=write_loop)
     main.write_thread.start() 
 def write_log(frame: CANFrame):
-    with main.ring_lock:
-        main.ring_buffer.push(frame)
+    try:
+        with main.ring_lock:
+            main.ring_buffer.push(frame)
+    except Exception as e:
+        print(f"LOGGER Service either not started or facing error \n Error : {e}")
+        
 
 def stop():
     main.running = False
