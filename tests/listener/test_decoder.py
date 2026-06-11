@@ -1,6 +1,6 @@
 import unittest
 
-from error_decoder import (
+from listener.error_decoder import (
     decode_error,
     CAN_ERR_ACK,
     CAN_ERR_BUSOFF,
@@ -15,8 +15,10 @@ class TestDecodeError(unittest.TestCase):
             can_id=CAN_ERR_ACK,
             dlc=0,
             data=b"",
-            timestamp=0,
+            timestamp_ns=0,
             is_error=True,
+            is_extended=False,
+            is_fd=False
         )
 
         decode_error(frame)
@@ -28,8 +30,10 @@ class TestDecodeError(unittest.TestCase):
             can_id=CAN_ERR_ACK | CAN_ERR_BUSOFF,
             dlc=0,
             data=b"",
-            timestamp=0,
+            timestamp_ns=0,
             is_error=True,
+            is_extended=False,
+            is_fd=False
         )
 
         decode_error(frame)

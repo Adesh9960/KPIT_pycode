@@ -3,7 +3,7 @@ from .driver.SocketCANAdapter import SocketCANAdapter
 import custom_types
 from threading import Lock, Thread
 from queue import Queue, PriorityQueue
-from TxRequest import RetryHeap
+from .TxRequest import RetryHeap
 
 message_monitor_list: dict[custom_types.can_id, MessageMonitor]
 adapter: SocketCANAdapter = None

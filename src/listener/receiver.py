@@ -1,7 +1,7 @@
 import time
 import listener.main as main
 from logger.logger import write_log
-from error_decoder import decode_error
+from .error_decoder import decode_error
 def is_UDS(): pass
 
 def receiver():

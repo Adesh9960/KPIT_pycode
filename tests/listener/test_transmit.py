@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import MagicMock
 
 import listener.main as main
-from transmitter import transmit
+from listener.tranmitter import transmit
 
 
 class DummyRequest:

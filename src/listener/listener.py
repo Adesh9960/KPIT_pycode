@@ -1,11 +1,11 @@
 import listener.main as main
-from driver.SocketCANAdapter import SocketCANAdapter
-from driver.CANconfig import CANConfig
-from tranmitter import transmitter
-from receiver import receiver
-from timeout import monitor_timeouts
+from .driver.SocketCANAdapter import SocketCANAdapter
+from .driver.CANconfig import CANConfig
+from .tranmitter import transmitter
+from .receiver import receiver
+from .timeout import monitor_timeouts
 import threading
-from TxRequest import TxRequest
+from .TxRequest import TxRequest
 import queue
 
 def start():

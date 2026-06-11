@@ -1,4 +1,4 @@
-from CANconfig import CANConfig
+from .CANconfig import CANConfig
 from data_structures.CANFrame import CANFrame
 from data_structures.BusStatistics import BusStatistics
 from errors.TransmissionError import TransmissionError

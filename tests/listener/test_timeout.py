@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import MagicMock
 
 import listener.main as main
-from timeout import check_timeouts
+from listener.timeout import check_timeouts
 
 
 class DummyMonitor:
