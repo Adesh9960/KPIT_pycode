@@ -1,5 +1,6 @@
 from enum import Enum
 from dataclasses import dataclass
+from can import Message
 class TxRequestType(Enum):
     UDS = "uds"
     RAWCAN = "raw_can"
@@ -9,7 +10,7 @@ class TxRequest:
     enqueue_timestamp_ns: int
     request_id: int 
     request_type: TxRequestType
-    payload: dict
+    payload: Message
     retry_count: int = 0
     max_retries: int
     next_retry_time: float = 0
