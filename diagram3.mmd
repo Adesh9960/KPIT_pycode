@@ -1,0 +1,57 @@
+sequenceDiagram
+
+participant UI
+
+participant App Layer
+
+participant UDS
+
+participant ISO-TP
+
+participant CAN Driver
+
+participant MCP2515
+
+participant CAN Bus
+
+participant ECU
+
+
+UI->>App Layer: User Command
+
+App Layer->>UDS: Create UDS Request
+
+UDS->>ISO-TP: Pass Payload
+
+ISO-TP->>CAN Driver: Frame(s)
+
+
+alt MCP2515 Interface
+
+CAN Driver->>MCP2515: SPI Transfer
+
+MCP2515->>CAN Bus: Transmit
+
+else PCAN USB Interface
+
+CAN Driver->>CAN Bus: Direct via USB
+
+end
+
+
+CAN Bus->>ECU: Deliver Message
+
+ECU->>CAN Bus: Response
+
+
+CAN Bus->>MCP2515: Receive
+
+MCP2515->>CAN Driver: SPI Read
+
+CAN Driver->>ISO-TP: Frame(s)
+
+ISO-TP->>UDS: Reassemble
+
+UDS->>App Layer: Parsed Response
+
+App Layer->>UI: Display Output

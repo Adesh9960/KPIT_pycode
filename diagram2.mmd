@@ -1,0 +1,29 @@
+sequenceDiagram
+
+participant User
+
+participant UDS
+
+participant ISO-TP
+
+participant CAN
+
+participant ECU
+
+
+User->>UDS: Session Control Request (0x10 03)
+
+UDS->>ISO-TP: Payload
+
+ISO-TP->>CAN: Send Frame
+
+CAN->>ECU: Request
+
+
+ECU->>CAN: Positive Response (0x50 03)
+
+CAN->>ISO-TP: Receive
+
+ISO-TP->>UDS: Forward
+
+UDS->>User: Session Activated

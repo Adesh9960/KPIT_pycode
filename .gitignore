@@ -1,0 +1,4 @@
+/venv/
+/LaneDetection/data/
+__pycache__/
+data/
