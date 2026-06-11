@@ -75,7 +75,7 @@ def decode_error(frame: CANFrame):
     if frame.can_id & CAN_ERR_RESTARTED:
         errors.append("Controller restarted")
     
-    frame.details = "".join(errors)
+    frame.details = "; ".join(errors)
     return frame
 
     

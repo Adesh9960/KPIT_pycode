@@ -11,11 +11,11 @@ class TxRequest:
     request_id: int 
     request_type: TxRequestType
     payload: Message
-    retry_count: int = 0
     max_retries: int
-    next_retry_time: float = 0
     timeout_ms: int
-    uds_error_callback: function | None
-    confirmation_callback: function | None
+    retry_count: int = 0
+    next_retry_time: float = 0
+    uds_error_callback: function | None = None
+    confirmation_callback: function | None= None
 
 type RetryHeap = list[tuple[int, TxRequest]]

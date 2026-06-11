@@ -10,7 +10,7 @@ def receiver():
         monitor = main.message_monitor_list[raw_frame.can_id]
 
         if monitor:
-            monitor = time.monotonic()
+            monitor.last_rx_time = time.monotonic()
         if not raw_frame.is_error:
             write_log(raw_frame)
             if is_UDS(raw_frame.can_id):

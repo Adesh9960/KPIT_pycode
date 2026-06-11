@@ -1,7 +1,6 @@
 import time
 import listener.main as main
 from errors import TransmissionError
-from data_structures.CANFrame import CANFrame
 from .TxRequest import TxRequest
 from logger.logger import write_log
 from utils.sendFrameToCANFrame import sendFrameToCANFrame
@@ -23,11 +22,12 @@ def transmit(msg: TxRequest):
             msg.uds_error_callback()
 
 def transmitter():
-    msg = main.tx_queue.remove()
-    transmit(msg)
-    if main.retry_queue[0][0] <= (time.monotonic() * 1000):
-        _, msg = heapq.heappop(main.retry_queue)
-        msg.retry_count += 1
+    while True:
+        msg = main.tx_queue.remove()
         transmit(msg)
+        if main.retry_queue[0][0] <= (time.monotonic() * 1000):
+            _, msg = heapq.heappop(main.retry_queue)
+            msg.retry_count += 1
+            transmit(msg)
 
     
