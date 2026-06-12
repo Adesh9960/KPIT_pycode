@@ -8,11 +8,16 @@ import can
 class SocketCANAdapter:
     config: CANConfig
     stats: BusStatistics
-    bus: can.BusABC | None
+    bus: can.BusABC | None = None
     def __init__(self, config: CANConfig):
         self.config = config
         self.stats = BusStatistics()
     def open(self): 
+        # Bring the interface down first
+        subprocess.run(
+            ["ip", "link", "set", "can0", "down"],
+            check=True,
+        )
         subprocess.run(
         [
           "ip","link","set",self.config.interface,"up",
@@ -20,6 +25,10 @@ class SocketCANAdapter:
             "restart-ms",str(self.config.restart_ms)
         ],
         check=True
+        )
+        subprocess.run(
+            ["ip", "link", "set", "can0", "up"],
+            check=True,
         )
         if self.config.fd_enabled:
             self.bus = can.Bus(interface=self.config.interface, channel=self.config.channel, fd=True)
@@ -57,6 +66,7 @@ class SocketCANAdapter:
             raise TransmissionError(msg.arbitration_id)
     
     def receive(self, timeout:float | None = None):
+        msg = None
         msg = self.bus.recv(timeout)
 
         if msg is None:

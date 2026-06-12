@@ -8,7 +8,7 @@ def receiver():
     while True:
         raw_frame = main.adapter.receive()
         monitor = main.message_monitor_list[raw_frame.can_id]
-
+        print(f"{raw_frame.can_id}, {raw_frame.data.hex()}")
         if monitor:
             monitor.last_rx_time = time.monotonic()
         if not raw_frame.is_error:

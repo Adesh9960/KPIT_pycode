@@ -16,7 +16,7 @@ def start():
     restart_ms=100
     )
     main.adapter = SocketCANAdapter(adapter_config)
-    
+    main.adapter.open()
     main.uds_queue = queue.Queue()
     main.can_queue = queue.Queue()
     
@@ -32,3 +32,5 @@ def start():
 
 def send_to_tx_queue(request: TxRequest):
     main.tx_queue.put(request)
+
+start()

@@ -23,7 +23,7 @@ def transmit(msg: TxRequest):
 
 def transmitter():
     while True:
-        msg = main.tx_queue.remove()
+        msg = main.tx_queue.get()
         transmit(msg)
         if main.retry_queue[0][0] <= (time.monotonic() * 1000):
             _, msg = heapq.heappop(main.retry_queue)
