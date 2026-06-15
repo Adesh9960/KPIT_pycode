@@ -12,7 +12,7 @@ import queue
 import can
 import time
 import isotp
-from listener.iso_tp_error_decoder import decode_isotp_error
+from listener.iso_tp_error_decoder import IsoTpErrorHandler
 
 def start():
     adapter_config = CANConfig(
@@ -24,23 +24,30 @@ def start():
     main.raw_can_receiver = RawReceiver()
     main.adapter = SocketCANAdapter(adapter_config, listeners=[main.raw_can_receiver])
     main.adapter.open()
+
+    #Setting ISO
+    iso_error_handler = IsoTpErrorHandler()
     main.stack = isotp.NotifierBasedCanStack(
         bus=main.adapter.bus,
         notifier = main.adapter.notifier,
         address=main.address,
-        error_handler = decode_isotp_error
+        error_handler = iso_error_handler
     )
+
+    #Setting Queues
     main.uds_queue = queue.Queue()
     main.can_queue = queue.Queue()
     main.tx_queue = queue.PriorityQueue()
+
+    #Setting Threads
     main.running = True
     main.tx_thread = threading.Thread(target=transmitter)
     main.rx_thread = threading.Thread(target=iso_receiver)
     main.timeout_thread = threading.Thread(target=monitor_timeouts)
-
     main.tx_thread.start()
     main.rx_thread.start()
     main.timeout_thread.start()
+
     print("Listener Started")
     print("Ready to receive and send messages")
 def stop():
