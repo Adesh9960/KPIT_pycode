@@ -5,19 +5,30 @@ from .TxRequest import TxRequest
 from logger.logger import write_log
 from utils.sendFrameToCANFrame import sendFrameToCANFrame
 import heapq
+
 def transmit(msg: TxRequest):
     try:
-        main.adapter.send(msg.payload)
+        if(msg.request_type == 'raw_can'):
+            main.adapter.send(msg.payload)
+        else:
+            start = time.monotonic()
+            while main.stack.transmitting():
+                if time.monotonic() >= start + 3:
+                    print("ISO-TP stuck for too long please restart...")
+            main.isotpTXCallback()
+            main.stack.send(msg.payload)
+
     except TransmissionError as e:
         error_log = sendFrameToCANFrame(msg.payload)
         error_log.details = "Transmission Error"
         write_log(error_log)
-        
+
         if(msg.request_type == 'raw_can' and msg.retry_count < msg.max_retries):
             timeout = ((msg.retry_count + 1) * 10)**2 
             msg.timeout_ms = timeout
             msg.next_retry_time = (time.monotonic() * 1000) + msg.timeout_ms 
             heapq.heappush(main.retry_queue, (msg.next_retry_time, msg))
+
         if(msg.request_type == 'uds' and msg.retry_count < msg.max_retries):
             msg.uds_error_callback()
 

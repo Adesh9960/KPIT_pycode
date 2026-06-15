@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 import queue
 
 import listener.main as main
-from listener.receiver import receiver
+from listener.iso_receiver import receiver
 
 
 class DummyFrame:
@@ -23,7 +23,7 @@ class TestReceiver(unittest.TestCase):
     @patch("listener.receiver.write_log")
     def test_receive_normal_frame(self, _, __):
         frame = DummyFrame()
-
+        
         main.adapter = MagicMock()
         main.adapter.receive.side_effect = [frame, KeyboardInterrupt()]
 

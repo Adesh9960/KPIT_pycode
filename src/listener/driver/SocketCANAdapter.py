@@ -9,9 +9,12 @@ class SocketCANAdapter:
     config: CANConfig
     stats: BusStatistics
     bus: can.BusABC | None
-    def __init__(self, config: CANConfig):
+    notifier: can.Notifier | None
+    listeners: list[can.Listener]
+    def __init__(self, config: CANConfig, listeners: list[can.Listener] = []):
         self.config = config
         self.stats = BusStatistics()
+        self.listeners = listeners
     def open(self):
         print("SocketCAN opening started")
         subprocess.run(
@@ -35,6 +38,10 @@ class SocketCANAdapter:
         else:
             self.bus = can.Bus(interface=self.config.interface, channel=self.config.channel)
         
+        self.notifier = can.Notifier(
+            bus=self.bus,
+            listeners=self.listeners
+        )
         print("SocketCAN opened")
         
     def close(self):
@@ -67,24 +74,24 @@ class SocketCANAdapter:
             self.stats.tx_error_frames += 1
             raise TransmissionError(msg.arbitration_id)
     
-    def receive(self, timeout:float | None = None):
-        msg = self.bus.recv(timeout)
-        if msg is None:
-            return None
+    # def receive(self, timeout:float | None = None):
+    #     msg = self.bus.recv(timeout)
+    #     if msg is None:
+    #         return None
         
-        self.stats.rx_frames += 1
-        if msg.is_error_frame:
-            self.stats.error_frames += 1
+    #     self.stats.rx_frames += 1
+    #     if msg.is_error_frame:
+    #         self.stats.error_frames += 1
 
-        return CANFrame(
-            timestamp_ns=int(msg.timestamp * 1_000_000_000),
-            can_id=msg.arbitration_id,
-            dlc=msg.dlc,
-            data=msg.data,
-            is_extended=msg.is_extended_id,
-            is_fd=msg.is_fd,
-            is_error=msg.is_error_frame
-        )
+    #     return CANFrame(
+    #         timestamp_ns=int(msg.timestamp * 1_000_000_000),
+    #         can_id=msg.arbitration_id,
+    #         dlc=msg.dlc,
+    #         data=msg.data,
+    #         is_extended=msg.is_extended_id,
+    #         is_fd=msg.is_fd,
+    #         is_error=msg.is_error_frame
+    #     )
     def clear_filter(self):
         self.bus.set_filters([])
 
