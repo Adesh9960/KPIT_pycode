@@ -12,19 +12,30 @@ class SocketCANAdapter:
     def __init__(self, config: CANConfig):
         self.config = config
         self.stats = BusStatistics()
-    def open(self): 
+    def open(self):
+        print("SocketCAN opening started")
+        subprocess.run(
+            ["ip", "link", "set", "can0", "down"],
+            check=True,
+        ) 
         subprocess.run(
         [
-          "ip","link","set",self.config.interface,"up",
+          "ip","link","set",self.config.channel,"up",
             "type","can","bitrate",str(self.config.bitrate),
             "restart-ms",str(self.config.restart_ms)
         ],
         check=True
         )
+        subprocess.run(
+            ["ip", "link", "set", "can0", "up"],
+            check=True,
+        )
         if self.config.fd_enabled:
             self.bus = can.Bus(interface=self.config.interface, channel=self.config.channel, fd=True)
         else:
             self.bus = can.Bus(interface=self.config.interface, channel=self.config.channel)
+        
+        print("SocketCAN opened")
         
     def close(self):
         if self.bus is not None:
@@ -42,11 +53,11 @@ class SocketCANAdapter:
         print(output)
         return output
     
-    def send(self, frame: CANFrame):
+    def send(self, frame: can.Message):
         msg = can.Message(
-        arbitration_id=frame.can_id,
+        arbitration_id=frame.arbitration_id,
         data=frame.data,
-        is_extended_id=frame.is_extended,
+        is_extended_id=frame.is_extended_id,
         is_fd=frame.is_fd
         )
         try:
@@ -58,7 +69,6 @@ class SocketCANAdapter:
     
     def receive(self, timeout:float | None = None):
         msg = self.bus.recv(timeout)
-
         if msg is None:
             return None
         

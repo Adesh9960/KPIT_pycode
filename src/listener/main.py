@@ -5,7 +5,8 @@ from threading import Lock, Thread
 from queue import Queue, PriorityQueue
 from .TxRequest import RetryHeap
 
-message_monitor_list: dict[custom_types.can_id, MessageMonitor]
+running: bool = False
+message_monitor_list: dict[custom_types.can_id, MessageMonitor] = {}
 adapter: SocketCANAdapter = None
 
 # rx queues

@@ -22,10 +22,10 @@ def transmit(msg: TxRequest):
             msg.uds_error_callback()
 
 def transmitter():
-    while True:
-        msg = main.tx_queue.remove()
+    while main.running:
+        msg = main.tx_queue.get()
         transmit(msg)
-        if main.retry_queue[0][0] <= (time.monotonic() * 1000):
+        if len(main.retry_queue) > 0 and main.retry_queue[0][0] <= (time.monotonic() * 1000):
             _, msg = heapq.heappop(main.retry_queue)
             msg.retry_count += 1
             transmit(msg)

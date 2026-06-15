@@ -9,6 +9,6 @@ def check_timeouts():
             message_monitor.callback()
 
 def monitor_timeouts():
-    while True:
+    while main.running:
         check_timeouts()
         time.sleep(0.01)
