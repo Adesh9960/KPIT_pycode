@@ -11,7 +11,6 @@ class TxRequest:
     enqueue_timestamp_ns: int
 
     # Not used for ordering
-    request_id: int = field(compare=False)
     request_type: TxRequestType = field(compare=False)
     payload: Message = field(compare=False)
     max_retries: int = field(compare=False)
@@ -20,5 +19,6 @@ class TxRequest:
     next_retry_time: float = field(default=0.0, compare=False)
     uds_error_callback: function | None = field(default=None, compare=False)
     confirmation_callback: function | None = field(default=None, compare=False)
+    request_id: int | None = field(default=None, compare=False)
 
 type RetryHeap = list[tuple[int, TxRequest]]

@@ -14,7 +14,7 @@ import time
 import isotp
 from listener.iso_tp_error_decoder import IsoTpErrorHandler
 
-def start():
+def start(uds_response_event = None):
     adapter_config = CANConfig(
     "socketcan",
     "can0",
@@ -37,14 +37,13 @@ def start():
     main.stack.start()
 
     #Setting Queues
-    main.uds_queue = queue.Queue()
     main.can_queue = queue.Queue()
     main.tx_queue = queue.PriorityQueue()
 
     #Setting Threads
     main.running = True
     main.tx_thread = threading.Thread(target=transmitter)
-    main.rx_thread = threading.Thread(target=iso_receiver)
+    main.rx_thread = threading.Thread(target=iso_receiver, args = (uds_response_event,))
     main.timeout_thread = threading.Thread(target=monitor_timeouts)
     main.tx_thread.start()
     main.rx_thread.start()

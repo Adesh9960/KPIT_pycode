@@ -20,7 +20,7 @@ def transmit(msg: TxRequest):
                     print("ISO-TP stuck for too long please restart...")
             if main.isotpTXCallback is not None:
                 main.isotpTXCallback()
-            main.stack.send(msg.payload.data)
+            main.stack.send(msg.payload)
             print("transmitted istop successfully")
 
     except TransmissionError as e:

@@ -1,7 +1,7 @@
 from data_structures.MessageMonitor import MessageMonitor
 from .driver.SocketCANAdapter import SocketCANAdapter
 import custom_types
-from threading import Lock, Thread
+from threading import Thread
 from queue import Queue, PriorityQueue
 from .TxRequest import RetryHeap
 import isotp
@@ -11,7 +11,6 @@ adapter: SocketCANAdapter = None
 
 # rx queues
 logger_queue: Queue
-uds_queue: Queue
 can_queue: Queue
 
 # tx queues
@@ -26,8 +25,8 @@ tx_thread: Thread
 #raw can
 raw_can_receiver: None
 #isotp
-rxid = 0x7E8
-txid = 0x7E0
+rxid = 0x62
+txid = 0x22
 last_is_fd = False
 last_is_extended = False
 address = isotp.Address(
