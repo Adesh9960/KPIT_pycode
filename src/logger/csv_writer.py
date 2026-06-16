@@ -37,12 +37,13 @@ def oldest_log_file() -> str:
 
 
 
-def latest_log_file() -> str:
+def latest_log_file() -> str | None:
     files = [
         os.path.join(main.LOGGER_FOLDER_PATH, f)
         for f in os.listdir(main.LOGGER_FOLDER_PATH)
         if os.path.isfile(os.path.join(main.LOGGER_FOLDER_PATH, f))
     ]
+    if len(files) == 0: return None
     latest_file = max(files, key=os.path.getmtime)
     return latest_file
 

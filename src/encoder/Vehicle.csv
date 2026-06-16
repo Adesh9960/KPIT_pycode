@@ -7,5 +7,4 @@ timestamp,can_id,extended_id,is_fd,dlc,message,Speed,RPM,Temp,OilTemp,Fuel,Volta
 3.0,0x1CFFE100,True,False,8,GearboxData,95,2500,0,0,0,0,0
 3.1,0x1CFFE200,True,False,8,TransmissionData,140,3800,0,0,0,0,0
 3.2,0x1CFFE300,True,False,8,DrivelineData,210,5100,0,0,0,0,0
-0.0,0x200,False,True,32,EngineDataFD,80,2500,95,0,0,0,0
-0.0,0x200,False,True,32,EngineDataFD,80,2500,95,0,0,0,0
+

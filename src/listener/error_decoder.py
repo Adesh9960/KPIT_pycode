@@ -1,4 +1,5 @@
 from data_structures.CANFrame import CANFrame
+import listener.main as main
 # Linux SocketCAN error flags
 CAN_ERR_TX_TIMEOUT = 0x00000001
 CAN_ERR_LOSTARB    = 0x00000002
@@ -29,7 +30,7 @@ def decode_error(frame: CANFrame):
     error_timings[(frame.can_id, bytes(frame.data))] = frame.timestamp_ns
     if last_error is not None:
         timeout = frame.timestamp_ns - last_error  
-        if(timeout < 100 * 1000):
+        if(timeout < 1000 * 1000):
             return None
         
     if frame.can_id & CAN_ERR_TX_TIMEOUT:
@@ -77,6 +78,7 @@ def decode_error(frame: CANFrame):
 
     if frame.can_id & CAN_ERR_BUSOFF:
         errors.append("Bus-Off")
+        main.adapter.stats.bus_off_count =+ 1
 
     if frame.can_id & CAN_ERR_BUSERROR:
         errors.append("Bus error")

@@ -1,22 +1,27 @@
 import time
 import listener.main as main
-from errors import TransmissionError
-from .TxRequest import TxRequest
+from errors.TransmissionError import TransmissionError 
+from .TxRequest import TxRequest,TxRequestType
 from logger.logger import write_log
 from utils.sendFrameToCANFrame import sendFrameToCANFrame
+from listener.driver.SocketCANAdapter import BusState
 import heapq
+
 
 def transmit(msg: TxRequest):
     try:
-        if(msg.request_type == 'raw_can'):
+        if(msg.request_type == TxRequestType.RAWCAN):
             main.adapter.send(msg.payload)
         else:
             start = time.monotonic()
+            print("transmitting isotp")
             while main.stack.transmitting():
                 if time.monotonic() >= start + 3:
                     print("ISO-TP stuck for too long please restart...")
-            main.isotpTXCallback()
-            main.stack.send(msg.payload)
+            if main.isotpTXCallback is not None:
+                main.isotpTXCallback()
+            main.stack.send(msg.payload.data)
+            print("transmitted istop successfully")
 
     except TransmissionError as e:
         error_log = sendFrameToCANFrame(msg.payload)
@@ -34,11 +39,16 @@ def transmit(msg: TxRequest):
 
 def transmitter():
     while main.running:
+        if main.adapter.get_bus_state() == BusState.ERROR: 
+            print("CAN Bus is off")
+            time.sleep(2)
+            continue
         msg = main.tx_queue.get()
         transmit(msg)
         if len(main.retry_queue) > 0 and main.retry_queue[0][0] <= (time.monotonic() * 1000):
             _, msg = heapq.heappop(main.retry_queue)
             msg.retry_count += 1
             transmit(msg)
+        time.sleep(0.01)
 
     

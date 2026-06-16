@@ -36,5 +36,5 @@ address = isotp.Address(
     rxid=rxid
 )
 stack: isotp.NotifierBasedCanStack
-isotpTXCallback: function
+isotpTXCallback: function | None = None
 

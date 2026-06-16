@@ -21,10 +21,10 @@ class RawReceiver(can.Listener):
             main.adapter.stats.error_frames += 1
             error_frame = decode_error(frame)
             if error_frame is not None:
-                print(error_frame)
                 write_log(error_frame)
 
         elif msg.arbitration_id == main.rxid:
+            print("Frame is isotp")
             print(frame)
             write_log(frame)
             main.last_is_extended = msg.is_extended_id

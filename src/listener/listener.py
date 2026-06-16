@@ -19,7 +19,8 @@ def start():
     "socketcan",
     "can0",
     500_000,
-    restart_ms=100
+    restart_ms=100,
+    # fd_enabled=True
     )
     main.raw_can_receiver = RawReceiver()
     main.adapter = SocketCANAdapter(adapter_config, listeners=[main.raw_can_receiver])
@@ -33,6 +34,7 @@ def start():
         address=main.address,
         error_handler = iso_error_handler
     )
+    main.stack.start()
 
     #Setting Queues
     main.uds_queue = queue.Queue()
@@ -70,13 +72,20 @@ def test_transmission():
         is_extended_id=False,
         is_fd=False
     )
+    iso_test_frame = can.Message(
+        arbitration_id=0x7E0,
+        data = b"\x62\xF1\x90\x12\x34\x56",
+        dlc = 8,
+        is_extended_id= False,
+        is_fd = False
+    )
     count = 1
    
     while(count < 10):
         test_request = TxRequest(
             priority=1,
             enqueue_timestamp_ns=time.time_ns(),
-            request_type=TxRequestType.RAWCAN,
+            request_type="raw_can",
             request_id=count,
             payload=test_frame,
             max_retries=0,
@@ -85,6 +94,16 @@ def test_transmission():
         send_to_tx_queue(test_request)
         count+= 1
         time.sleep(3)
+    iso_test = TxRequest(
+        priority=1,
+        enqueue_timestamp_ns=time.time_ns(),
+        request_type="uds",
+        request_id=count,
+        payload=iso_test_frame,
+        max_retries=0,
+        timeout_ms=100
+    )
+    send_to_tx_queue(iso_test)
     logger.stop()
     stop()
 
