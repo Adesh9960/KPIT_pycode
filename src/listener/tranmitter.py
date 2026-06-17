@@ -44,6 +44,8 @@ def transmitter():
             time.sleep(2)
             continue
         msg = main.tx_queue.get()
+        if isinstance(msg, bytes):
+            print(msg)
         transmit(msg)
         if len(main.retry_queue) > 0 and main.retry_queue[0][0] <= (time.monotonic() * 1000):
             _, msg = heapq.heappop(main.retry_queue)

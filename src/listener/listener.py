@@ -14,10 +14,10 @@ import time
 import isotp
 from listener.iso_tp_error_decoder import IsoTpErrorHandler
 
-def start(uds_response_event = None):
+def start(address, uds_response_event = None, channel = "can0"):
     adapter_config = CANConfig(
     "socketcan",
-    "can0",
+    channel,
     500_000,
     restart_ms=100,
     # fd_enabled=True
@@ -31,7 +31,7 @@ def start(uds_response_event = None):
     main.stack = isotp.NotifierBasedCanStack(
         bus=main.adapter.bus,
         notifier = main.adapter.notifier,
-        address=main.address,
+        address=address,
         error_handler = iso_error_handler
     )
     main.stack.start()

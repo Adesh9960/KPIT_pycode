@@ -1,6 +1,7 @@
 import simulator.DIDs as DIDs
 from listener.listener import send_to_tx_queue
-
+from listener.TxRequest import TxRequest, TxRequestType
+import time
 class UDSRepsonseError(Exception):
     """
     Raised when a there is a error.
@@ -22,8 +23,18 @@ def get_DID(DID: int):
     
 def set_DID():
     pass
+def createTXRequest(payload: bytes):
+    return TxRequest(
+        priority=10,
+        enqueue_timestamp_ns=time.time_ns(),
+        request_type=TxRequestType.UDS,
+        payload=payload,
+        max_retries=0,
+        timeout_ms=100,
+    )
 
 def handle_tester_request(payload: bytearray):
+    print("inside handle tester request")
     sid = payload[0]
     match sid:
         case 0x22:
@@ -38,13 +49,14 @@ def handle_tester_request(payload: bytearray):
                 try:
                     did_data = get_DID(did)
                 except UDSRepsonseError as e:
-                    return send_to_tx_queue(bytes(0x7F + e.sid + e.error_data))
+                    return send_to_tx_queue(createTXRequest(bytes(0x7F + e.sid + e.error_data)))
                 
                 response.append(
                         bytes.fromhex(did) + did_data
                     )
+                
         
-                send_to_tx_queue(response)
+            send_to_tx_queue(createTXRequest(bytes(response)))
 
         case 0x2E:
             print("WriteDataByIdentifier")

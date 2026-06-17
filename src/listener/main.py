@@ -29,11 +29,7 @@ rxid = 0x62
 txid = 0x22
 last_is_fd = False
 last_is_extended = False
-address = isotp.Address(
-    isotp.AddressingMode.Normal_11bits,
-    txid=txid,
-    rxid=rxid
-)
+
 stack: isotp.NotifierBasedCanStack
 isotpTXCallback: function | None = None
 
