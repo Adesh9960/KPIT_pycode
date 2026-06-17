@@ -7,19 +7,22 @@ from listener.listener import send_to_tx_queue
 
 
 def encode():
-    db = cantools.database.load_file("./encoder/Vehicle.dbc")
+    db = cantools.database.load_file("Vehicle.dbc")
     last_processed_row = 0
     sequence_number = 0
+CAN_FD_Mask = 0x80000000
     while True:
-        df = pd.read_csv("./encoder/Vehicle.csv")
+        df = pd.read_csv("Vehicle.csv")
         current_row = len(df)
-
-        if current_row > last_processed_row:
-            new_rows = df.iloc[last_processed_row:current_row]
-
-            for _, row in new_rows.iterrows():
+    
+        # gets new rows entries
+    if current_row > last_processed_row:
+            new_rows = df.iloc[last_processed_row:current_row]   
+        
+             # checks whether id is extended grab whatever text in extended_id and converts it into py bool
+        for _, row in new_rows.iterrows():
                 raw_id = int(row["can_id"], 16)
-                is_extended = str(row["extended_id"]).lower() == "true"
+                is_extended = str(row["extended_id"]).lower() == "true"  
 
                 # cantools requires bit 31 set for extended frame lookups
                 lookup_id = raw_id | 0x80000000 if is_extended else raw_id
@@ -38,8 +41,8 @@ def encode():
                 else:
                     print("Classical CAN Frame")
 
-
-                signals = {signal.name: row[signal.name] for signal in msg_def.signals}
+            # for checking if signal are within min,max value
+                signals = {signal.name: row[signal.name] for signal in msg_def.signals} 
 
                 for signal in msg_def.signals:
                      val = row[signal.name]
