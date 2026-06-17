@@ -2,29 +2,27 @@ import pandas as pd
 import cantools
 import can
 import time
+from can import Message
+
 
 db = cantools.database.load_file("Vehicle.dbc")
 last_processed_row = 0
 sequence_number = 0
-CAN_FD_Mask = 0x80000000
 
 while True:
     df = pd.read_csv("Vehicle.csv")
     current_row = len(df)
-    
-    # gets new rows entries
+
     if current_row > last_processed_row:
-        new_rows = df.iloc[last_processed_row:current_row]   
-        
-         # checks whether id is extended grab whatever text in extended_id and converts it into py bool
+        new_rows = df.iloc[last_processed_row:current_row]
+
         for _, row in new_rows.iterrows():
             raw_id = int(row["can_id"], 16)
-            is_extended = str(row["extended_id"]).lower() == "true"  
+            is_extended = str(row["extended_id"]).lower() == "true"
 
-            # add of 0x80000000
-            lookup_id = raw_id | CAN_FD_Mask  if is_extended else raw_id 
+            # cantools requires bit 31 set for extended frame lookups
+            lookup_id = raw_id | 0x80000000 if is_extended else raw_id
 
-            # If Id not found in dbc
             try:
                 msg_def = db.get_message_by_frame_id(lookup_id)
             except KeyError:
@@ -39,32 +37,49 @@ while True:
             else:
                 print("Classical CAN Frame")
 
-            # for checking if signal are within min,max value
-            signals = {signal.name: row[signal.name] for signal in msg_def.signals} 
+
+            signals = {signal.name: row[signal.name] for signal in msg_def.signals}
             
             for signal in msg_def.signals:
                  val = row[signal.name]
                  if not (signal.minimum <= val <= signal.maximum):
                     print(f"[WARN] {signal.name}={val} out of range [{signal.minimum},{signal.maximum}]")
 
-            # encodes the bytes and signal
-            payload = msg_def.encode(signals) 
+            
+            payload = msg_def.encode(signals)
 
-            # maps and create can frame
             frame = can.Message(
-                arbitration_id=raw_id,      
+                arbitration_id=raw_id,      # ← still use the raw ID here
                 data=payload,
                 dlc=row["dlc"],
                 is_extended_id=is_extended,
                 is_fd=is_fd
             )
 
-            # add sequence no. to each can frame
+        
+            request = TxRequest(
+                priority=1,
+                enqueue_timestamp_ns=time.time_ns(),
+                request_id=int(time.time_ns()),
+                request_type=TxRequestType.RAWCAN,
+                payload=frame,
+                max_retries=3,
+                timeout_ms=1000,
+                uds_error_callback=None,
+                confirmation_callback=None
+            )
+            send_to_tx_queue(request)
+
+            print(
+                f"Queued Frame: "
+                f"{hex(frame.arbitration_id)}"
+            )
+
             sequence_number += 1
-            print(f"[SEQ #{sequence_number}] {frame}")  
+            print(f"[SEQ #{sequence_number}] {frame}")
+
             
 
         last_processed_row = current_row
 
-    # sleeps every 1 sec
-    time.sleep(1) 
+    time.sleep(1)
