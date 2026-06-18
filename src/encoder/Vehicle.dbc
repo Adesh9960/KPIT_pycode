@@ -22,8 +22,9 @@ BO_ 2566848768 MeraInfo: 8 ECU1
  SG_ RPM : 16|16@1+ (1,0) [0|8000] "rpm" ECU1
 
 BO_ 2634006946 BatteryData: 8 ECU1
- SG_ Voltage : 0|16@1+ (0.1,0) [0|100] "V" ECU1
- SG_ Current : 16|16@1+ (0.1,0) [0|200] "A" ECU1
+ SG_ throttle : 0|16@1+ (1,0) [0|400] "%" ECU1
+ SG_ Acceleration : 16|16@1+ (1,0) [0|300] "kmph^2" ECU1
+
 
  
 BO_ 2634014976 GearboxData: 8 ECU1
