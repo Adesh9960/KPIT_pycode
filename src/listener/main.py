@@ -10,8 +10,8 @@ message_monitor_list: dict[custom_types.can_id, MessageMonitor] = {}
 adapter: SocketCANAdapter = None
 
 # rx queues
-logger_queue: Queue
-can_queue: Queue
+logger_queue: Queue = None
+can_queue: Queue = None
 
 # tx queues
 tx_queue: PriorityQueue

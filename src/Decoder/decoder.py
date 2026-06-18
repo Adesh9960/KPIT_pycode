@@ -8,7 +8,8 @@ import listener.main as main
 
 # load dbc file to ram
 db= cantools.database.load_file("encoder/Vehicle.dbc")
-rx_queue = main.can_queue
+
+
 
 
 #Lookup Signal   
@@ -22,6 +23,7 @@ for msg in db.messages:
     
 
 def run_decoder():
+    rx_queue = main.can_queue
     while True:
         msg = rx_queue.get()
 

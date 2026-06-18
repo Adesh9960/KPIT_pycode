@@ -32,7 +32,14 @@ def start(address, uds_response_event = None, channel = "can0"):
         bus=main.adapter.bus,
         notifier = main.adapter.notifier,
         address=address,
-        error_handler = iso_error_handler
+        error_handler = iso_error_handler,
+        params = {
+    'rx_flowcontrol_timeout': 5000,        # N_Bs: Wait up to 5s for Flow Control frame (Default: 1000)
+    'rx_consecutive_frame_timeout': 5000,  # N_Cs: Wait up to 5s for the next Consecutive Frame (Default: 1000)
+    'wftmax': 10,                          # Max number of Wait Flow Control frames allowed (Default: 0/4)
+    'stmin': 10,                           # Separation Time (ms) to tell the sender to slow down
+    'tx_data_length': 8,                   # Standard 8-byte CAN frame data length
+}
     )
     main.stack.start()
 
@@ -51,6 +58,7 @@ def start(address, uds_response_event = None, channel = "can0"):
 
     print("Listener Started")
     print("Ready to receive and send messages")
+
 def stop():
     print("Stopping listener...")
     main.running = False

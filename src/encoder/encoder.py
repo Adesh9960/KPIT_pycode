@@ -7,16 +7,15 @@ from listener.listener import send_to_tx_queue
 
 
 def encode():
-    db = cantools.database.load_file("Vehicle.dbc")
+    db = cantools.database.load_file("encoder/Vehicle.dbc")
     last_processed_row = 0
     sequence_number = 0
-CAN_FD_Mask = 0x80000000
     while True:
-        df = pd.read_csv("Vehicle.csv")
+        df = pd.read_csv("encoder/Vehicle.csv")
         current_row = len(df)
     
         # gets new rows entries
-    if current_row > last_processed_row:
+        if current_row > last_processed_row:
             new_rows = df.iloc[last_processed_row:current_row]   
         
              # checks whether id is extended grab whatever text in extended_id and converts it into py bool
@@ -83,8 +82,6 @@ CAN_FD_Mask = 0x80000000
                 sequence_number += 1
                 print(f"[SEQ #{sequence_number}] {frame}")
 
-
-
-            last_processed_row = current_row
+        last_processed_row = current_row
 
         time.sleep(1)

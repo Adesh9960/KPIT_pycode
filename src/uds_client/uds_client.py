@@ -48,7 +48,7 @@ class UDS:
     def readDataByIdentifier(self, DID: int):
         request = ReadDataByIdentifier().make_request(didlist= DID, didconfig=None)
         payload = request.get_payload()
-        timeout = 5
+        timeout = 10
         self.send_and_wait(payload, timeout)
 
     def writeDataByIdentifier(self, DID: int, data: bytes):
