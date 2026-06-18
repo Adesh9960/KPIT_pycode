@@ -2,8 +2,8 @@ import unittest
 import queue
 
 import listener.main as main
-from listener import send_to_tx_queue
-from TxRequest import TxRequest, TxRequestType
+from listener.listener import send_to_tx_queue
+from listener.TxRequest import TxRequest, TxRequestType
 
 
 class TestTxQueue(unittest.TestCase):

@@ -17,7 +17,7 @@ def inc_file_count():
     file_count += 1 
 
 def frames_to_logs(frames: list[CANFrame])-> list[str]:
-    logs = [f"{frame.timestamp_ns},{frame.can_id},{frame.dlc},{frame.data.hex()}\n" for frame in frames]
+    logs = [f"{frame.timestamp_ns}, {hex(frame.can_id)}, {frame.dlc}, {frame.data.hex()}, {frame.details}\n" for frame in frames]
     return logs
 
 
@@ -35,6 +35,17 @@ def oldest_log_file() -> str:
         print("No files found.")
         return None
 
+
+
+def latest_log_file() -> str | None:
+    files = [
+        os.path.join(main.LOGGER_FOLDER_PATH, f)
+        for f in os.listdir(main.LOGGER_FOLDER_PATH)
+        if os.path.isfile(os.path.join(main.LOGGER_FOLDER_PATH, f))
+    ]
+    if len(files) == 0: return None
+    latest_file = max(files, key=os.path.getmtime)
+    return latest_file
 
 
 def remove_first_n_lines(file_path: str, n: int) -> int:
@@ -109,13 +120,19 @@ def write_to_csv():
     with main.ring_lock:
         frames = main.ring_buffer.get_all()
     logs = frames_to_logs(frames)
-    if main.LOGGER_FILE_PATH is None or os.path.getsize(main.LOGGER_FILE_PATH) >= 104857600:
-        if(main.logger_file is not None): 
+    if len(logs) <= 0:
+        return
+    print(f"Logger file path is : {main.LOGGER_FILE_PATH}")
+    if main.LOGGER_FILE_PATH is None or (not os.path.exists(main.LOGGER_FILE_PATH)) or os.path.getsize(main.LOGGER_FILE_PATH) >= 104857600:
+        if(main.LOGGER_FILE_PATH is not None and os.path.exists(main.LOGGER_FILE_PATH)): 
             main.logger_file.close()
-        main.set_logger_file(os.path.join(main.LOGGER_FOLDER_PATH, "log" + f"{file_count:03d}.csv"))
-        inc_file_count()
-    if len(logs) > 0:
-        perform_write(logs)
+        if(main.LOGGER_FILE_PATH is None): main.set_logger_file(latest_log_file())
+        if main.LOGGER_FILE_PATH is None: 
+            main.set_logger_file(os.path.join(main.LOGGER_FOLDER_PATH, "log" + f"{file_count:03d}.csv"))
+            inc_file_count()
+
+    perform_write(logs)
+
 
 
 

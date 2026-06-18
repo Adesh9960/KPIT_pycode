@@ -3,43 +3,49 @@ VERSION ""
 NS_ :
 BS_:
 
-BU_: ECU1
+BU_: ECU1 ECU2 ECU3 ECU4 ECU5 ECU6 ECU7 ECU8
 
 BO_ 256 VehicleData: 8 ECU1
+ SG_ Speed_kmh : 0|16@1+ (1,0) [0|190] "kmph" ECU1
+ SG_ Engine_RPM : 16|16@1+ (1,0) [0|6500] "rpm" ECU1
+ SG_ Throttle_Pct : 32|8@1+ (1,0) [0|100] "pct" ECU1
+ SG_ Stall_Risk : 48|1@1+ (1,0) [0|1] "" ECU1
 
-SG_ Speed : 0|16@1+ (1,0) [0|250] "kmph" ECU1
-SG_ RPM : 16|16@1+ (1,0) [0|8000] "rpm" ECU1
-SG_ Temp : 32|8@1- (1,0) [-40|215] "degC" ECU1
+BO_ 512 TempData: 8 ECU2
+ SG_ Coolant_Temp_C : 0|8@1+ (1,0) [0|200] "degC" ECU2
+ SG_ Oil_Temp_C : 8|16@1+ (1,0) [0|200] "degC" ECU2
+ SG_ Ambient_Temp_C : 24|8@1+ (1,0) [0|200] "degC" ECU2
 
-BO_ 512 EngineData: 8 ECU1
- 
- SG_ Speed : 0|8@1+ (1,0) [0|200] "kmph" ECU1
- SG_ RPM : 8|16@1+ (0.5,1) [0|8000] "rpm" ECU1
+BO_ 768 EngineDataFD: 32 ECU3
+ SG_ Engine_RPM : 0|16@1+ (1,0) [0|6500] "rpm" ECU3
+ SG_ Speed_kmh : 16|16@1+ (1,0) [0|190] "kmph" ECU3
+ SG_ Coolant_Temp_C : 32|8@1+ (1,-40) [0|200] "degC" ECU3
 
-BO_ 2566848768 MeraInfo: 8 ECU1
- 
- SG_ Speed : 0|16@1+ (1,0) [0|300] "kmph" ECU1
- SG_ RPM : 16|16@1+ (1,0) [0|8000] "rpm" ECU1
+BO_ 2634006946 BatteryData: 8 ECU4
+ SG_ Throttle_Pct : 0|8@1+ (1,0) [0|100] "pct" ECU4
+ SG_ Accel_ms2 : 8|16@1- (1,0) [-200|200] "ms2" ECU4
+ SG_ Battery_V : 24|8@1+ (1,0) [0|20] "V" ECU4
 
-BO_ 2634006946 BatteryData: 8 ECU1
- SG_ throttle : 0|16@1+ (1,0) [0|400] "%" ECU1
- SG_ Acceleration : 16|16@1+ (1,0) [0|300] "kmph^2" ECU1
+BO_ 2634014976 GearboxData: 8 ECU5
+ SG_ Speed_kmh : 0|16@1+ (1,0) [0|300] "kmph" ECU5
+ SG_ Engine_RPM : 16|16@1+ (1,0) [0|6500] "rpm" ECU5
+ SG_ Gear_Num : 32|8@1+ (1,0) [0|5] "" ECU5
+ SG_ Engine_Load_Pct : 40|8@1+ (1,0) [0|100] "pct" ECU5
 
+BO_ 2634015232 TransmissionData: 8 ECU6
+ SG_ Speed_kmh : 0|16@1+ (1,0) [0|300] "kmph" ECU6
+ SG_ Fuel_Rate_mL_s : 16|16@1+ (1,0) [0|10] "mLs" ECU6
+ SG_ Remaining_Fuel_L : 32|8@1+ (1,0) [0|50] "L" ECU6
+ SG_ Fuel_Pct : 40|8@1+ (1,0) [0|100] "pct" ECU6
 
- 
-BO_ 2634014976 GearboxData: 8 ECU1
- SG_ Speed : 0|16@1+ (1,0) [0|300] "kmph" ECU1
- SG_ RPM : 16|16@1+ (1,0) [0|8000] "rpm" ECU1
+BO_ 2634015488 DrivelineData: 8 ECU7
+ SG_ Speed_kmh : 0|16@1+ (1,0) [0|300] "kmph" ECU7
+ SG_ Engine_RPM : 16|16@1+ (1,0) [0|8000] "rpm" ECU7
+ SG_ Distance_km : 32|16@1+ (1,0) [0|999] "km" ECU7
 
-BO_ 2634015232 TransmissionData: 8 ECU1
- SG_ Speed : 0|16@1+ (1,0) [0|300] "kmph" ECU1
- SG_ RPM : 16|16@1+ (1,0) [0|8000] "rpm" ECU1
+BO_ 1024 TyreData: 8 ECU8
+ SG_ Tyre_P_FL : 0|16@1+ (1,0) [0|60] "psi" ECU8
+ SG_ Tyre_P_FR : 16|16@1+ (1,0) [0|60] "psi" ECU8
+ SG_ Tyre_P_RL : 32|8@1+ (1,0) [0|60] "psi" ECU8
+ SG_ Tyre_P_RR : 40|8@1+ (1,0) [0|60] "psi" ECU8
 
-BO_ 2634015488 DrivelineData: 8 ECU1
- SG_ Speed : 0|16@1+ (1,0) [0|300] "kmph" ECU1
- SG_ RPM : 16|16@1+ (1,0) [0|8000] "rpm" ECU1
-
-BO_ 512 EngineDataFD: 32 ECU1
- SG_ RPM : 0|16@1+ (1,0) [0|65535] "rpm" ECU1
- SG_ Speed : 16|16@1+ (0.1,0) [0|300] "km/h" ECU1
- SG_ Temp : 32|8@1+ (1,-40) [-40|215] "C" ECU1

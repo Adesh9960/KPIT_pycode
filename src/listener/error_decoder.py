@@ -1,4 +1,5 @@
 from data_structures.CANFrame import CANFrame
+import listener.main as main
 # Linux SocketCAN error flags
 CAN_ERR_TX_TIMEOUT = 0x00000001
 CAN_ERR_LOSTARB    = 0x00000002
@@ -10,6 +11,7 @@ CAN_ERR_BUSOFF     = 0x00000040
 CAN_ERR_BUSERROR   = 0x00000080
 CAN_ERR_RESTARTED  = 0x00000100
 
+error_timings = {}
 
 def decode_error(frame: CANFrame):
     """
@@ -23,6 +25,14 @@ def decode_error(frame: CANFrame):
     """
     errors = []
 
+    # Rate Limiting 
+    last_error = error_timings.get((frame.can_id, bytes(frame.data))) 
+    error_timings[(frame.can_id, bytes(frame.data))] = frame.timestamp_ns
+    if last_error is not None:
+        timeout = frame.timestamp_ns - last_error  
+        if(timeout < 1000 * 1000):
+            return None
+        
     if frame.can_id & CAN_ERR_TX_TIMEOUT:
         errors.append("TX timeout")
 
@@ -68,6 +78,7 @@ def decode_error(frame: CANFrame):
 
     if frame.can_id & CAN_ERR_BUSOFF:
         errors.append("Bus-Off")
+        main.adapter.stats.bus_off_count =+ 1
 
     if frame.can_id & CAN_ERR_BUSERROR:
         errors.append("Bus error")
@@ -75,7 +86,8 @@ def decode_error(frame: CANFrame):
     if frame.can_id & CAN_ERR_RESTARTED:
         errors.append("Controller restarted")
     
-    frame.details = "; ".join(errors)
+
+    frame.details =  "; ".join(errors)
     return frame
 
     
