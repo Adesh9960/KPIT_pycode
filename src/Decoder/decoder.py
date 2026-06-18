@@ -21,7 +21,7 @@ for msg in db.messages:
         message_map[msg.frame_id] = msg
     
 
-def run_decoder():
+def run_decoder(notify_callback: function = None):
     while True:
         msg = rx_queue.get()
 
@@ -91,7 +91,8 @@ def run_decoder():
             }
 
             print(decoded_packet)
-
+            if(notify_callback is not None):
+                notify_callback(decoded_packet)
         except Exception as e:
 
             print(
