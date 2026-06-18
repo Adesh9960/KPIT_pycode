@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECU Simulator Dashboard</title>
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+
+<header>
+    <div class="header-left">
+        <div class="header-brand">
+            <span class="brand-icon">⚙</span>
+            <div>
+                <h1>ECU Simulator</h1>
+                <span class="subtitle">Real-time engine telemetry</span>
+            </div>
+        </div>
+    </div>
+    <nav class="mode-switch">
+        <button class="mode-btn active" data-mode="live" onclick="setMode('live')">
+            <span class="live-blink"></span> Live Mode
+        </button>
+        <button class="mode-btn" data-mode="history" onclick="setMode('history')">
+            ⏱ History
+        </button>
+    </nav>
+</header>
+
+<!-- ====================================================
+     LIVE MODE
+===================================================== -->
+<section id="live-mode" class="mode-view active">
+
+    <!-- Top status bar -->
+    <div class="status-bar">
+        <div class="status-left">
+            <span id="connection-status" class="status-pill status-ok">● LIVE</span>
+            <span id="engine-state-badge" class="state-badge">IDLE</span>
+        </div>
+        <div class="status-right">
+            <span id="last-update" class="update-time">--</span>
+            <button id="advanced-toggle" class="adv-btn" onclick="toggleAdvanced()">
+                Advanced ▾
+            </button>
+        </div>
+    </div>
+
+    <!-- ── ROW 1: Primary Gauges ── -->
+    <div class="gauge-row">
+        <div class="gauge-card" id="speed-card">
+            <div class="gauge-label">SPEED</div>
+            <div class="gauge-wrap" id="speed-gauge"></div>
+        </div>
+        <div class="gauge-card" id="rpm-card">
+            <div class="gauge-label">ENGINE RPM</div>
+            <div class="gauge-wrap" id="rpm-gauge"></div>
+        </div>
+        <div class="gauge-card" id="fuel-card">
+            <div class="gauge-label">FUEL LEVEL</div>
+            <div class="gauge-wrap" id="fuel-gauge"></div>
+        </div>
+        <div class="gauge-card" id="coolant-card">
+            <div class="gauge-label">COOLANT TEMP</div>
+            <div class="gauge-wrap" id="coolant-gauge"></div>
+        </div>
+    </div>
+
+    <!-- ── ROW 2: Secondary Info Panels ── -->
+    <div class="info-row">
+
+        <!-- Gear + Engine State -->
+        <div class="info-panel gear-panel">
+            <div class="panel-title">TRANSMISSION</div>
+            <div class="gear-display" id="gear-display">N</div>
+            <div class="gear-name" id="gear-name">Neutral</div>
+            <div class="mini-chips">
+                <div class="mini-chip">
+                    <span class="mc-label">Clutch</span>
+                    <span class="mc-val" id="clutch-val">--</span>
+                </div>
+                <div class="mini-chip">
+                    <span class="mc-label">Brake</span>
+                    <span class="mc-val" id="brake-val">--</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thermal Panel -->
+        <div class="info-panel thermal-panel">
+            <div class="panel-title">THERMALS</div>
+            <div class="thermal-row">
+                <div class="thermal-item">
+                    <span class="th-label">Coolant</span>
+                    <span class="th-val" id="coolant-val">--</span>
+                    <span class="th-unit">°C</span>
+                </div>
+                <div class="thermal-item">
+                    <span class="th-label">Oil Temp</span>
+                    <span class="th-val" id="oil-val">--</span>
+                    <span class="th-unit">°C</span>
+                </div>
+                <div class="thermal-item">
+                    <span class="th-label">Ambient</span>
+                    <span class="th-val" id="ambient-val">--</span>
+                    <span class="th-unit">°C</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fuel Panel -->
+        <div class="info-panel fuel-panel">
+            <div class="panel-title">FUEL SYSTEM</div>
+            <div class="fuel-bar-wrap">
+                <div class="fuel-bar-bg">
+                    <div class="fuel-bar-fill" id="fuel-bar"></div>
+                </div>
+                <span id="fuel-pct-text" class="fuel-pct-text">--%</span>
+            </div>
+            <div class="thermal-row" style="margin-top:10px">
+                <div class="thermal-item">
+                    <span class="th-label">Remaining</span>
+                    <span class="th-val" id="fuel-l-val">--</span>
+                    <span class="th-unit">L</span>
+                </div>
+                <div class="thermal-item">
+                    <span class="th-label">Fuel Rate</span>
+                    <span class="th-val" id="fuel-rate-val">--</span>
+                    <span class="th-unit">mL/s</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Motion Panel -->
+        <div class="info-panel motion-panel">
+            <div class="panel-title">MOTION</div>
+            <div class="thermal-row">
+                <div class="thermal-item">
+                    <span class="th-label">Accel</span>
+                    <span class="th-val" id="accel-val">--</span>
+                    <span class="th-unit">m/s²</span>
+                </div>
+                <div class="thermal-item">
+                    <span class="th-label">Distance</span>
+                    <span class="th-val" id="dist-val">--</span>
+                    <span class="th-unit">km</span>
+                </div>
+            </div>
+            <div class="thermal-row" style="margin-top:8px">
+                <div class="thermal-item">
+                    <span class="th-label">Throttle</span>
+                    <span class="th-val" id="throttle-val">--</span>
+                    <span class="th-unit">%</span>
+                </div>
+                <div class="thermal-item">
+                    <span class="th-label">Engine Load</span>
+                    <span class="th-val" id="load-val">--</span>
+                    <span class="th-unit">%</span>
+                </div>
+            </div>
+            <div class="thermal-row" style="margin-top:8px">
+                <div class="thermal-item">
+                    <span class="th-label">Battery</span>
+                    <span class="th-val" id="battery-val">--</span>
+                    <span class="th-unit">V</span>
+                </div>
+                <div class="thermal-item">
+                    <span class="th-label">Rev Limit</span>
+                    <span class="th-val" id="revlim-val">--</span>
+                    <span class="th-unit"></span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ── ADVANCED PANEL ── -->
+    <div id="advanced-panel" class="advanced-panel">
+        <div class="adv-section-title">ADVANCED DIAGNOSTICS</div>
+        <div class="adv-grid">
+            <div class="adv-chip">
+                <span class="adv-label">Tyre FL</span>
+                <span class="adv-val" id="tyre-fl">-- psi</span>
+            </div>
+            <div class="adv-chip">
+                <span class="adv-label">Tyre FR</span>
+                <span class="adv-val" id="tyre-fr">-- psi</span>
+            </div>
+            <div class="adv-chip">
+                <span class="adv-label">Tyre RL</span>
+                <span class="adv-val" id="tyre-rl">-- psi</span>
+            </div>
+            <div class="adv-chip">
+                <span class="adv-label">Tyre RR</span>
+                <span class="adv-val" id="tyre-rr">-- psi</span>
+            </div>
+            <div class="adv-chip">
+                <span class="adv-label">Airbag</span>
+                <span class="adv-val ok" id="airbag-val">OK</span>
+            </div>
+            <div class="adv-chip">
+                <span class="adv-label">Door Lock</span>
+                <span class="adv-val" id="door-lock-val">--</span>
+            </div>
+            <div class="adv-chip">
+                <span class="adv-label">Stall Risk</span>
+                <span class="adv-val" id="stall-val">--</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Live Speed Trend ── -->
+    <div class="section-title">Live Speed &amp; RPM Trend</div>
+    <div id="live-chart" class="chart-box small-chart"></div>
+
+</section>
+
+<!-- ====================================================
+     HISTORY MODE
+===================================================== -->
+<section id="history-mode" class="mode-view">
+
+    <div class="history-controls">
+        <div class="control-group">
+            <label>Signal</label>
+            <select id="signal-select">
+                <option value="speed">Speed (km/h)</option>
+                <option value="rpm">Engine RPM</option>
+                <option value="coolant">Coolant Temp (°C)</option>
+                <option value="oil_temp">Oil Temp (°C)</option>
+                <option value="fuel_pct">Fuel Level (%)</option>
+                <option value="fuel_rate">Fuel Rate (mL/s)</option>
+                <option value="throttle">Throttle (%)</option>
+                <option value="engine_load">Engine Load (%)</option>
+                <option value="accel">Acceleration (m/s²)</option>
+                <option value="battery">Battery Voltage (V)</option>
+                <option value="gear_num">Gear Number</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <label>Range</label>
+            <select id="range-select">
+                <option value="50">Last 50 records</option>
+                <option value="100" selected>Last 100 records</option>
+                <option value="200">Last 200 records</option>
+                <option value="all">All records</option>
+            </select>
+        </div>
+        <button class="refresh-btn" onclick="loadHistory()">↺ Refresh</button>
+    </div>
+
+    <div id="history-chart" class="chart-box"></div>
+
+    <div class="section-title" style="margin-top:28px">Recent Records</div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Gear</th>
+                    <th>Speed km/h</th>
+                    <th>RPM</th>
+                    <th>Coolant °C</th>
+                    <th>Oil °C</th>
+                    <th>Fuel %</th>
+                    <th>Throttle %</th>
+                    <th>State</th>
+                </tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+        </table>
+    </div>
+
+</section>
+
+<script src="https://cdn.socket.io/4.8.3/socket.io.min.js"></script>
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+</body>
+</html>

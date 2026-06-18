@@ -102,4 +102,4 @@ def run_decoder(notify_callback: function = None):
 
         finally:
 
-            rx_queue.task_done()
+            main.can_queue.task_done()

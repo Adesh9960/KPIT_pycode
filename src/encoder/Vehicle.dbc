@@ -13,8 +13,8 @@ SG_ Temp : 32|8@1- (1,0) [-40|215] "degC" ECU1
 
 BO_ 512 EngineData: 8 ECU1
  
- SG_ Speed : 0|8@1+ (1,0) [0|200] "kmph" ECU1
- SG_ RPM : 8|16@1+ (0.5,1) [0|8000] "rpm" ECU1
+ SG_ speed : 0|8@1+ (1,0) [0|200] "kmph" ECU1
+ SG_ rpm : 8|16@1+ (0.5,1) [0|8000] "rpm" ECU1
 
 BO_ 2566848768 MeraInfo: 8 ECU1
  
