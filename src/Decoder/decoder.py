@@ -8,7 +8,7 @@ import listener.main as main
 
 # load dbc file to ram
 db= cantools.database.load_file("encoder/Vehicle.dbc")
-
+mask = 0x80000000
 
 
 
@@ -16,8 +16,8 @@ db= cantools.database.load_file("encoder/Vehicle.dbc")
 message_map = {}
 
 for msg in db.messages:
-    if msg.frame_id & 0x80000000:       
-        message_map[msg.frame_id & ~0x80000000] = msg  
+    if msg.frame_id & mask:       
+        message_map[msg.frame_id & ~mask] = msg  
     else:
         message_map[msg.frame_id] = msg
     
