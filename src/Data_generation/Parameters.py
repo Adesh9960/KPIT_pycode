@@ -1,7 +1,6 @@
 import time
 import os
 import sys
-import csv
 import requests
 
 try:
@@ -9,6 +8,8 @@ try:
 except ImportError:
     print("Please install the keyboard module first by running: pip install keyboard")
     sys.exit()
+
+from encoder.encoder import encode_frame
 
 # --- CONSTANTS & CONFIG ---
 FUEL_SAVE_FILE = "fuel_save.txt"
@@ -58,63 +59,35 @@ def clear_screen():
 def main():
     current_gear = 'n'
     time_held = 0.0
-    refresh_rate = 0.1 
-    
-    current_speed = 0.0       
+    refresh_rate = 0.1
+
+    current_speed = 0.0
     prev_speed = 0.0          # for acceleration calculation
-    baseline_speed = 0.0      
-    was_accelerating = False  
-    
-    # ENGINE VARIABLES 
+    baseline_speed = 0.0
+    was_accelerating = False
+
+    # ENGINE VARIABLES
     current_rpm = 800.0
     IDLE_RPM = 800.0
     MAX_RPM = 6500.0
     gear_grind_warning = False
-    
+
     # FUEL & DISTANCE VARIABLES
     instant_fuel_rate = 0.0      # mL per second
     total_fuel_ml = 0.0          # Total fuel burned this trip
-    remaining_fuel_ml = load_fuel_state() # Load from persistence file
+    remaining_fuel_ml = load_fuel_state()  # Load from persistence file
     distance_km = 0.0            # Distance covered this trip
-    fuel_save_counter = 0        # tick counter for periodic fuel save (fix #5)
-    
+    fuel_save_counter = 0        # tick counter for periodic fuel save
+
     ambient_temp = get_live_ambient_temp()
-    # removed unnecessary time.sleep(2) — print message is enough feedback
-    
+
     coolant_temp = ambient_temp
     oil_temp = ambient_temp       # oil lags ~10°C behind coolant
-    target_temp = 90.0        
+    target_temp = 90.0
     battery_voltage = 12.6        # volts
 
-    csv_filename = "engine_telemetry_log.csv"
-    write_headers = not os.path.exists(csv_filename) 
-    
-    log_file = open(csv_filename, mode='a', newline='')
-    csv_writer = csv.writer(log_file)
-    
-    if write_headers:
-        csv_writer.writerow([
-            # Core signals
-            'System_Time', 'Gear', 'Gear_Num', 'Speed_kmh', 'Engine_RPM',
-            # Thermal
-            'Coolant_Temp_C', 'Oil_Temp_C', 'Ambient_Temp_C',
-            # Fuel
-            'Fuel_Rate_mL_s', 'Remaining_Fuel_L', 'Fuel_Pct',
-            # Motion
-            'Distance_km', 'Accel_ms2',
-            # Engine state
-            'Engine_Load_Pct', 'Throttle_Pct', 'Rev_Limiter',
-            'Engine_State', 'Stall_Risk',
-            # Pedals / controls
-            'Clutch_State', 'Brake_State',
-            # Electrical
-            'Battery_V',
-            # Placeholders for future real sensors
-            'Tyre_P_FL', 'Tyre_P_FR', 'Tyre_P_RL', 'Tyre_P_RR',
-        ])
-
     clear_screen()
-    print("Starting Continuous Physics Engine with Persistent Fuel & Telemetry...")
+    print("Starting Continuous Physics Engine with Direct Encoder Feed...")
     time.sleep(1)
 
     while True:
@@ -124,9 +97,7 @@ def main():
             clear_screen()
             print(f"Engine Turned Off. Trip Fuel Consumed: {total_fuel_ml:.1f} mL")
             print(f"Trip Distance: {distance_km:.3f} km")
-            print(f"Telemetry saved to: {csv_filename}")
             print(f"Fuel state saved. Remaining: {(remaining_fuel_ml/1000):.2f} Liters.")
-            log_file.close() 
             break
 
         # Refuel Logic
@@ -137,15 +108,15 @@ def main():
         is_accelerating = keyboard.is_pressed('space')
         is_braking = keyboard.is_pressed('b')
         is_clutch_down = keyboard.is_pressed('c')
-        
-        gear_grind_warning = False 
+
+        gear_grind_warning = False
 
         # Check for gear changes
         for g in ['n', '1', '2', '3', '4', '5']:
             if keyboard.is_pressed(g) and current_gear != g:
                 if is_clutch_down:
                     current_gear = g
-                    time_held = 0.0 
+                    time_held = 0.0
                     if current_speed > 0:
                         # Slight momentum loss during shift
                         current_speed = max(0.0, current_speed - 1.5)
@@ -154,7 +125,7 @@ def main():
                     gear_grind_warning = True
 
         physics = gear_physics[current_gear]
-        
+
         if is_accelerating and not was_accelerating:
             baseline_speed = current_speed
         was_accelerating = is_accelerating
@@ -163,26 +134,24 @@ def main():
         prev_speed = current_speed
 
         # --- SPEED PHYSICS & EXPONENTIAL BRAKING ---
-        # Bug fix #4: define drag_deceleration once here so it's always in scope
         drag_deceleration = (current_speed * 0.05) * refresh_rate
 
         if is_braking:
-            # Exponential decay: scrubs more speed at higher speeds. 
-            # The +10.0 ensures the car actually comes to a complete, full stop.
+            # Exponential decay: scrubs more speed at higher speeds.
             brake_force = (current_speed * 0.8 + 10.0) * refresh_rate
             current_speed = max(0.0, current_speed - brake_force)
             time_held = 0.0
-            
+
         elif is_accelerating and not is_clutch_down and current_gear != 'n':
             if remaining_fuel_ml > 0:
                 time_held += refresh_rate
                 acceleration = physics['k'] * (physics['max'] - current_speed)
                 current_speed += acceleration * refresh_rate
-            
+
         else:
-            time_held = 0.0 
+            time_held = 0.0
             idle_speed = physics['idle']
-            
+
             if current_gear == 'n' or is_clutch_down:
                 drag_deceleration = (current_speed * 0.05) * refresh_rate
                 current_speed = max(0.0, current_speed - drag_deceleration)
@@ -202,14 +171,13 @@ def main():
         distance_km += (current_speed / 3600.0) * refresh_rate
 
         # --- RPM PHYSICS ---
-        # Bug fix #1+2: in-gear at speed=0 should be IDLE_RPM, not 0 (engine is still running)
         if remaining_fuel_ml <= 0 and current_speed == 0:
             current_rpm = 0.0  # Out of gas AND stopped — engine dead
         elif is_clutch_down or current_gear == 'n':
             if is_accelerating and remaining_fuel_ml > 0:
-                current_rpm = min(MAX_RPM, current_rpm + (4000.0 * refresh_rate)) 
+                current_rpm = min(MAX_RPM, current_rpm + (4000.0 * refresh_rate))
             else:
-                current_rpm = max(IDLE_RPM if remaining_fuel_ml > 0 else 0, current_rpm - (3000.0 * refresh_rate)) 
+                current_rpm = max(IDLE_RPM if remaining_fuel_ml > 0 else 0, current_rpm - (3000.0 * refresh_rate))
         else:
             if current_speed == 0:
                 # Stopped in gear: engine holds idle (stall check done separately in alerts)
@@ -218,7 +186,7 @@ def main():
                 speed_ratio = current_speed / physics['max']
                 current_rpm = max(IDLE_RPM, 1000 + (speed_ratio * (MAX_RPM - 1000)))
 
-        # --- NEW FUEL CONSUMPTION LOGIC ---
+        # --- FUEL CONSUMPTION LOGIC ---
         if current_rpm == 0:
             instant_fuel_rate = 0.0
         elif remaining_fuel_ml <= 0:
@@ -227,17 +195,17 @@ def main():
             if is_accelerating:
                 instant_fuel_rate = (current_rpm / MAX_RPM) * 3.0
             else:
-                instant_fuel_rate = 0.5 
+                instant_fuel_rate = 0.5
         else:
             if is_accelerating:
                 engine_load = (current_speed / max(1, physics['max'])) + 0.5
                 instant_fuel_rate = engine_load * (current_rpm / MAX_RPM) * 12.0
             else:
                 if current_rpm > IDLE_RPM + 150:
-                    instant_fuel_rate = 0.0 # Coasting in gear
+                    instant_fuel_rate = 0.0  # Coasting in gear
                 else:
                     instant_fuel_rate = 0.5
-                    
+
         # Apply consumption to both total trip and actual tank
         consumed_this_tick = instant_fuel_rate * refresh_rate
         total_fuel_ml += consumed_this_tick
@@ -249,10 +217,10 @@ def main():
             heat_input = engine_load * 2.0 * refresh_rate
         else:
             if current_rpm > IDLE_RPM + 1000 and is_clutch_down:
-                heat_input = 1.5 * refresh_rate 
+                heat_input = 1.5 * refresh_rate
             else:
                 heat_input = 0.3 * refresh_rate
-            
+
         coolant_temp += heat_input
 
         if coolant_temp > target_temp:
@@ -273,10 +241,10 @@ def main():
             battery_voltage = max(11.8, battery_voltage - 0.005 * refresh_rate)
 
         # --- DERIVED SIGNALS ---
-        accel_ms2 = round((current_speed - prev_speed) / 0.1, 2)  # km/h per 0.1s → approx m/s²
+        accel_ms2 = round((current_speed - prev_speed) / 0.1, 2)  # km/h per 0.1s -> approx m/s^2
         fuel_pct = round((remaining_fuel_ml / MAX_FUEL_ML) * 100.0, 1)
 
-        # Engine load: how hard the engine is working (0.0–1.5 range mapped to 0–100%)
+        # Engine load: how hard the engine is working (0.0-1.5 range mapped to 0-100%)
         if current_gear != 'n' and not is_clutch_down and current_speed > 0:
             raw_load = (current_speed / max(1, physics['max'])) + 0.5
         else:
@@ -313,36 +281,32 @@ def main():
         # Gear number as integer (0 for Neutral)
         gear_num = 0 if current_gear == 'n' else int(current_gear)
 
-        # --- CSV LOGGING (bug fix #3: bare numbers, no unit strings) ---
-        current_time_str = time.strftime("%H:%M:%S")
-        csv_writer.writerow([
-            current_time_str,
-            physics['name'],
-            gear_num,
-            int(current_speed),
-            int(current_rpm),
-            round(coolant_temp, 2),
-            round(oil_temp, 2),
-            round(ambient_temp, 1),
-            round(instant_fuel_rate, 2),
-            round(remaining_fuel_ml / 1000, 3),
-            fuel_pct,
-            round(distance_km, 4),
-            accel_ms2,
-            engine_load_pct,
-            throttle_pct,
-            rev_limiter,
-            engine_state,
-            stall_risk,
-            "DOWN" if is_clutch_down else "UP",
-            "PRESSED" if is_braking else "OFF",
-            round(battery_voltage, 2),
-            32.1, 32.0, 31.8, 31.9,   # Tyre pressure placeholders (FL, FR, RL, RR)
-        ])
-        
-        log_file.flush() 
+        # --- DIRECT ENCODER FEED (no CSV, no file I/O) ---
+        telemetry_row = {
+            "Speed_kmh": int(current_speed),
+            "Engine_RPM": int(current_rpm),
+            "Coolant_Temp_C": round(coolant_temp, 2),
+            "Oil_Temp_C": round(oil_temp, 2),
+            "Ambient_Temp_C": round(ambient_temp, 1),
+            "Fuel_Rate_mL_s": round(instant_fuel_rate, 2),
+            "Remaining_Fuel_L": round(remaining_fuel_ml / 1000, 3),
+            "Fuel_Pct": fuel_pct,
+            "Distance_km": round(distance_km, 4),
+            "Accel_ms2": accel_ms2,
+            "Engine_Load_Pct": engine_load_pct,
+            "Throttle_Pct": throttle_pct,
+            "Gear_Num": gear_num,
+            "Battery_V": round(battery_voltage, 2),
+            "Tyre_P_FL": 32.1,
+            "Tyre_P_FR": 32.0,
+            "Tyre_P_RL": 31.8,
+            "Tyre_P_RR": 31.9,
+            "Stall_Risk": stall_risk,
+        }
 
-        # Bug fix #5: reliable tick-based fuel save instead of time.time() modulo
+        encode_frame(telemetry_row)
+
+        # Bug fix: reliable tick-based fuel save instead of time.time() modulo
         fuel_save_counter += 1
         if fuel_save_counter >= 50:
             save_fuel_state(remaining_fuel_ml)
@@ -352,10 +316,9 @@ def main():
         clear_screen()
         print("=" * 50)
         print("         REAL-TIME ENGINE SIMULATOR")
-        
         print("=" * 50)
-        
-        # Dashboard Alerts (stall check now works because RPM stays at IDLE at speed=0)
+
+        # Dashboard Alerts
         if remaining_fuel_ml <= 0:
             print(" [!] OUT OF FUEL! PRESS 'R' TO REFUEL!")
         elif remaining_fuel_ml < 4000:
@@ -370,12 +333,12 @@ def main():
             print(" [!] ENGINE OVERHEATING!")
         else:
             print("")
-            
+
         print("-" * 50)
         print(f" GEAR:          [{physics['name']}]   STATE: [{engine_state}]")
-        print(f" SPEED:         {int(current_speed)} km/h       ACCEL: {accel_ms2} m/s²")
+        print(f" SPEED:         {int(current_speed)} km/h       ACCEL: {accel_ms2} m/s^2")
         print(f" RPM:           {int(current_rpm)} RPM")
-        print(f" COOLANT:       {coolant_temp:.1f} °C       OIL: {oil_temp:.1f} °C")
+        print(f" COOLANT:       {coolant_temp:.1f} C       OIL: {oil_temp:.1f} C")
         print(f" BATTERY:       {battery_voltage:.2f} V")
         print("-" * 50)
         fuel_percentage = fuel_pct
