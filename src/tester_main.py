@@ -17,6 +17,6 @@ listener.start(address, uds_client.on_response)
 decoder.start()
 logger.start()
 
-vin = uds_client.readDataByIdentifier(0x1F90)
+vin = uds_client.readDataByIdentifier(0xF190)
 # listener.test_transmission()
    

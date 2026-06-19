@@ -344,7 +344,7 @@ function renderHistoryChart(data) {
 
     const xFull = data.time    || [];
     const yFull = data[meta.key] || [];
-
+  
     const x = getSlice(xFull, range);
     const y = getSlice(yFull, range);
 

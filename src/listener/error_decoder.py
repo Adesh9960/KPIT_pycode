@@ -30,7 +30,7 @@ def decode_error(frame: CANFrame):
     error_timings[(frame.can_id, bytes(frame.data))] = frame.timestamp_ns
     if last_error is not None:
         timeout = frame.timestamp_ns - last_error  
-        if(timeout < 1000 * 1000):
+        if(timeout < 10000 * 1000):
             return None
         
     if frame.can_id & CAN_ERR_TX_TIMEOUT:

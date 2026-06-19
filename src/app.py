@@ -8,6 +8,7 @@ import isotp
 from flask import Flask, request, jsonify, render_template
 from flask_socketio import SocketIO
 
+uds_client: UDS
 
 app = Flask(
     __name__,
@@ -35,10 +36,15 @@ def get_DID():
     data = request.get_json()
 
     print(data)
-    
+    if uds_client is None: 
+        return jsonify({
+            "status": "error",
+            "message": "UDS client not initialized"
+        })
+    response = uds_client.readDataByIdentifier(0xF190)
     return jsonify({
         "status": "success",
-        "received": data
+        "data": response 
     })
 
 @socketio.on("connect")

@@ -26,7 +26,8 @@ def transmit(msg: TxRequest):
     except TransmissionError as e:
         error_log = sendFrameToCANFrame(msg.payload)
         error_log.details = "Transmission Error"
-        write_log(error_log)
+        if main.listener_enabled:
+            write_log(error_log)
 
         if(msg.request_type == 'raw_can' and msg.retry_count < msg.max_retries):
             timeout = ((msg.retry_count + 1) * 10)**2 

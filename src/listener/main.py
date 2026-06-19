@@ -9,6 +9,8 @@ running: bool = False
 message_monitor_list: dict[custom_types.can_id, MessageMonitor] = {}
 adapter: SocketCANAdapter = None
 
+#enable_listener
+listener_enabled = False
 # rx queues
 logger_queue: Queue = None
 can_queue: Queue = None
@@ -32,4 +34,6 @@ last_is_extended = False
 
 stack: isotp.NotifierBasedCanStack
 isotpTXCallback: function | None = None
+
+
 

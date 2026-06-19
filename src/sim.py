@@ -11,4 +11,4 @@ address = isotp.Address(
 
 listener.start(address, handle_tester_request, "can1")  
 logger.start()
-encode()
+# encode()

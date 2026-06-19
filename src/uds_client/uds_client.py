@@ -50,6 +50,36 @@ class UDS:
         payload = request.get_payload()
         timeout = 10
         self.send_and_wait(payload, timeout)
+        print("UDS Response: ", self._response)
+
+        response = self._response
+
+        # Negative Response
+        if response[0] == 0x7F:
+            original_sid = response[1]
+            nrc = response[2]
+
+            print(
+                f"Negative Response: SID=0x{original_sid:02X}, NRC=0x{nrc:02X}"
+            )
+            return
+
+        # Positive Response
+        if response[0] != 0x62:
+            raise ValueError(
+                f"Unexpected SID 0x{response[0]:02X}"
+            )
+
+
+        did = int.from_bytes(response[1:3], "big")
+        value = response[3:].decode("ascii")
+        # print(hex(did))
+        # print(value)
+        reslist = {}
+        reslist[did] = value
+        print(reslist)
+        return reslist
+        
 
     def writeDataByIdentifier(self, DID: int, data: bytes):
         timeout = 0.05
@@ -60,7 +90,7 @@ class UDS:
         )
         payload = request.get_payload()
         self.send_and_wait(payload, timeout)
-    
+
 
     def calculate_key(self, seed: bytes) -> bytes:
         """
