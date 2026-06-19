@@ -313,49 +313,49 @@ def main():
             fuel_save_counter = 0
 
         # --- DASHBOARD DISPLAY ---
-        clear_screen()
-        print("=" * 50)
-        print("         REAL-TIME ENGINE SIMULATOR")
-        print("=" * 50)
+        # clear_screen()
+        # print("=" * 50)
+        # print("         REAL-TIME ENGINE SIMULATOR")
+        # print("=" * 50)
 
-        # Dashboard Alerts
-        if remaining_fuel_ml <= 0:
-            print(" [!] OUT OF FUEL! PRESS 'R' TO REFUEL!")
-        elif remaining_fuel_ml < 4000:
-            print(" [!] LOW FUEL WARNING!")
-        elif gear_grind_warning:
-            print(" [!] GRINDING GEARS! PRESS CLUTCH ('c') TO SHIFT!")
-        elif stall_risk:
-            print(" [!] STALL RISK! PRESS CLUTCH OR SHIFT DOWN!")
-        elif rev_limiter:
-            print(" [!] REV LIMITER REACHED - SHIFT UP !!!")
-        elif coolant_temp > 105:
-            print(" [!] ENGINE OVERHEATING!")
-        else:
-            print("")
+        # # Dashboard Alerts
+        # if remaining_fuel_ml <= 0:
+        #     print(" [!] OUT OF FUEL! PRESS 'R' TO REFUEL!")
+        # elif remaining_fuel_ml < 4000:
+        #     print(" [!] LOW FUEL WARNING!")
+        # elif gear_grind_warning:
+        #     print(" [!] GRINDING GEARS! PRESS CLUTCH ('c') TO SHIFT!")
+        # elif stall_risk:
+        #     print(" [!] STALL RISK! PRESS CLUTCH OR SHIFT DOWN!")
+        # elif rev_limiter:
+        #     print(" [!] REV LIMITER REACHED - SHIFT UP !!!")
+        # elif coolant_temp > 105:
+        #     print(" [!] ENGINE OVERHEATING!")
+        # else:
+        #     print("")
 
-        print("-" * 50)
-        print(f" GEAR:          [{physics['name']}]   STATE: [{engine_state}]")
-        print(f" SPEED:         {int(current_speed)} km/h       ACCEL: {accel_ms2} m/s^2")
-        print(f" RPM:           {int(current_rpm)} RPM")
-        print(f" COOLANT:       {coolant_temp:.1f} C       OIL: {oil_temp:.1f} C")
-        print(f" BATTERY:       {battery_voltage:.2f} V")
-        print("-" * 50)
-        fuel_percentage = fuel_pct
-        print(f" TRIP DIST:     {distance_km:.3f} km")
-        print(f" FUEL:          {fuel_percentage:.1f}%  ({remaining_fuel_ml/1000:.2f} L)")
-        if instant_fuel_rate == 0.0 and current_rpm > 0 and remaining_fuel_ml > 0:
-            print(" FUEL RATE:     [INJECTORS OFF - COASTING]")
-        else:
-            print(f" FUEL RATE:     {instant_fuel_rate:.1f} mL/sec   LOAD: {engine_load_pct}%")
-        print("-" * 50)
-        gas_str = "ON" if is_accelerating else "OFF"
-        brake_str = "ON" if is_braking else "OFF"
-        clutch_str = "DOWN" if is_clutch_down else "UP"
-        print(f" PEDALS:  [GAS:{gas_str}] [BRAKE:{brake_str}] [CLUTCH:{clutch_str}]")
-        print("=" * 50)
-        print(" [Space]:Accel  [B]:Brake  [C]:Clutch  [1-5/N]:Gear")
-        print(" [R]:Refuel  [Q]:Quit & Save")
+        # print("-" * 50)
+        # print(f" GEAR:          [{physics['name']}]   STATE: [{engine_state}]")
+        # print(f" SPEED:         {int(current_speed)} km/h       ACCEL: {accel_ms2} m/s^2")
+        # print(f" RPM:           {int(current_rpm)} RPM")
+        # print(f" COOLANT:       {coolant_temp:.1f} C       OIL: {oil_temp:.1f} C")
+        # print(f" BATTERY:       {battery_voltage:.2f} V")
+        # print("-" * 50)
+        # fuel_percentage = fuel_pct
+        # print(f" TRIP DIST:     {distance_km:.3f} km")
+        # print(f" FUEL:          {fuel_percentage:.1f}%  ({remaining_fuel_ml/1000:.2f} L)")
+        # if instant_fuel_rate == 0.0 and current_rpm > 0 and remaining_fuel_ml > 0:
+        #     print(" FUEL RATE:     [INJECTORS OFF - COASTING]")
+        # else:
+        #     print(f" FUEL RATE:     {instant_fuel_rate:.1f} mL/sec   LOAD: {engine_load_pct}%")
+        # print("-" * 50)
+        # gas_str = "ON" if is_accelerating else "OFF"
+        # brake_str = "ON" if is_braking else "OFF"
+        # clutch_str = "DOWN" if is_clutch_down else "UP"
+        # print(f" PEDALS:  [GAS:{gas_str}] [BRAKE:{brake_str}] [CLUTCH:{clutch_str}]")
+        # print("=" * 50)
+        # print(" [Space]:Accel  [B]:Brake  [C]:Clutch  [1-5/N]:Gear")
+        # print(" [R]:Refuel  [Q]:Quit & Save")
 
         time.sleep(refresh_rate)
 

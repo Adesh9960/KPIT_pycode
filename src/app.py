@@ -1,9 +1,9 @@
 import logger.logger as logger
 import listener.listener as listener
-from encoder.encoder import encode
 from uds_client.uds_client import UDS, UDSRoles
 import Decoder.decoder_thread as decoder
 import isotp
+from utils.frontendFieldMapper import build_analytics_packet
 
 from flask import Flask, request, jsonify, render_template
 from flask_socketio import SocketIO
@@ -59,12 +59,10 @@ def handle_disconnect():
 def send_realtime_data(frame):
     print("Send realitme called")
     print(frame)
+    analytics = build_analytics_packet(frame)
     socketio.emit(
         "analytics",
-        {
-            "speed": frame["signals"]["Speed"],
-            "rpm": frame["signals"]["RPM"]
-        }
+        analytics
     )
 
 if __name__ == "__main__":

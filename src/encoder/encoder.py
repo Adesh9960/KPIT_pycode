@@ -1,8 +1,11 @@
 import cantools
 import can
 from encoder.msg_map import MESSAGE_MAP
-# from listener.TxRequest import TxRequest, TxRequestType
-# from listener.listener import send_to_tx_queue
+from listener.TxRequest import TxRequest, TxRequestType
+from listener.listener import send_to_tx_queue
+from data_structures.CANFrame import CANFrame
+import testm as main
+import time
 
 db = cantools.database.load_file("encoder/Vehicle.dbc")
 sequence_number = 0
@@ -29,9 +32,11 @@ def encode_frame(telemetry_row: dict):
                 continue
 
             if is_fd:
-                print("CAN FD is Detected")
+                pass
+                # print("CAN FD is Detected")
             else:
-                print("Classical CAN Frame")
+                pass
+                # print("Classical CAN Frame")
 
             # map telemetry CSV columns to DBC signal names
             signals = {
@@ -56,24 +61,35 @@ def encode_frame(telemetry_row: dict):
                 is_extended_id=is_extended,
                 is_fd=is_fd
             )
-
-            # # To send to queue
-            # request = TxRequest(
-            #     priority=1,
-            #     enqueue_timestamp_ns=time.time_ns(),
-            #     request_id=int(time.time_ns()),
-            #     request_type=TxRequestType.RAWCAN,
-            #     payload=frame,
-            #     max_retries=3,
-            #     timeout_ms=1000,
-            #     uds_error_callback=None,
-            #     confirmation_callback=None
+            # frame = CANFrame(
+            #     timestamp_ns= time.time_ns(),
+            #     can_id = raw_id,
+            #     dlc = msg_config["dlc"],
+            #     data=payload,
+            #     is_extended=is_extended,
+            #     is_fd=is_fd,
+            #     is_error=False
             # )
-            # send_to_tx_queue(request)
+            if raw_id == 0x100:
+                print("encoded frame: ", frame)
+            # # To send to queue
+                request = TxRequest(
+                    priority=1,
+                    enqueue_timestamp_ns=time.time_ns(),
+                    request_id=int(time.time_ns()),
+                    request_type=TxRequestType.RAWCAN,
+                    payload=frame,
+                    max_retries=3,
+                    timeout_ms=1000,
+                    uds_error_callback=None,
+                    confirmation_callback=None
+                )
+                send_to_tx_queue(request)
+            # main.can_queue.put(frame)
 
             # add sequence no. to each can frame
             sequence_number += 1
-            print(f"[SEQ #{sequence_number}] [{msg_name}] {frame}")
+            # print(f"[SEQ #{sequence_number}] [{msg_name}] {frame}")
 
         except Exception as e:
             print(f"[ROW ERROR] {msg_name}: {e} — skipping")

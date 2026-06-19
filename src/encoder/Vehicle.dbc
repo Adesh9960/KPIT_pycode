@@ -34,7 +34,7 @@ BO_ 2634014976 GearboxData: 8 ECU5
 
 BO_ 2634015232 TransmissionData: 8 ECU6
  SG_ Speed_kmh : 0|16@1+ (1,0) [0|300] "kmph" ECU6
- SG_ Fuel_Rate_mL_s : 16|16@1+ (1,0) [0|10] "mLs" ECU6
+ SG_ Fuel_Rate_mL_s : 16|16@1+ (1,0) [0|100] "mLs" ECU6
  SG_ Remaining_Fuel_L : 32|8@1+ (1,0) [0|50] "L" ECU6
  SG_ Fuel_Pct : 40|8@1+ (1,0) [0|100] "pct" ECU6
 

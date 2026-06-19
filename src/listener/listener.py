@@ -14,7 +14,7 @@ import time
 import isotp
 from listener.iso_tp_error_decoder import IsoTpErrorHandler
 
-def start(address, uds_response_event = None, channel = "can0", enable_listener = True):
+def start(address, uds_response_event = None, channel = "can0", enable_logger = True):
     adapter_config = CANConfig(
     "socketcan",
     channel,
@@ -22,7 +22,7 @@ def start(address, uds_response_event = None, channel = "can0", enable_listener 
     restart_ms=100,
     # fd_enabled=True
     )
-    main.listener_enabled = enable_listener
+    main.listener_enabled = enable_logger
     main.raw_can_receiver = RawReceiver()
     main.adapter = SocketCANAdapter(adapter_config, listeners=[main.raw_can_receiver])
     main.adapter.open()

@@ -1,6 +1,4 @@
 import cantools
-import can
-import time
 from Decoder.validate import validate_signals
 from Decoder.dlc_guards import validate_dlc
 from Decoder.hit_misses import lookup_message_definition
