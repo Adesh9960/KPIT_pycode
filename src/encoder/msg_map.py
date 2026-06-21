@@ -79,5 +79,16 @@ MESSAGE_MAP = {
             "Tyre_P_RL": "Tyre_P_RL",
             "Tyre_P_RR": "Tyre_P_RR"
         }
+    },
+    "ActuatorData":{
+         "can_id": 0x600,
+        "is_extended": False,
+        "is_fd": False,
+        "dlc": 3,
+        "signals": {
+            "Head_Lamp": "Head_Lamp",
+            "Radiator_Fan": "Radiator_Fan",
+            "Fuel_Pump": "Fuel_Pump"
+        }
     }
 }

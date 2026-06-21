@@ -31,13 +31,6 @@ def encode_frame(telemetry_row: dict):
                 print(f"[SKIP] {msg_name} not found in DBC.")
                 continue
 
-            if is_fd:
-                pass
-                # print("CAN FD is Detected")
-            else:
-                pass
-                # print("Classical CAN Frame")
-
             # map telemetry CSV columns to DBC signal names
             signals = {
                 dbc_signal: float(telemetry_row[csv_col])

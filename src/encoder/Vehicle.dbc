@@ -3,7 +3,7 @@ VERSION ""
 NS_ :
 BS_:
 
-BU_: ECU1 ECU2 ECU3 ECU4 ECU5 ECU6 ECU7 ECU8
+BU_: ECU1 ECU2 ECU3 ECU4 ECU5 ECU6 ECU7 ECU8 ECU9
 
 BO_ 256 VehicleData: 8 ECU1
  SG_ Speed_kmh : 0|16@1+ (1,0) [0|190] "kmph" ECU1
@@ -49,3 +49,7 @@ BO_ 1024 TyreData: 8 ECU8
  SG_ Tyre_P_RL : 32|8@1+ (1,0) [0|60] "psi" ECU8
  SG_ Tyre_P_RR : 40|8@1+ (1,0) [0|60] "psi" ECU8
 
+BO_ 1536 ActuatorData: 3 ECU8
+ SG_ Head_Lamp     : 0|8@1+  (1,0) [0|1] "" ECU8
+ SG_ Radiator_Fan  : 8|8@1+  (1,0) [0|1] "" ECU8
+ SG_ Fuel_Pump     : 16|8@1+ (1,0) [0|1] "" ECU8

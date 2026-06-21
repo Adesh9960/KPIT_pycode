@@ -1,3 +1,0 @@
-DIDlist = {
-    0xF190: "WAUFFAFL2GA006626"
-}

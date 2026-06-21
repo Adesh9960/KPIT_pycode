@@ -1,4 +1,4 @@
 import Decoder.decoder_thread as decoder
-import Data_generation.Parameters as parameters
+import simulator.Data_generation.Parameters as parameters
 decoder.start()
 parameters.main()
