@@ -4,8 +4,11 @@ from listener.TxRequest import TxRequest, TxRequestType
 from listener.listener import send_to_tx_queue
 import time
 import threading
-class SecurityAccessError(Exception):
-    pass
+import uds_client.uploadFirmware as handleUploadFirmware
+from uds_client.sessionControl import diagnostic_session_control
+from uds_client.IOControl import io_control
+from uds_client.securityAccess import security_access
+
 class UDSRoles(Enum):
     USER = "user"
     MECHANIC = "mech"
@@ -23,6 +26,11 @@ def createUDSRequest(payload, timeout, priority = 10) -> TxRequest:
         )
 class UDS:
     role: UDSRoles
+    diagnostic_session_control = diagnostic_session_control
+    io_control = io_control
+    security_access = security_access
+    transfer_data_upload = handleUploadFirmware.transfer_data_upload
+    transfer_exit_upload = handleUploadFirmware.transfer_exit_upload
     def __init__(self, role):
         self.role = role
         self._event = threading.Event()
@@ -89,61 +97,8 @@ class UDS:
             didconfig=None
         )
         payload = request.get_payload()
-        self.send_and_wait(payload, timeout)
+        self.send_and_wait(payload, timeout)    
 
-
-    def calculate_key(self, seed: bytes) -> bytes:
-        """
-        Must match ECU algorithm.
-        Demo algorithm only.
-        """
-        return bytes(b ^ 0xA5 for b in seed)
-    
-    def security_access(self, level: int = 1):
-        request_seed_subfunction = (level * 2) - 1
-        send_key_subfunction = level * 2
-
-        # Step 1: Request Seed
-        response = self.send_and_wait(
-            bytes([
-                0x27,
-                request_seed_subfunction
-            ]),
-            5
-        )
-
-        # Check positive response
-        if response[0] != 0x67:
-            raise SecurityAccessError(
-                f"Negative response: {response.hex()}"
-            )
-
-        seed = response[2:]
-
-        print(f"Received seed: {seed.hex()}")
-
-        # Step 2: Calculate key
-        key = self.calculate_key(seed)
-
-        print(f"Calculated key: {key.hex()}")
-
-        # Step 3: Send Key
-        response = self.send_and_wait(
-            bytes([
-                0x27,
-                send_key_subfunction
-            ]) + key
-        )
-
-        if response != bytes([
-            0x67,
-            send_key_subfunction
-        ]):
-            raise SecurityAccessError(
-                f"Unlock failed: {response.hex()}"
-            )
-
-        print("Security Access Granted")
-        return True
-
-
+    def firmwareUpload(self, output_file):
+        handleUploadFirmware.request_upload()
+        handleUploadFirmware.read_firmware_from_ecu(output_file)
