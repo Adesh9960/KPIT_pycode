@@ -6,7 +6,7 @@ import isotp
 from utils.frontendFieldMapper import build_analytics_packet
 from utils.files import zip_folder, delete_file
 from flask import Flask, request, jsonify, render_template, send_file
-from flask_socketio import SocketIO
+
 
 uds_client: UDS
 
@@ -15,8 +15,6 @@ app = Flask(
     template_folder="Frontend/templates",
     static_folder="Frontend/static"
 )
-
-socketio = SocketIO(app, cors_allowed_origins=["*"])
 
 @app.route("/")
 def home():
@@ -124,37 +122,16 @@ def IO_control():
             "message": "Could not change control"
         })
 
-
-@socketio.on("connect")
-def handle_connect():
-    print("Client connected")
-
-@socketio.on("disconnect")
-def handle_disconnect():
-    print("Client disconnected")
-
-
-def send_realtime_data(frame):
-    print("Send realitme called")
-    print(frame)
-    analytics = build_analytics_packet(frame)
-    socketio.emit(
-        "analytics",
-        analytics
-    )
-
-
-
 if __name__ == "__main__":
-    address = isotp.Address(
-    isotp.AddressingMode.Normal_11bits,
-    txid=0x22,
-    rxid=0x62
-    )
-    uds_client = UDS(UDSRoles.USER)
-    listener.start(address, uds_client.on_response)
-    decoder.start(send_realtime_data)
-    logger.start()
+    # address = isotp.Address(
+    # isotp.AddressingMode.Normal_11bits,
+    # txid=0x22,
+    # rxid=0x62
+    # )
+    # uds_client = UDS(UDSRoles.USER)
+    # listener.start(address, uds_client.on_response)
+    # decoder.start(send_realtime_data)
+    # logger.start()
     app.run()
 
 

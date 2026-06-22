@@ -1,282 +1,723 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ECU Simulator Dashboard</title>
-    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ECU Simulator Dashboard</title>
+  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
-<body>
+<body class="mode-live">
 
-<header>
-    <div class="header-left">
-        <div class="header-brand">
-            <span class="brand-icon">⚙</span>
-            <div>
-                <h1>ECU Simulator</h1>
-                <span class="subtitle">Real-time engine telemetry</span>
-            </div>
-        </div>
+<header id="app-header">
+  <div class="header-brand">
+    <div class="brand-logo">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+        <circle cx="14" cy="14" r="13" stroke="currentColor" stroke-width="1.5" opacity="0.3"/>
+        <path d="M14 4 L14 8 M14 20 L14 24 M4 14 L8 14 M20 14 L24 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <circle cx="14" cy="14" r="4" fill="currentColor"/>
+        <path d="M8 8 L11 11 M17 17 L20 20 M20 8 L17 11 M11 17 L8 20" stroke="currentColor" stroke-width="1" stroke-linecap="round" opacity="0.6"/>
+      </svg>
     </div>
-    <nav class="mode-switch">
-        <button class="mode-btn active" data-mode="live" onclick="setMode('live')">
-            <span class="live-blink"></span> Live Mode
-        </button>
-        <button class="mode-btn" data-mode="history" onclick="setMode('history')">
-            ⏱ History
-        </button>
-    </nav>
+    <div class="brand-text">
+      <span class="brand-name">ECU SIMULATOR</span>
+      <span class="brand-sub">REAL-TIME ENGINE TELEMETRY</span>
+    </div>
+  </div>
+
+  <nav class="tab-nav" id="tab-nav">
+    <button class="tab-btn active" data-mode="live" onclick="setMode('live')" title="Live Dashboard">
+      <svg class="tab-icon" viewBox="0 0 20 20" fill="none">
+        <circle cx="10" cy="10" r="3" fill="currentColor"/>
+        <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.4"/>
+        <circle cx="10" cy="10" r="9.5" stroke="currentColor" stroke-width="1" fill="none" opacity="0.2"/>
+      </svg>
+      <span class="live-dot"></span>
+      <span class="tab-label">Live</span>
+    </button>
+
+    <button class="tab-btn" data-mode="advanced" onclick="setMode('advanced')" title="Advanced User Mode">
+      <svg class="tab-icon" viewBox="0 0 20 20" fill="none">
+        <path d="M10 2L12.5 7H17.5L13.5 10.5L15 15.5L10 12.5L5 15.5L6.5 10.5L2.5 7H7.5L10 2Z" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+      </svg>
+      <span class="tab-label">Advanced</span>
+    </button>
+
+    <button class="tab-btn tech-tab hidden" id="tech-tab-btn" data-mode="technician" onclick="setMode('technician')" title="Technician Mode — Extended Diagnostic Session">
+      <svg class="tab-icon" viewBox="0 0 20 20" fill="none">
+        <path d="M9 2H11V4.07A7 7 0 0 1 16.93 9H19V11H16.93A7 7 0 0 1 11 15.93V18H9V15.93A7 7 0 0 1 3.07 11H1V9H3.07A7 7 0 0 1 9 4.07V2Z" stroke="currentColor" stroke-width="1.4" fill="none"/>
+        <circle cx="10" cy="10" r="2.5" fill="currentColor"/>
+      </svg>
+      <span class="tab-label">Technician</span>
+      <span class="tech-badge">EXT</span>
+    </button>
+
+    <button class="tab-btn prog-tab hidden" id="prog-tab-btn" data-mode="programming" onclick="setMode('programming')" title="Programming Mode — 0x10 0x02">
+      <svg class="tab-icon" viewBox="0 0 20 20" fill="none">
+        <path d="M10 2L18 6V14L10 18L2 14V6L10 2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+      </svg>
+      <span class="tab-label">Programming</span>
+      <span class="tech-badge" style="background: rgba(255,215,64,0.2); color: var(--tech-amber); border-color: rgba(255,215,64,0.3);">PRG</span>
+    </button>
+
+    <button class="tab-btn" data-mode="history" onclick="setMode('history')" title="Signal History">
+      <svg class="tab-icon" viewBox="0 0 20 20" fill="none">
+        <polyline points="2,15 6,9 9,12 13,5 17,8" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
+        <line x1="2" y1="17" x2="18" y2="17" stroke="currentColor" stroke-width="1" opacity="0.4"/>
+      </svg>
+      <span class="tab-label">History</span>
+    </button>
+  </nav>
+
+  <div class="header-actions">
+    <div class="uds-status" id="uds-status" title="UDS Session — type 0x10 0x03 to unlock Technician mode">
+      <span class="uds-dot"></span>
+      <span class="uds-label" id="uds-label">DEFAULT</span>
+    </div>
+    <div class="tp-indicator hidden" id="tp-indicator" title="TesterPresent 0x3E heartbeat">
+      <span class="tp-dot"></span>
+      <span class="tp-label">TP</span>
+    </div>
+
+    <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode">
+      <svg class="theme-icon sun" viewBox="0 0 20 20" fill="none">
+        <circle cx="10" cy="10" r="4" stroke="currentColor" stroke-width="1.5"/>
+        <line x1="10" y1="1" x2="10" y2="3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="10" y1="16.5" x2="10" y2="19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="1" y1="10" x2="3.5" y2="10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="16.5" y1="10" x2="19" y2="10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="3.5" y1="3.5" x2="5.5" y2="5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="14.5" y1="14.5" x2="16.5" y2="16.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="16.5" y1="3.5" x2="14.5" y2="5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="5.5" y1="14.5" x2="3.5" y2="16.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <svg class="theme-icon moon" viewBox="0 0 20 20" fill="none">
+        <path d="M17 11.5A7.5 7.5 0 0 1 8.5 3a7.5 7.5 0 1 0 8.5 8.5z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+      </svg>
+    </button>
+
+    <div class="conn-pill" id="conn-pill">
+      <span class="conn-dot" id="conn-dot"></span>
+      <span id="conn-label">CONNECTING</span>
+    </div>
+    <span class="sys-time" id="sys-time">--:--:--</span>
+  </div>
 </header>
 
-<!-- ====================================================
-     LIVE MODE
-===================================================== -->
-<section id="live-mode" class="mode-view active">
+<section class="page active" id="live-mode">
+  <div class="lv-status-row">
+    <span id="connection-status" class="status-pill ok">● LIVE</span>
+    <span id="engine-state-badge" class="eng-state">IDLE</span>
+    <span class="lv-timestamp" style="display: flex; gap: 12px; font-weight: 600; letter-spacing: 1px; margin-left: auto;">
+      <span>MODE: <strong style="color: var(--lv-green)">DYNAMIC</strong></span>
+      <span style="opacity: 0.4">|</span>
+      <span>DATE: <strong style="color: var(--lv-blue)" id="live-date-display">--/--/----</strong></span>
+    </span>
+  </div>
 
-    <!-- Top status bar -->
-    <div class="status-bar">
-        <div class="status-left">
-            <span id="connection-status" class="status-pill status-ok">● LIVE</span>
-            <span id="engine-state-badge" class="state-badge">IDLE</span>
+  <div class="lv-primary-grid">
+    <div class="lv-primary-card lv-speed-card">
+      <div class="lv-card-label">SPEED</div>
+      <div class="gauge-wrap" id="speed-gauge"></div>
+    </div>
+    <div class="lv-primary-card lv-rpm-card">
+      <div class="lv-card-label">ENGINE RPM</div>
+      <div class="gauge-wrap" id="rpm-gauge"></div>
+    </div>
+    <div class="lv-primary-card lv-fuel-card">
+      <div class="lv-card-label">FUEL LEVEL</div>
+      <div class="gauge-wrap" id="fuel-gauge"></div>
+    </div>
+    <div class="lv-primary-card lv-dist-card">
+      <div class="lv-card-label">TRIP DISTANCE</div>
+      <div class="lv-dist-inner">
+        <span class="lv-dist-num" id="distance-main-val">0.00</span>
+        <span class="lv-dist-unit">KM</span>
+      </div>
+      <div class="lv-dist-sub-row">
+        <div class="lv-dist-sub">
+          <span class="lv-ds-lbl">EST. RANGE</span>
+          <span class="lv-ds-val" id="est-range">-- km</span>
         </div>
-        <div class="status-right">
-            <span id="last-update" class="update-time">--</span>
-            <button id="advanced-toggle" class="adv-btn" onclick="toggleAdvanced()">
-                Advanced ▾
-            </button>
+        <div class="lv-dist-sub">
+          <span class="lv-ds-lbl">ECONOMY</span>
+          <span class="lv-ds-val" id="fuel-economy">-- km/L</span>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="lv-secondary-grid">
+    <div class="lv-sec-panel lv-transmission">
+      <div class="lv-sec-title">TRANSMISSION</div>
+      <div class="lv-gear-block">
+        <span class="lv-gear-num" id="gear-display">N</span>
+        <div class="lv-gear-right">
+          <span class="lv-gear-name" id="gear-name">Neutral</span>
+          <span class="lv-shift-hint" id="shift-hint">—</span>
+        </div>
+      </div>
+      <div class="lv-control-chips">
+        <div class="lv-ctrl-chip" id="chip-clutch">
+          <span class="chip-dot"></span>
+          <span class="chip-lbl">CLUTCH</span>
+          <span class="chip-val" id="clutch-val">UP</span>
+        </div>
+        <div class="lv-ctrl-chip" id="chip-brake">
+          <span class="chip-dot"></span>
+          <span class="chip-lbl">BRAKE</span>
+          <span class="chip-val" id="brake-val">OFF</span>
+        </div>
+      </div>
     </div>
 
-    <!-- ── ROW 1: Primary Gauges ── -->
-    <div class="gauge-row">
-        <div class="gauge-card" id="speed-card">
-            <div class="gauge-label">SPEED</div>
-            <div class="gauge-wrap" id="speed-gauge"></div>
+    <div class="lv-sec-panel lv-thermals">
+      <div class="lv-sec-title">ENGINE THERMALS</div>
+      <div class="lv-thermal-grid">
+        <div class="lv-th-item">
+          <span class="lv-th-label">Coolant</span>
+          <span class="lv-th-val" id="coolantTemp">--</span>
+          <span class="lv-th-unit">°C</span>
+          <div class="lv-th-bar-bg"><div class="lv-th-bar-fill" id="bar-coolant"></div></div>
         </div>
-        <div class="gauge-card" id="rpm-card">
-            <div class="gauge-label">ENGINE RPM</div>
-            <div class="gauge-wrap" id="rpm-gauge"></div>
+        <div class="lv-th-item">
+          <span class="lv-th-label">Warmup</span>
+          <span class="lv-th-val" id="warmup-pct">--</span>
+          <span class="lv-th-unit">%</span>
+          <div class="lv-th-bar-bg"><div class="lv-th-bar-fill lv-warmup-bar" id="bar-warmup"></div></div>
         </div>
-        <div class="gauge-card" id="fuel-card">
-            <div class="gauge-label">FUEL LEVEL</div>
-            <div class="gauge-wrap" id="fuel-gauge"></div>
-        </div>
-        <div class="gauge-card" id="coolant-card">
-            <div class="gauge-label">COOLANT TEMP</div>
-            <div class="gauge-wrap" id="coolant-gauge"></div>
-        </div>
+      </div>
     </div>
 
-    <!-- ── ROW 2: Secondary Info Panels ── -->
-    <div class="info-row">
-
-        <!-- Gear + Engine State -->
-        <div class="info-panel gear-panel">
-            <div class="panel-title">TRANSMISSION</div>
-            <div class="gear-display" id="gear-display">N</div>
-            <div class="gear-name" id="gear-name">Neutral</div>
-            <div class="mini-chips">
-                <div class="mini-chip">
-                    <span class="mc-label">Clutch</span>
-                    <span class="mc-val" id="clutch-val">--</span>
-                </div>
-                <div class="mini-chip">
-                    <span class="mc-label">Brake</span>
-                    <span class="mc-val" id="brake-val">--</span>
-                </div>
-            </div>
+    <div class="lv-sec-panel lv-fuel-panel">
+      <div class="lv-sec-title">FUEL SYSTEM</div>
+      <div class="lv-fuel-bar-wrap">
+        <div class="lv-fuel-bar-bg"><div class="lv-fuel-bar-fill" id="fuel-bar"></div></div>
+        <span class="lv-fuel-pct" id="fuelLevel">--%</span>
+      </div>
+      <div class="lv-fuel-stats">
+        <div class="lv-th-item">
+          <span class="lv-th-label">Remaining</span>
+          <span class="lv-th-val" id="fuel-l-val">--</span>
+          <span class="lv-th-unit">L</span>
         </div>
-
-        <!-- Thermal Panel -->
-        <div class="info-panel thermal-panel">
-            <div class="panel-title">THERMALS</div>
-            <div class="thermal-row">
-                <div class="thermal-item">
-                    <span class="th-label">Coolant</span>
-                    <span class="th-val" id="coolant-val">--</span>
-                    <span class="th-unit">°C</span>
-                </div>
-                <div class="thermal-item">
-                    <span class="th-label">Oil Temp</span>
-                    <span class="th-val" id="oil-val">--</span>
-                    <span class="th-unit">°C</span>
-                </div>
-                <div class="thermal-item">
-                    <span class="th-label">Ambient</span>
-                    <span class="th-val" id="ambient-val">--</span>
-                    <span class="th-unit">°C</span>
-                </div>
-            </div>
+        <div class="lv-th-item">
+          <span class="lv-th-label">Fuel Rate</span>
+          <span class="lv-th-val" id="fuel-rate-val">--</span>
+          <span class="lv-th-unit">mL/s</span>
         </div>
-
-        <!-- Fuel Panel -->
-        <div class="info-panel fuel-panel">
-            <div class="panel-title">FUEL SYSTEM</div>
-            <div class="fuel-bar-wrap">
-                <div class="fuel-bar-bg">
-                    <div class="fuel-bar-fill" id="fuel-bar"></div>
-                </div>
-                <span id="fuel-pct-text" class="fuel-pct-text">--%</span>
-            </div>
-            <div class="thermal-row" style="margin-top:10px">
-                <div class="thermal-item">
-                    <span class="th-label">Remaining</span>
-                    <span class="th-val" id="fuel-l-val">--</span>
-                    <span class="th-unit">L</span>
-                </div>
-                <div class="thermal-item">
-                    <span class="th-label">Fuel Rate</span>
-                    <span class="th-val" id="fuel-rate-val">--</span>
-                    <span class="th-unit">mL/s</span>
-                </div>
-            </div>
+        <div class="lv-th-item">
+          <span class="lv-th-label">Fuel Pump</span>
+          <span class="lv-th-val" id="fuel-pump-val">--</span>
+          <span class="lv-th-unit"> </span>
         </div>
-
-        <!-- Motion Panel -->
-        <div class="info-panel motion-panel">
-            <div class="panel-title">MOTION</div>
-            <div class="thermal-row">
-                <div class="thermal-item">
-                    <span class="th-label">Accel</span>
-                    <span class="th-val" id="accel-val">--</span>
-                    <span class="th-unit">m/s²</span>
-                </div>
-                <div class="thermal-item">
-                    <span class="th-label">Distance</span>
-                    <span class="th-val" id="dist-val">--</span>
-                    <span class="th-unit">km</span>
-                </div>
-            </div>
-            <div class="thermal-row" style="margin-top:8px">
-                <div class="thermal-item">
-                    <span class="th-label">Throttle</span>
-                    <span class="th-val" id="throttle-val">--</span>
-                    <span class="th-unit">%</span>
-                </div>
-                <div class="thermal-item">
-                    <span class="th-label">Engine Load</span>
-                    <span class="th-val" id="load-val">--</span>
-                    <span class="th-unit">%</span>
-                </div>
-            </div>
-            <div class="thermal-row" style="margin-top:8px">
-                <div class="thermal-item">
-                    <span class="th-label">Battery</span>
-                    <span class="th-val" id="battery-val">--</span>
-                    <span class="th-unit">V</span>
-                </div>
-                <div class="thermal-item">
-                    <span class="th-label">Rev Limit</span>
-                    <span class="th-val" id="revlim-val">--</span>
-                    <span class="th-unit"></span>
-                </div>
-            </div>
-        </div>
-
+      </div>
     </div>
 
-    <!-- ── ADVANCED PANEL ── -->
-    <div id="advanced-panel" class="advanced-panel">
-        <div class="adv-section-title">ADVANCED DIAGNOSTICS</div>
-        <div class="adv-grid">
-            <div class="adv-chip">
-                <span class="adv-label">Tyre FL</span>
-                <span class="adv-val" id="tyre-fl">-- psi</span>
-            </div>
-            <div class="adv-chip">
-                <span class="adv-label">Tyre FR</span>
-                <span class="adv-val" id="tyre-fr">-- psi</span>
-            </div>
-            <div class="adv-chip">
-                <span class="adv-label">Tyre RL</span>
-                <span class="adv-val" id="tyre-rl">-- psi</span>
-            </div>
-            <div class="adv-chip">
-                <span class="adv-label">Tyre RR</span>
-                <span class="adv-val" id="tyre-rr">-- psi</span>
-            </div>
-            <div class="adv-chip">
-                <span class="adv-label">Airbag</span>
-                <span class="adv-val ok" id="airbag-val">OK</span>
-            </div>
-            <div class="adv-chip">
-                <span class="adv-label">Door Lock</span>
-                <span class="adv-val" id="door-lock-val">--</span>
-            </div>
-            <div class="adv-chip">
-                <span class="adv-label">Stall Risk</span>
-                <span class="adv-val" id="stall-val">--</span>
-            </div>
+    <div class="lv-sec-panel lv-electrical">
+      <div class="lv-sec-title">ELECTRICAL</div>
+      <div class="lv-thermal-grid">
+        <div class="lv-th-item">
+          <span class="lv-th-label">Battery</span>
+          <span class="lv-th-val" id="batteryVoltage">--</span>
+          <span class="lv-th-unit">V</span>
+          <div class="lv-th-bar-bg"><div class="lv-th-bar-fill" id="bar-batt"></div></div>
         </div>
+        <div class="lv-th-item">
+          <span class="lv-th-label">Rev Limiter</span>
+          <span class="lv-th-val" id="revlim-val">OK</span>
+          <span class="lv-th-unit"> </span>
+        </div>
+        <div class="lv-th-item">
+          <span class="lv-th-label">Stall Risk</span>
+          <span class="lv-th-val" id="stall-live">OK</span>
+          <span class="lv-th-unit"> </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="lv-chart-label">LIVE SPEED &amp; RPM TREND</div>
+  <div id="live-chart" class="lv-chart-box"></div>
+</section>
+
+<section class="page" id="advanced-mode">
+  <div class="adv-mode-strip">
+    <div class="adv-mode-indicator" id="adv-mode-indicator">
+      <span class="adv-mode-dot"></span>
+      <span id="adv-mode-label">USER MODE</span>
+    </div>
+    <div style="font-size: 11px; color: var(--adv-muted); font-weight: 600; letter-spacing: 0.5px; display: flex; align-items: center; gap: 10px;">
+      <span>SYSTEM HEALTH: <span style="color: var(--adv-green);">NOMINAL</span></span>
+      <span style="opacity: 0.3;">|</span>
+      <span>DATE: <span style="color: var(--adv-text);" id="adv-date-display">--/--/----</span></span>
+    </div>
+  </div>
+
+  <div id="adv-user-content">
+    <div class="adv-hero">
+      <div class="adv-car-card">
+        <div class="adv-car-stats-grid">
+          <div class="adv-cs"><span class="adv-cs-val" id="adv-rpm-hero">—</span><span class="adv-cs-lbl">ENGINE RPM</span></div>
+          <div class="adv-cs"><span class="adv-cs-val" id="adv-load-hero">—</span><span class="adv-cs-lbl">ENGINE LOAD</span></div>
+          <div class="adv-cs"><span class="adv-cs-val" id="adv-iat-hero">—</span><span class="adv-cs-lbl">AMBIENT °C</span></div>
+          <div class="adv-cs"><span class="adv-cs-val" id="adv-throttle-hero">—</span><span class="adv-cs-lbl">THROTTLE</span></div>
+        </div>
+        <div class="adv-car-svg-wrap">
+          <svg viewBox="0 0 246 90" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:240px">
+            <rect x="20" y="45" width="206" height="30" rx="8" fill="#3b1fa8" opacity="0.7"/>
+            <rect x="35" y="28" width="176" height="30" rx="6" fill="#4c2db5" opacity="0.8"/>
+            <rect x="93" y="30" width="60" height="18" rx="5" fill="#5b21b6" opacity="0.5"/>
+            <circle cx="70" cy="74" r="15" fill="#2d1b69" stroke="white" stroke-width="2"/>
+            <circle cx="70" cy="74" r="6" fill="#1a0f3d"/>
+            <circle cx="176" cy="74" r="15" fill="#2d1b69" stroke="white" stroke-width="2"/>
+            <circle cx="176" cy="74" r="6" fill="#1a0f3d"/>
+          </svg>
+        </div>
+        <div class="adv-state-chips">
+          <span class="adv-sch" id="adv-engine-state-chip">IDLE</span>
+          <span class="adv-sch adv-sch-gear" id="adv-gear-chip">N</span>
+          <span class="adv-sch" id="adv-brake-chip">BRAKE: OFF</span>
+          <span class="adv-sch" id="adv-clutch-chip">CLUTCH: UP</span>
+        </div>
+      </div>
+
+      <div class="adv-white-card adv-activity-card">
+        <div class="adv-card-head">
+          <span class="adv-card-title">Vehicle Health</span>
+          <span class="adv-card-link" onclick="setMode('live')">View Live ↗</span>
+        </div>
+        <div class="adv-speed-big" id="adv-speed-big">0 km/h</div>
+        <div class="adv-speed-sub">Current speed — live feed</div>
+        <div class="adv-mini-stats-grid">
+          <div class="adv-ms"><span class="adv-ms-val" id="adv-accel-mini">—</span><span class="adv-ms-lbl">m/s²</span></div>
+          <div class="adv-ms"><span class="adv-ms-val" id="adv-dist-mini">—</span><span class="adv-ms-lbl">km trip</span></div>
+          <div class="adv-ms"><span class="adv-ms-val" id="adv-fuel-mini">—</span><span class="adv-ms-lbl">% fuel</span></div>
+          <div class="adv-ms"><span class="adv-ms-val" id="adv-cool-mini">—</span><span class="adv-ms-lbl">°C coolant</span></div>
+        </div>
+        <div class="adv-spark-wrap" style="display:none;"><div id="adv-speed-chart" style="width:100%;height:100%"></div></div>
+      </div>
+
+      <div class="adv-white-card adv-sensors-card">
+        <div class="adv-card-head"><span class="adv-card-title">Live Sensors</span></div>
+        <div class="adv-sensor-list">
+          <div class="adv-sr"><div class="adv-sr-name"><div class="adv-sr-chk">✓</div>Fuel Level</div><div class="adv-sr-val" id="sn-fuel">—</div></div>
+          <div class="adv-sr"><div class="adv-sr-name"><div class="adv-sr-chk">✓</div>Oil Temp</div><div class="adv-sr-val" id="sn-oil">—</div></div>
+          <div class="adv-sr"><div class="adv-sr-name"><div class="adv-sr-chk">✓</div>Coolant Temp</div><div class="adv-sr-val" id="sn-cool">—</div></div>
+          <div class="adv-sr"><div class="adv-sr-name"><div class="adv-sr-chk">✓</div>Battery Voltage</div><div class="adv-sr-val" id="sn-volt">—</div></div>
+          <div class="adv-sr"><div class="adv-sr-name"><div class="adv-sr-chk">✓</div>Engine RPM</div><div class="adv-sr-val" id="sn-rpm">—</div></div>
+          <div class="adv-sr"><div class="adv-sr-name"><div class="adv-sr-chk">✓</div>Fuel Rate</div><div class="adv-sr-val" id="sn-fuelrate">—</div></div>
+          <div class="adv-sr"><div class="adv-sr-name"><div class="adv-sr-chk">✓</div>Trip Distance</div><div class="adv-sr-val" id="sn-dist">—</div></div>
+          <div class="adv-sr"><div class="adv-sr-name"><div class="adv-sr-chk">✓</div>Head Lamp</div><div class="adv-sr-val" id="sn-headlamp">—</div></div>
+          <div class="adv-sr"><div class="adv-sr-name"><div class="adv-sr-chk">✓</div>Radiator Fan</div><div class="adv-sr-val" id="sn-radfan">—</div></div>
+        </div>
+      </div>
     </div>
 
-    <!-- ── Live Speed Trend ── -->
-    <div class="section-title">Live Speed &amp; RPM Trend</div>
-    <div id="live-chart" class="chart-box small-chart"></div>
+    <div class="adv-kpi-row">
+      <div class="adv-white-card adv-kpi-card">
+        <div class="adv-kpi-label">CAR BATTERY</div>
+        <div class="adv-kpi-val" id="adv-batt">—</div>
+        <div class="adv-kpi-sub" id="adv-batt-sub">— V</div>
+        <div class="adv-kpi-bar-bg"><div class="adv-kpi-bar-fill" id="adv-batt-bar"></div></div>
+      </div>
+      <div class="adv-white-card adv-kpi-card">
+        <div class="adv-kpi-label">ALTERNATOR</div>
+        <div class="adv-kpi-val" id="adv-alt">—</div>
+        <div class="adv-kpi-sub" id="adv-alt-sub">Charging</div>
+        <div class="adv-kpi-bar-bg"><div class="adv-kpi-bar-fill" id="adv-alt-bar" style="background:var(--adv-blue)"></div></div>
+      </div>
+      <div class="adv-white-card adv-kpi-card">
+        <div class="adv-kpi-label">OIL TEMP</div>
+        <div class="adv-kpi-val" id="adv-oiltemp-kpi">—</div>
+        <div class="adv-kpi-sub">Target: 80–110 °C</div>
+        <div class="adv-kpi-bar-bg"><div class="adv-kpi-bar-fill" id="adv-oiltemp-bar" style="background:var(--adv-amber)"></div></div>
+      </div>
+      <div class="adv-white-card adv-kpi-card">
+        <div class="adv-kpi-label">FUEL RATE</div>
+        <div class="adv-kpi-val" id="adv-fuelrate-kpi">—</div>
+        <div class="adv-kpi-sub">mL / sec consumption</div>
+        <div class="adv-kpi-bar-bg"><div class="adv-kpi-bar-fill" id="adv-fuelrate-bar" style="background:var(--adv-amber)"></div></div>
+      </div>
+      <div class="adv-white-card adv-kpi-card">
+        <div class="adv-kpi-label">EST. RANGE</div>
+        <div class="adv-kpi-val" id="adv-range-kpi">—</div>
+        <div class="adv-kpi-sub">Based on current fuel rate</div>
+        <div class="adv-kpi-bar-bg"><div class="adv-kpi-bar-fill" id="adv-range-bar" style="background:var(--adv-green)"></div></div>
+      </div>
+    </div>
+
+    <div class="adv-bottom-row">
+      <div class="adv-white-card adv-safety-card">
+        <div class="adv-card-head"><span class="adv-card-title">Safety Systems</span></div>
+        <div class="adv-safety-list">
+          <div class="adv-safety-row"><div class="adv-sft-dot" style="background:#10b981"></div><div class="adv-sft-info"><div class="adv-sft-name">Airbags — Driver / Passenger / Side</div><div class="adv-sft-sub">All 6 modules armed and ready</div></div><span class="adv-pill adv-pill-ok">READY</span></div>
+          <div class="adv-safety-row"><div class="adv-sft-dot" style="background:#10b981"></div><div class="adv-sft-info"><div class="adv-sft-name">ABS &amp; Traction Control</div><div class="adv-sft-sub">Anti-lock braking system nominal</div></div><span class="adv-pill adv-pill-ok">ACTIVE</span></div>
+          <div class="adv-safety-row"><div class="adv-sft-dot" style="background:#10b981"></div><div class="adv-sft-info"><div class="adv-sft-name">Electronic Stability Program</div><div class="adv-sft-sub">ESP monitoring yaw &amp; traction</div></div><span class="adv-pill adv-pill-ok">ACTIVE</span></div>
+          <div class="adv-safety-row"><div class="adv-sft-dot" id="adv-revlim-dot" style="background:#f59e0b"></div><div class="adv-sft-info"><div class="adv-sft-name">Rev Limiter</div><div class="adv-sft-sub" id="adv-revlim-sub">Monitoring</div></div><span class="adv-pill adv-pill-warn" id="adv-revlim-badge">STANDBY</span></div>
+          <div class="adv-safety-row"><div class="adv-sft-dot" id="adv-stall-dot" style="background:#10b981"></div><div class="adv-sft-info"><div class="adv-sft-name">Stall Risk Monitor</div><div class="adv-sft-sub" id="adv-stall-sub">All clear</div></div><span class="adv-pill adv-pill-ok" id="adv-stall-badge">OK</span></div>
+        </div>
+      </div>
+
+      <div class="adv-white-card adv-tyre-card">
+        <div class="adv-card-head"><span class="adv-card-title">Tyre Pressure Monitor</span></div>
+        <div class="adv-tyre-grid">
+          <div class="adv-tyre-cell"><div class="adv-tyre-pos">FRONT LEFT</div><div class="adv-tyre-val" id="t-fl">— <span class="adv-tyre-unit">psi</span></div><div class="adv-tyre-bar-bg"><div class="adv-tyre-bar-fill" id="t-fl-bar"></div></div></div>
+          <div class="adv-tyre-cell"><div class="adv-tyre-pos">FRONT RIGHT</div><div class="adv-tyre-val" id="t-fr">— <span class="adv-tyre-unit">psi</span></div><div class="adv-tyre-bar-bg"><div class="adv-tyre-bar-fill" id="t-fr-bar"></div></div></div>
+          <div class="adv-tyre-cell"><div class="adv-tyre-pos">REAR LEFT</div><div class="adv-tyre-val" id="t-rl">— <span class="adv-tyre-unit">psi</span></div><div class="adv-tyre-bar-bg"><div class="adv-tyre-bar-fill" id="t-rl-bar"></div></div></div>
+          <div class="adv-tyre-cell"><div class="adv-tyre-pos">REAR RIGHT</div><div class="adv-tyre-val" id="t-rr">— <span class="adv-tyre-unit">psi</span></div><div class="adv-tyre-bar-bg"><div class="adv-tyre-bar-fill" id="t-rr-bar"></div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="page" id="technician-mode">
+  <div class="tech-header-strip">
+    <div class="tech-session-badge">
+      <span class="tech-dot"></span>
+      <span>EXTENDED DIAGNOSTIC SESSION — 0x10 0x03</span>
+    </div>
+    <div class="tech-header-right">
+      <div class="tech-precond-bar" id="tech-precond-bar">
+        <span class="precond-item" id="pc-speed">
+          <span class="pc-dot pc-bad"></span> Speed: MOVING
+        </span>
+        <span class="precond-item" id="pc-session">
+          <span class="pc-dot pc-ok"></span> Session: EXT
+        </span>
+        <span class="precond-item" id="pc-security">
+          <span class="pc-dot pc-bad"></span> Security: LOCKED
+        </span>
+      </div>
+      <button class="tech-exit-btn" onclick="exitTechMode()">✕ Exit Session</button>
+    </div>
+  </div>
+
+  <div class="tech-section-label">READ DATA BY IDENTIFIER — 0x22</div>
+  <div class="tech-did-grid">
+    <div class="tech-did-row"><span class="tech-did-lbl">Speed (0xF401)</span><span class="tech-did-val" id="did-speed">—</span><button class="tech-did-btn" onclick="readDID(0xF401,'did-speed','km/h')">READ</button></div>
+    <div class="tech-did-row"><span class="tech-did-lbl">Engine RPM (0xF402)</span><span class="tech-did-val" id="did-rpm">—</span><button class="tech-did-btn" onclick="readDID(0xF402,'did-rpm','RPM')">READ</button></div>
+    <div class="tech-did-row"><span class="tech-did-lbl">Coolant Temp (0xF403)</span><span class="tech-did-val" id="did-coolant">—</span><button class="tech-did-btn" onclick="readDID(0xF403,'did-coolant','°C')">READ</button></div>
+    <div class="tech-did-row"><span class="tech-did-lbl">Oil Temp (0xF404)</span><span class="tech-did-val" id="did-oiltemp">—</span><button class="tech-did-btn" onclick="readDID(0xF404,'did-oiltemp','°C')">READ</button></div>
+    <div class="tech-did-row"><span class="tech-did-lbl">Fuel % (0xF405)</span><span class="tech-did-val" id="did-fuelpct">—</span><button class="tech-did-btn" onclick="readDID(0xF405,'did-fuelpct','%')">READ</button></div>
+    <div class="tech-did-row"><span class="tech-did-lbl">Battery V (0xF406)</span><span class="tech-did-val" id="did-batt">—</span><button class="tech-did-btn" onclick="readDID(0xF406,'did-batt','V')">READ</button></div>
+    <div class="tech-did-row"><span class="tech-did-lbl">Engine Load (0xF407)</span><span class="tech-did-val" id="did-load">—</span><button class="tech-did-btn" onclick="readDID(0xF407,'did-load','%')">READ</button></div>
+    <div class="tech-did-row"><span class="tech-did-lbl">Throttle % (0xF408)</span><span class="tech-did-val" id="did-throttle">—</span><button class="tech-did-btn" onclick="readDID(0xF408,'did-throttle','%')">READ</button></div>
+    <div class="tech-did-row"><span class="tech-did-lbl">Gear Num (0xF409)</span><span class="tech-did-val" id="did-gear">—</span><button class="tech-did-btn" onclick="readDID(0xF409,'did-gear','')">READ</button></div>
+    <div class="tech-did-row"><span class="tech-did-lbl">Fuel Rate (0xF40A)</span><span class="tech-did-val" id="did-fuelrate">—</span><button class="tech-did-btn" onclick="readDID(0xF40A,'did-fuelrate','mL/s')">READ</button></div>
+    <div class="tech-did-row"><span class="tech-did-lbl">VIN (0xF190)</span><span class="tech-did-val" id="did-vin">—</span><button class="tech-did-btn" onclick="readDID(0xF190,'did-vin','')">READ</button></div>
+    <div class="tech-did-row"><span class="tech-did-lbl">SW Version (0xF189)</span><span class="tech-did-val" id="did-swver">—</span><button class="tech-did-btn" onclick="readDID(0xF189,'did-swver','')">READ</button></div>
+  </div>
+
+  <div class="tech-uds-response" id="tech-uds-response">
+    <span class="tech-uds-response-lbl">UDS Response:</span>
+    <span id="uds-response-text">—</span>
+  </div>
+
+  <div class="tech-section-label" style="margin-top:20px">INPUT OUTPUT CONTROL — 0x2F (ACTUATOR TESTS)</div>
+  <div class="tech-io-grid">
+    <div class="tech-io-card">
+      <div class="tech-io-name">HEAD LAMP <span class="tech-io-did">0xF410</span></div>
+      <div class="tech-io-state" id="io-headlamp-state">ECU CONTROL</div>
+      <div class="tech-io-btns">
+        <button class="tech-io-btn tech-io-on"  onclick="ioControl(0xF410,1,1)">FORCE ON</button>
+        <button class="tech-io-btn tech-io-off" onclick="ioControl(0xF410,1,0)">FORCE OFF</button>
+        <button class="tech-io-btn tech-io-ecu" onclick="ioControl(0xF410,0,0)">RETURN TO ECU</button>
+      </div>
+    </div>
+    <div class="tech-io-card">
+      <div class="tech-io-name">RADIATOR FAN <span class="tech-io-did">0xF411</span></div>
+      <div class="tech-io-state" id="io-radfan-state">ECU CONTROL</div>
+      <div class="tech-io-btns">
+        <button class="tech-io-btn tech-io-on"  onclick="ioControl(0xF411,1,1)">FORCE ON</button>
+        <button class="tech-io-btn tech-io-off" onclick="ioControl(0xF411,1,0)">FORCE OFF</button>
+        <button class="tech-io-btn tech-io-ecu" onclick="ioControl(0xF411,0,0)">RETURN TO ECU</button>
+      </div>
+    </div>
+    <div class="tech-io-card">
+      <div class="tech-io-name">FUEL PUMP <span class="tech-io-did">0xF412</span></div>
+      <div class="tech-io-state" id="io-fuelpump-state">ECU CONTROL</div>
+      <div class="tech-io-btns">
+        <button class="tech-io-btn tech-io-on"  onclick="ioControl(0xF412,1,1)">FORCE ON</button>
+        <button class="tech-io-btn tech-io-off" onclick="ioControl(0xF412,1,0)">FORCE OFF</button>
+        <button class="tech-io-btn tech-io-ecu" onclick="ioControl(0xF412,0,0)">RETURN TO ECU</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="tech-section-label" style="margin-top:20px">DTC INFORMATION — 0x19</div>
+  <div class="tech-dtc-panel">
+    <div class="tech-dtc-header">
+      <span id="dtc-count-badge" class="dtc-count-badge ok">No Active DTCs</span>
+      <button class="tech-dtc-clear-btn" id="dtc-clear-btn" disabled onclick="clearDTCs()">Clear DTCs (0x14) — Programming session required</button>
+    </div>
+    <div class="tech-dtc-list" id="tech-dtc-list">
+      <div class="tech-dtc-empty">No DTCs stored. All systems nominal.</div>
+    </div>
+  </div>
+
+  <div class="tech-section-label" style="margin-top:20px">ECU MODULE STATUS</div>
+  <div class="tech-ecu-grid">
+    <div class="tech-ecu-card">
+      <div class="tech-ecu-name">ECM <span class="tech-ecu-id">0x7E0</span></div>
+      <div class="tech-ecu-status ok">ONLINE</div>
+      <div class="tech-ecu-params">
+        <div class="tech-param"><span class="tp-lbl">RPM</span><span class="tp-val" id="tech-rpm">—</span></div>
+        <div class="tech-param"><span class="tp-lbl">Engine Load</span><span class="tp-val" id="tech-load">—</span></div>
+        <div class="tech-param"><span class="tp-lbl">Throttle %</span><span class="tp-val" id="tech-throttle">—</span></div>
+        <div class="tech-param"><span class="tp-lbl">Coolant</span><span class="tp-val" id="tech-coolant">—</span></div>
+        <div class="tech-param"><span class="tp-lbl">Oil Temp</span><span class="tp-val" id="tech-oiltemp">—</span></div>
+        <div class="tech-param"><span class="tp-lbl">Fuel Rate</span><span class="tp-val" id="tech-fuelrate">—</span></div>
+        <div class="tech-param"><span class="tp-lbl">Accel m/s²</span><span class="tp-val" id="tech-accel">—</span></div>
+        <div class="tech-param"><span class="tp-lbl">Stall Risk</span><span class="tp-val" id="tech-stall">—</span></div>
+        <div class="tech-param"><span class="tp-lbl">Engine State</span><span class="tp-val" id="tech-engstate">—</span></div>
+      </div>
+      <div class="tech-dtc-row"><span class="tech-dtc-lbl">DTCs</span><span class="tech-dtc-val ok" id="tech-ecm-dtc">None</span></div>
+    </div>
+    <div class="tech-ecu-card">
+      <div class="tech-ecu-name">TCM <span class="tech-ecu-id">0x7E1</span></div>
+      <div class="tech-ecu-status ok">ONLINE</div>
+      <div class="tech-ecu-params">
+        <div class="tech-param"><span class="tp-lbl">Gear</span><span class="tp-val" id="tech-gear">—</span></div>
+        <div class="tech-param"><span class="tp-lbl">Gear Num</span><span class="tp-val" id="tech-gearnum">—</span></div>
+        <div class="tech-param"><span class="tp-lbl">Clutch</span><span class="tp-val" id="tech-clutch">—</span></div>
+        <div class="tech-param"><span class="tp-lbl">Brake State</span><span class="tp-val" id="tech-brake">—</span></div>
+        <div class="tech-param"><span class="tp-lbl">Fluid Temp</span><span class="tp-val" id="tech-transtemp">—</span></div>
+        <div class="tech-param"><span class="tp-lbl">Shift Status</span><span class="tp-val">NORMAL</span></div>
+        <div class="tech-param"><span class="tp-lbl">Lock Status</span><span class="tp-val">ENGAGED</span></div>
+      </div>
+      <div class="tech-dtc-row"><span class="tech-dtc-lbl">DTCs</span><span class="tech-dtc-val ok">None</span></div>
+    </div>
+    <div class="tech-ecu-card">
+      <div class="tech-ecu-name">ABS <span class="tech-ecu-id">0x7E2</span></div>
+      <div class="tech-ecu-status ok">ONLINE</div>
+      <div class="tech-ecu-params">
+        <div class="tech-param"><span class="tp-lbl">Speed</span><span class="tp-val" id="tech-speed">—</span></div>
+        <div class="tech-param"><span class="tp-lbl">Wheel FL</span><span class="tp-val" id="tech-wfl">—</span></div>
+        <div class="tech-param"><span class="tp-lbl">Wheel FR</span><span class="tp-val" id="tech-wfr">—</span></div>
+        <div class="tech-param"><span class="tp-lbl">Wheel RL</span><span class="tp-val" id="tech-wrl">—</span></div>
+        <div class="tech-param"><span class="tp-lbl">Wheel RR</span><span class="tp-val" id="tech-wrr">—</span></div>
+        <div class="tech-param"><span class="tp-lbl">ABS Pump</span><span class="tp-val">STANDBY</span></div>
+        <div class="tech-param"><span class="tp-lbl">Brake Pressure</span><span class="tp-val" id="tech-brakepsi">—</span></div>
+      </div>
+      <div class="tech-dtc-row"><span class="tech-dtc-lbl">DTCs</span><span class="tech-dtc-val ok">None</span></div>
+    </div>
+    <div class="tech-ecu-card">
+      <div class="tech-ecu-name">BCM <span class="tech-ecu-id">0x7E3</span></div>
+      <div class="tech-ecu-status ok">ONLINE</div>
+      <div class="tech-ecu-params">
+        <div class="tech-param"><span class="tp-lbl">Battery V</span><span class="tp-val" id="tech-batt">—</span></div>
+        <div class="tech-param"><span class="tp-lbl">Battery SOC</span><span class="tp-val" id="tech-soc">—</span></div>
+        <div class="tech-param"><span class="tp-lbl">Alternator</span><span class="tp-val" id="tech-alt">—</span></div>
+        <div class="tech-param"><span class="tp-lbl">Head Lamp</span><span class="tp-val" id="tech-headlamp">—</span></div>
+        <div class="tech-param"><span class="tp-lbl">Radiator Fan</span><span class="tp-val" id="tech-radfan">—</span></div>
+        <div class="tech-param"><span class="tp-lbl">Fuel Pump</span><span class="tp-val" id="tech-fuelpump">—</span></div>
+        <div class="tech-param"><span class="tp-lbl">Tyre FL</span><span class="tp-val" id="tech-tfl">—</span></div>
+        <div class="tech-param"><span class="tp-lbl">Tyre FR</span><span class="tp-val" id="tech-tfr">—</span></div>
+        <div class="tech-param"><span class="tp-lbl">Tyre RL</span><span class="tp-val" id="tech-trl">—</span></div>
+        <div class="tech-param"><span class="tp-lbl">Tyre RR</span><span class="tp-val" id="tech-trr">—</span></div>
+      </div>
+      <div class="tech-dtc-row"><span class="tech-dtc-lbl">DTCs</span><span class="tech-dtc-val ok">None</span></div>
+    </div>
+  </div>
+
+  <div class="tech-section-label" style="margin-top:20px">CAN BUS NETWORK MONITOR</div>
+  <div class="tech-can-grid">
+    <div class="tech-can-stat"><span class="tech-can-lbl">BUS LOAD</span><span class="tech-can-val" id="tech-can-load">35%</span></div>
+    <div class="tech-can-stat"><span class="tech-can-lbl">MSG RATE</span><span class="tech-can-val" id="tech-can-msgrate">50 msg/s</span></div>
+    <div class="tech-can-stat"><span class="tech-can-lbl">ERROR RATE</span><span class="tech-can-val" id="tech-can-errrate">0 err/s</span></div>
+    <div class="tech-can-stat"><span class="tech-can-lbl">LATENCY</span><span class="tech-can-val" id="tech-can-latency">&lt;10 ms</span></div>
+    <div class="tech-can-stat"><span class="tech-can-lbl">BUS VOLTAGE</span><span class="tech-can-val">2.48 V</span></div>
+    <div class="tech-can-stat"><span class="tech-can-lbl">TERMINATION</span><span class="tech-can-val ok-text">120Ω OK</span></div>
+    <div class="tech-can-stat"><span class="tech-can-lbl">MSG LOSS</span><span class="tech-can-val">0.0%</span></div>
+    <div class="tech-can-stat"><span class="tech-can-lbl">SESSION</span><span class="tech-can-val ok-text" id="can-session-display">0x03 EXT</span></div>
+  </div>
+
+  <div class="tech-section-label" style="margin-top:20px">CAN MESSAGE SNIFFER (LIVE)</div>
+  <div class="tech-sniffer-wrap">
+    <div class="tech-sniffer-head">
+      <span>TIMESTAMP</span><span>CAN ID</span><span>DATA (HEX)</span><span>SIGNAL</span><span>VALUE</span>
+    </div>
+    <div class="tech-sniffer-body" id="tech-sniffer-body"></div>
+  </div>
+
+  <div class="tech-section-label" style="margin-top:28px;color:var(--tech-amber)">
+    ⚠ PROGRAMMING SESSION SECURITY (0x27)
+  </div>
+  <div class="prog-security-card">
+    <div class="prog-sec-title">SECURITY ACCESS — 0x27</div>
+    <div class="prog-sec-body">
+      <div class="prog-sec-row">
+        <span class="prog-sec-lbl">Seed (from ECU):</span>
+        <span class="prog-sec-val-display" id="prog-seed-display">—</span>
+        <button class="prog-btn prog-btn-sec" onclick="requestSeed()" id="btn-request-seed">Request Seed</button>
+      </div>
+      <div class="prog-sec-row">
+        <span class="prog-sec-lbl">Key (your answer):</span>
+        <input class="prog-key-input" type="text" id="prog-key-input" placeholder="e.g. 0xDEAD" maxlength="10"/>
+        <button class="prog-btn prog-btn-send" onclick="sendKey()" id="btn-send-key" disabled>Send Key</button>
+      </div>
+      <div class="prog-sec-attempts">
+        Attempts remaining: <span id="sec-attempts-left">3</span>
+        <span class="prog-lockout-msg hidden" id="prog-lockout-msg">🔒 Locked — wait before retrying</span>
+      </div>
+    </div>
+  </div>
 
 </section>
 
-<!-- ====================================================
-     HISTORY MODE
-===================================================== -->
-<section id="history-mode" class="mode-view">
+<section class="page" id="programming-mode">
+  <div class="prog-header-strip">
+    <div style="display: flex; flex-direction: column; gap: 6px;">
+      <div class="prog-session-badge">
+        <span class="prog-dot"></span>
+        <span>PROGRAMMING SESSION — 0x10 0x02</span>
+      </div>
+      <div style="font-family: var(--mono); font-size: 10px; color: #00aa00; letter-spacing: 1px; padding-left: 16px; display: flex; gap: 12px;">
+        <span>BAUD RATE: <strong style="color: #00ff00;">500 kbps</strong></span>
+        <span style="opacity: 0.5;">|</span>
+        <span>LATENCY: <strong style="color: #00ff00;">< 8 ms</strong></span>
+        <span style="opacity: 0.5;">|</span>
+        <span>BLOCK SIZE: <strong style="color: #00ff00;">4096 Bytes</strong></span>
+      </div>
+    </div>
+    <button class="prog-exit-btn" onclick="exitProgrammingSession()">✕ Exit Session</button>
+  </div>
+  
+  <div class="prog-section-label">| ECU IDENTIFICATION</div>
+  <div class="prog-id-grid">
+    <div class="prog-id-card"><div class="prog-id-lbl">ECU Part Number</div><div class="prog-id-val" id="prog-part-num">Bosch 0281002983</div></div>
+    <div class="prog-id-card"><div class="prog-id-lbl">ECU Software Version</div><div class="prog-id-val" id="prog-sw-ver">1037376080</div></div>
+    <div class="prog-id-card"><div class="prog-id-lbl">ECU Hardware Version</div><div class="prog-id-val" id="prog-hw-ver">H02</div></div>
+    <div class="prog-id-card"><div class="prog-id-lbl">VIN</div><div class="prog-id-val" id="prog-vin">WVWZZZ1KZBW123456</div></div>
+    <div class="prog-id-card"><div class="prog-id-lbl">ECU Serial Number</div><div class="prog-id-val" id="prog-serial">123456789ABC</div></div>
+    <div class="prog-id-card"><div class="prog-id-lbl">Manufacturer ID</div><div class="prog-id-val" id="prog-mfr">Bosch 026120xxxx</div></div>
+    <div class="prog-id-card"><div class="prog-id-lbl">Supported Protocols</div><div class="prog-id-val" id="prog-protocols">CAN (500 kbps), UDS</div></div>
+    <div class="prog-id-card"><div class="prog-id-lbl">Memory Type</div><div class="prog-id-val" id="prog-mem-type">ST10F272</div></div>
+    <div class="prog-id-card"><div class="prog-id-lbl">Bootloader Version</div><div class="prog-id-val" id="prog-boot-ver">v1.0.4</div></div>
+  </div>
 
-    <div class="history-controls">
-        <div class="control-group">
-            <label>Signal</label>
-            <select id="signal-select">
-                <option value="speed">Speed (km/h)</option>
-                <option value="rpm">Engine RPM</option>
-                <option value="coolant">Coolant Temp (°C)</option>
-                <option value="oil_temp">Oil Temp (°C)</option>
-                <option value="fuel_pct">Fuel Level (%)</option>
-                <option value="fuel_rate">Fuel Rate (mL/s)</option>
-                <option value="throttle">Throttle (%)</option>
-                <option value="engine_load">Engine Load (%)</option>
-                <option value="accel">Acceleration (m/s²)</option>
-                <option value="battery">Battery Voltage (V)</option>
-                <option value="gear_num">Gear Number</option>
-            </select>
-        </div>
-        <div class="control-group">
-            <label>Range</label>
-            <select id="range-select">
-                <option value="50">Last 50 records</option>
-                <option value="100" selected>Last 100 records</option>
-                <option value="200">Last 200 records</option>
-                <option value="all">All records</option>
-            </select>
-        </div>
-        <button class="refresh-btn" onclick="loadHistory()">↺ Refresh</button>
+  <div class="prog-main-grid">
+    <div class="prog-panel">
+      <div class="prog-panel-title">Firmware &amp; File</div>
+
+      <div class="prog-file-row"><span class="prog-file-lbl">Original File (Read)</span><span class="prog-file-val" id="prog-orig-file">— not read yet —</span></div>
+      <div class="prog-file-row"><span class="prog-file-lbl">Modified File (Write)</span><span class="prog-file-val" id="prog-mod-file">— none selected —</span></div>
+      <div class="prog-file-row"><span class="prog-file-lbl">File Checksum</span><span class="prog-file-val" id="prog-checksum">—</span></div>
+      <div class="prog-file-row"><span class="prog-file-lbl">File Size</span><span class="prog-file-val" id="prog-filesize">—</span></div>
+      <div class="prog-file-row"><span class="prog-file-lbl">Compatibility List</span><span class="prog-file-val" id="prog-compat">VW Golf MK7 2.0 TDI (2015–2020)</span></div>
+      <div class="prog-file-row"><span class="prog-file-lbl">Tuning Map Details</span><span class="prog-file-val" id="prog-tunemap">+20% fuel, +0.5 bar boost</span></div>
+
+      <div class="prog-btn-row">
+        <button class="prog-btn" id="prog-btn-read" onclick="progReadEcu()">Read ECU</button>
+        <button class="prog-btn" id="prog-btn-select" onclick="progSelectFile()">Select Tune</button>
+        <button class="prog-btn" id="prog-btn-verify" onclick="progVerifyFile()">Verify File</button>
+      </div>
+      <div class="prog-btn-row" style="margin-top: 10px;">
+        <button class="prog-btn primary" id="prog-btn-write" onclick="progStartFlash()">Start Flashing</button>
+        <button class="prog-btn danger" id="prog-btn-cancel" onclick="progCancelFlash()" disabled>Cancel</button>
+      </div>
     </div>
 
-    <div id="history-chart" class="chart-box"></div>
+    <div class="prog-panel">
+      <div class="prog-panel-title">Programming Progress</div>
 
-    <div class="section-title" style="margin-top:28px">Recent Records</div>
-    <div class="table-wrap">
-        <table>
-            <thead>
-                <tr>
-                    <th>Time</th>
-                    <th>Gear</th>
-                    <th>Speed km/h</th>
-                    <th>RPM</th>
-                    <th>Coolant °C</th>
-                    <th>Oil °C</th>
-                    <th>Fuel %</th>
-                    <th>Throttle %</th>
-                    <th>State</th>
-                </tr>
-            </thead>
-            <tbody id="table-body"></tbody>
-        </table>
+      <div class="prog-progress-meta">
+        <div class="prog-meta-item"><div class="prog-meta-lbl">Voltage Stability</div><div class="prog-meta-val" id="prog-voltage">12.4 V</div></div>
+        <div class="prog-meta-item"><div class="prog-meta-lbl">Connection Status</div><div class="prog-meta-val ok" id="prog-conn">Stable</div></div>
+        <div class="prog-meta-item"><div class="prog-meta-lbl">Time Elapsed</div><div class="prog-meta-val" id="prog-elapsed">00:00:00</div></div>
+        <div class="prog-meta-item"><div class="prog-meta-lbl">Est. Time Remaining</div><div class="prog-meta-val" id="prog-remaining">—:—:—</div></div>
+      </div>
+
+      <div class="prog-bar-bg"><div class="prog-bar-fill" id="prog-bar-fill"></div></div>
+      <div class="prog-bar-label">
+        <span id="prog-current-op">Idle — no operation in progress</span>
+        <span id="prog-percent">0%</span>
+      </div>
+
+      <div class="prog-log-window" id="prog-log-window">
+        <div class="prog-log-line">[--:--:--] Session ready. Awaiting Read ECU or Start Flashing.</div>
+      </div>
+      <span class="prog-status-chip idle" id="prog-status-chip" style="display:none;">IDLE</span>
     </div>
-
+  </div>
+  
+  <div class="prog-controls-wrap" id="prog-controls-wrap" style="margin-top: 20px;">
+    <div class="prog-sec-title" style="color:var(--prog-amber);">INPUT OUTPUT CONTROL — PROGRAMMING TIER</div>
+    <div class="prog-controls-note">Controls below are only active while in an active programming session.</div>
+    <div class="prog-action-row">
+      <span class="prog-action-lbl">ECU Reset (0x11)</span>
+      <button class="prog-btn prog-btn-danger" id="btn-ecu-reset" disabled onclick="ecuReset()">Hard Reset</button>
+      <span class="prog-action-warn">⚠ Clears session and adaptations</span>
+    </div>
+  </div>
 </section>
 
-<script src="https://cdn.socket.io/4.8.3/socket.io.min.js"></script>
+<section class="page" id="history-mode">
+  <div class="hs-header-row">
+    <div>
+      <div class="hs-title">Signal Explorer</div>
+      <div class="hs-subtitle">ECU telemetry log — rolling buffer</div>
+    </div>
+  </div>
+  <div class="hs-controls">
+    <div class="hs-ctrl-group"><label class="hs-ctrl-label">SIGNAL</label>
+      <select class="hs-select" id="signal-select">
+        <option value="speed">Speed (km/h)</option>
+        <option value="rpm">Engine RPM</option>
+        <option value="coolant">Coolant Temp (°C)</option>
+        <option value="oil_temp">Oil Temp (°C)</option>
+        <option value="fuel_pct">Fuel Level (%)</option>
+        <option value="fuel_rate">Fuel Rate (mL/s)</option>
+        <option value="throttle">Throttle (%)</option>
+        <option value="engine_load">Engine Load (%)</option>
+        <option value="accel">Acceleration (m/s²)</option>
+        <option value="battery">Battery Voltage (V)</option>
+        <option value="gear_num">Gear Number</option>
+      </select>
+    </div>
+    <div class="hs-ctrl-group"><label class="hs-ctrl-label">RANGE</label>
+      <select class="hs-select" id="range-select">
+        <option value="50">Last 50 records</option>
+        <option value="100" selected>Last 100 records</option>
+        <option value="200">Last 200 records</option>
+        <option value="all">All records</option>
+      </select>
+    </div>
+    <button class="hs-refresh-btn" onclick="loadHistory()">↺ Refresh</button>
+  </div>
+
+  <div id="history-chart" class="hs-chart-box"></div>
+
+  <div class="hs-kpi-strip">
+    <div class="hs-kpi"><div class="hs-kpi-lbl">MIN</div><div class="hs-kpi-val" id="hs-min">—</div></div>
+    <div class="hs-kpi"><div class="hs-kpi-lbl">MAX</div><div class="hs-kpi-val" id="hs-max">—</div></div>
+    <div class="hs-kpi"><div class="hs-kpi-lbl">AVG</div><div class="hs-kpi-val" id="hs-avg">—</div></div>
+    <div class="hs-kpi"><div class="hs-kpi-lbl">CURRENT</div><div class="hs-kpi-val" id="hs-cur">—</div></div>
+    <div class="hs-kpi"><div class="hs-kpi-lbl">SAMPLES</div><div class="hs-kpi-val" id="hs-count">—</div></div>
+  </div>
+
+  <div class="hs-table-title">RECENT RECORDS</div>
+  <div class="hs-table-wrap">
+    <table class="hs-table">
+      <thead><tr><th>TIME</th><th>GEAR</th><th>SPEED</th><th>RPM</th><th>COOLANT °C</th><th>OIL °C</th><th>FUEL %</th><th>THROTTLE %</th><th>STATE</th></tr></thead>
+      <tbody id="table-body"></tbody>
+    </table>
+  </div>
+</section>
+
+<div class="uds-overlay" id="uds-overlay">
+  <div class="uds-modal">
+    <div class="uds-modal-icon">🔓</div>
+    <div class="uds-modal-title">Extended Diagnostic Session</div>
+    <div class="uds-modal-body">UDS Service 0x10 — Session Control<br><code>0x10 0x03</code> received<br>Technician mode is now unlocked.</div>
+    <button class="uds-modal-btn" onclick="confirmTechUnlock()">Enter Technician Mode</button>
+    <button class="uds-modal-cancel" onclick="cancelTechUnlock()">Cancel</button>
+  </div>
+</div>
+
+<div id="alert-toast-stack"></div>
 <script src="{{ url_for('static', filename='js/script.js') }}"></script>
-
 </body>
 </html>

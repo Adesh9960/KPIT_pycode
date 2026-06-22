@@ -1,5 +1,5 @@
 from simulator.actuators.actuator import Actuator
-
+from simulator.DTC.DTCManager import DTCManager
 security_level: str
 security_key: str
 session_level: str
@@ -43,3 +43,6 @@ upload_offset = 0
 firmware_image = bytearray(
     b"Simulator Firmware v1.0"
 )
+
+#DTC Manager
+
