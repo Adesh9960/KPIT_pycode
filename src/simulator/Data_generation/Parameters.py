@@ -60,6 +60,8 @@ def get_live_ambient_temp():
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
+
+#Newly made function
 def check_gear(is_clutch_down):
             # Check for gear changes
         for g in ['n', '1', '2', '3', '4', '5']:
@@ -90,6 +92,7 @@ def handle_rpm_physics(is_clutch_down, is_accelerating, physics):
             else:
                 speed_ratio = main.current_speed / physics['max']
                 main.current_rpm = max(main.IDLE_RPM, 1000 + (speed_ratio * (main.MAX_RPM - 1000)))
+
 
 def handle_fuel_physics(is_clutch_down, is_accelerating, physics):
         if main.current_rpm == 0:
@@ -162,7 +165,7 @@ def handle_battery_and_temp(is_clutch_down, is_accelerating, physics):
         else:
             heat_input = 0.3 * main.refresh_rate
 
-        main.coolant_temp += heat_input
+    main.coolant_temp += heat_input
 
     if main.coolant_temp > main.target_temp:
         cooling_effect = ((main.coolant_temp - main.target_temp) * 0.2 + (main.current_speed * 0.01)) * main.refresh_rate
@@ -200,6 +203,7 @@ def get_engine_state(is_clutch_down, is_accelerating, physics, is_braking):
             engine_state = "COASTING"
         else:
             engine_state = "IDLE"
+        return engine_state
 
 def get_telemetry_entry(is_clutch_down, physics):
         accel_ms2 = round((main.current_speed - main.prev_speed) / 0.1, 2)  # km/h per 0.1s -> approx m/s^2
@@ -312,7 +316,7 @@ def run_vehicle_simulator():
 
         #send data to encoder stage
         telemetry_row = get_telemetry_entry(is_clutch_down, physics)
-        # encode_frame(telemetry_row)
+        encode_frame(telemetry_row)
 
         # reliable tick-based fuel save instead of time.time() modulo
         main.fuel_save_counter += 1
