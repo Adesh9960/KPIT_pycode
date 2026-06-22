@@ -22,19 +22,20 @@ def createUDSRequest(payload, timeout, priority = 10) -> TxRequest:
             request_type=TxRequestType.UDS,
             payload=payload,
             max_retries=0,
-            timeout_ms=timeout,
+            timeout_ms=timeout * 1000,
         )
 class UDS:
     role: UDSRoles
     diagnostic_session_control = diagnostic_session_control
     io_control = io_control
     security_access = security_access
+
     transfer_data_upload = handleUploadFirmware.transfer_data_upload
     transfer_exit_upload = handleUploadFirmware.transfer_exit_upload
     def __init__(self, role):
         self.role = role
         self._event = threading.Event()
-        self._response = threading.Event()
+        self._response: bytes
 
     def on_response(self, payload):
         self._response = payload
@@ -100,5 +101,5 @@ class UDS:
         self.send_and_wait(payload, timeout)    
 
     def firmwareUpload(self, output_file):
-        handleUploadFirmware.request_upload()
-        handleUploadFirmware.read_firmware_from_ecu(output_file)
+        handleUploadFirmware.request_upload(self)
+        handleUploadFirmware.read_firmware_from_ecu(self, output_file)
