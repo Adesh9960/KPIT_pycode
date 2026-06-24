@@ -638,6 +638,15 @@ function updateAdvanced(d) {
     const sp    = d.speed || 0;
     const fuelL = d.remaining_fuel_l || d.fuel_l || 0;
     
+    // Fuel System card (merged Vehicle Health section)
+    const fuelPct = Math.max(0, Math.min(100, fuel));
+    const advFuelBar = document.getElementById("adv-fuel-bar");
+    if (advFuelBar) advFuelBar.style.width = fuelPct + "%";
+    setText("adv-fuel-pct-val",  fuelPct.toFixed(1) + "%");
+    setText("adv-fuel-l-val",    fuelL.toFixed(2));
+    setText("adv-fuel-rate-val", fr.toFixed(2));
+    setText("adv-fuel-pump-val", d.fuel_pump != null ? (d.fuel_pump ? "ON" : "OFF") : "--");
+    
 
     setText("adv-rpm-hero",      (d.rpm||0).toLocaleString());
     setText("adv-load-hero",     (d.engine_load||0).toFixed(1) + "%");
@@ -652,10 +661,8 @@ function updateAdvanced(d) {
     setText("adv-speed-big",  sp + " km/h");
     setText("adv-accel-mini", (d.accel_ms2||d.accel||0).toFixed(2));
     setText("adv-dist-mini",  (d.distance_km||0).toFixed(2));
-    setText("adv-fuel-mini",  fuel.toFixed(1));
     setText("adv-cool-mini",  cool.toFixed(1));
 
-    setText("sn-fuel",     fuel.toFixed(1) + "%");
     setText("sn-oil",      ot.toFixed(1) + "°C");
     setText("sn-cool",     cool.toFixed(1) + "°C");
     setText("sn-volt",     bv.toFixed(2) + " V");
@@ -680,8 +687,6 @@ function updateAdvanced(d) {
     setText("adv-oiltemp-kpi", ot.toFixed(1) + " °C");
     const otBar = document.getElementById("adv-oiltemp-bar");
     if (otBar) { otBar.style.width=Math.min(100,((ot-40)/80)*100).toFixed(0)+"%"; otBar.style.background=ot>110?"#ef4444":"#f59e0b"; }
-    setText("adv-fuelrate-kpi", fr.toFixed(2) + " mL/s");
-    const frBar = document.getElementById("adv-fuelrate-bar");
     if (frBar) { frBar.style.width=Math.min(100,(fr/12)*100).toFixed(0)+"%"; frBar.style.background=fr>8?"#ef4444":"#f59e0b"; }
     const estKm = (fr>0.01&&sp>0) ? Math.round((fuelL*1000/fr/3600)*sp) : 0;
     setText("adv-range-kpi", estKm > 0 ? estKm + " km" : "—");

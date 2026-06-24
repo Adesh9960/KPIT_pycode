@@ -355,14 +355,47 @@
                 class="adv-cs-lbl">THROTTLE</span></div>
           </div>
           <div class="adv-car-svg-wrap">
-            <svg viewBox="0 0 246 90" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:240px">
-              <rect x="20" y="45" width="206" height="30" rx="8" fill="#3b1fa8" opacity="0.7" />
-              <rect x="35" y="28" width="176" height="30" rx="6" fill="#4c2db5" opacity="0.8" />
-              <rect x="93" y="30" width="60" height="18" rx="5" fill="#5b21b6" opacity="0.5" />
-              <circle cx="70" cy="74" r="15" fill="#2d1b69" stroke="white" stroke-width="2" />
-              <circle cx="70" cy="74" r="6" fill="#1a0f3d" />
-              <circle cx="176" cy="74" r="15" fill="#2d1b69" stroke="white" stroke-width="2" />
-              <circle cx="176" cy="74" r="6" fill="#1a0f3d" />
+            <svg viewBox="0 0 246 130" fill="none" xmlns="http://www.w3.org/2000/svg"
+              style="width:100%;max-width:240px">
+              <ellipse cx="123" cy="108" rx="95" ry="10" fill="#1e1147" opacity="0.45" />
+
+              <path
+                d="M30 96 L36 68 Q40 56 54 51 L82 45 Q96 42 110 42 L156 42 Q172 43 184 51 L204 63 Q213 68 214 79 L215 96 Z"
+                fill="#ede9fe" />
+              <path
+                d="M30 96 L36 68 Q40 56 54 51 L82 45 Q96 42 110 42 L156 42 Q172 43 184 51 L204 63 Q213 68 214 79 L215 96 Z"
+                fill="url(#bodyShade)" />
+
+              <path d="M64 51 L88 27 Q94 22 106 21 L140 21 Q154 22 162 29 L182 51 Z" fill="#ddd6fe" />
+              <path d="M71 49 L91 30 Q96 26 107 26 L136 26 Q146 27 152 33 L171 49 Z" fill="#312e81" opacity="0.92" />
+              <path d="M97 30 L136 30 L149 49 L84 49 Z" fill="#1e1b4b" opacity="0.55" />
+              <line x1="121" y1="27" x2="119" y2="49" stroke="#4c1d95" stroke-width="1.5" />
+
+              <rect x="40" y="60" width="166" height="34" rx="6" fill="#c4b5fd" opacity="0.5" />
+
+              <ellipse cx="68" cy="98" rx="20" ry="20" fill="#1e1147" />
+              <ellipse cx="68" cy="98" rx="20" ry="20" fill="none" stroke="#a78bfa" stroke-width="2.5" />
+              <ellipse cx="68" cy="98" rx="8" ry="8" fill="#0d0a26" />
+              <ellipse cx="68" cy="98" rx="8" ry="8" fill="none" stroke="#7c3aed" stroke-width="1.5" />
+
+              <ellipse cx="178" cy="98" rx="20" ry="20" fill="#1e1147" />
+              <ellipse cx="178" cy="98" rx="20" ry="20" fill="none" stroke="#a78bfa" stroke-width="2.5" />
+              <ellipse cx="178" cy="98" rx="8" ry="8" fill="#0d0a26" />
+              <ellipse cx="178" cy="98" rx="8" ry="8" fill="none" stroke="#7c3aed" stroke-width="1.5" />
+
+              <rect x="205" y="68" width="10" height="10" rx="2" fill="#fde68a" opacity="0.9" />
+              <rect x="29" y="73" width="6" height="8" rx="2" fill="#f87171" opacity="0.85" />
+
+              <path d="M40 60 L205 60" stroke="#7c3aed" stroke-width="1" opacity="0.4" />
+              <path d="M82 45 L64 51" stroke="#a78bfa" stroke-width="0.75" opacity="0.5" />
+
+              <defs>
+                <linearGradient id="bodyShade" x1="28" y1="42" x2="216" y2="96" gradientUnits="userSpaceOnUse">
+                  <stop offset="0" stop-color="#f5f3ff" stop-opacity="0.35" />
+                  <stop offset="0.5" stop-color="#a78bfa" stop-opacity="0.15" />
+                  <stop offset="1" stop-color="#4c1d95" stop-opacity="0.35" />
+                </linearGradient>
+              </defs>
             </svg>
           </div>
           <div class="adv-state-chips">
@@ -421,11 +454,6 @@
           <div class="adv-sensor-list">
             <div class="adv-sr">
               <div class="adv-sr-name">
-                <div class="adv-sr-chk">✓</div>Fuel Level
-              </div>
-            </div>
-            <div class="adv-sr">
-              <div class="adv-sr-name">
                 <div class="adv-sr-chk">✓</div>Oil Temp
               </div>
               <div class="adv-sr-val" id="sn-oil">—</div>
@@ -447,11 +475,6 @@
                 <div class="adv-sr-chk">✓</div>Engine RPM
               </div>
               <div class="adv-sr-val" id="sn-rpm">—</div>
-            </div>
-            <div class="adv-sr">
-              <div class="adv-sr-name">
-                <div class="adv-sr-chk">✓</div>Fuel Rate
-              </div>
             </div>
             <div class="adv-sr">
               <div class="adv-sr-name">
