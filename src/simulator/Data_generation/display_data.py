@@ -26,7 +26,7 @@ def display_stats(is_clutch_down, is_accelerating, physics, is_braking, engine_s
         print(f" RPM:           {int(main.current_rpm)} RPM")
         print(f" COOLANT:       {main.coolant_temp:.1f} C       OIL: {main.oil_temp:.1f} C")
         print(f" BATTERY:       {main.battery_voltage:.2f} V")
-        print(f" HeadLamp:       {"ON" if main.head_lamp.state else "OFF"}")
+        print(f" HeadLamp:       {'ON' if main.head_lamp.state else 'OFF'}")
 
         print("-" * 50)
         # fuel_percentage = fuel_pct

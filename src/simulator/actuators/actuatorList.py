@@ -1,5 +1,5 @@
 from .actuator import Actuator
-import simulator.main as main
+from Data_generation import main
 ACTUATORS_DB = {
     0x1001: main.radiator_fan,
     0x1002: main.fuel_pump,
