@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CAN Dashboard</title>
+
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+    <style>
+        body {
+            background: #111;
+            color: white;
+            font-family: Arial;
+            display: flex;
+            justify-content: center;
+            gap: 100px;
+            margin-top: 100px;
+        }
+
+        .card {
+            text-align: center;
+        }
+
+        .label {
+            font-size: 30px;
+            color: #888;
+        }
+
+        .value {
+            font-size: 100px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <div class="label">Speed</div>
+        <div id="speed" class="value">0</div>
+    </div>
+
+    <div class="card">
+        <div class="label">RPM</div>
+        <div id="rpm" class="value">0</div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+
+</body>
+</html>

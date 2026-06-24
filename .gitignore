@@ -1,0 +1,6 @@
+/venv/
+/LaneDetection/data/
+__pycache__/
+data/
+/fuel_save.txt
+src/all_logs.zip
