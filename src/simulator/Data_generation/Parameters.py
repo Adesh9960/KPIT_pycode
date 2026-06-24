@@ -612,11 +612,14 @@ def run_vehicle_simulator():
             "Engine_Load_Pct": float(telemetry_row.get("Engine_Load_Pct", 0)),
             "Throttle_Pct": float(telemetry_row.get("Throttle_Pct", 0)),
             "Rev_Limiter": int(telemetry_row.get("Rev_Limiter", 0)),
-            "engine_state": engine_state, # Extracted from local variable
+            # "engine_state": engine_state, # Extracted from local variable
             "Stall_Risk": int(telemetry_row.get("Stall_Risk", 0)),
             "Clutch_State": telemetry_row.get("Clutch_State", "UP"),
             "Brake_State": telemetry_row.get("Brake_State", "UP"),
             "Battery_V": float(telemetry_row.get("Battery_V", 0)),
+            "Head_Lamp": int(main.head_lamp.state),
+            "Radiator_Fan": int(main.radiator_fan.state),
+            "Fuel_Pump": int(main.fuel_pump.state),
         }
 
         # 4. Transmit the data to encoder
