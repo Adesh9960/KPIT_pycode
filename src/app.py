@@ -140,7 +140,6 @@ def IO_control():
 
 @app.route("/live-data", methods = ["GET"])
 def live_data():
-
     with analytics_lock:
         return jsonify(latest_analytics)
 
@@ -156,8 +155,9 @@ def send_realtime_data(frame):
 
 
 @app.route("/history-data", methods = ["GET"])
-def live_dashboard():
-    return jsonify(history)
+def history_data():
+    with analytics_lock:
+        return jsonify(history)
 
 
 if __name__ == "__main__":
@@ -166,8 +166,8 @@ if __name__ == "__main__":
     txid=0x22,
     rxid=0x62
     )
-    uds_client = UDS(UDSRoles.USER)
-    listener.start(address, uds_client.on_response)
-    decoder.start(send_realtime_data)
-    logger.start()
+    # uds_client = UDS(UDSRoles.USER)
+    # listener.start(address, uds_client.on_response)
+    # decoder.start(send_realtime_data)
+    # logger.start()
     app.run()

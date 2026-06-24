@@ -8,7 +8,7 @@
 // ── State ──
 let currentMode     = "live";
 const LIVE_BUF      = 80;
-let bufTime = [], bufSpeed = [], bufRpm = [];
+// let bufTime = [], bufSpeed = [], bufRpm = [];
 let advSparkBuf     = { x: [], y: [] };
 let techUnlocked    = false;
 let progUnlocked    = false;       // Programming session security granted
@@ -170,7 +170,7 @@ function updateSessionDisplay(label) {
 async function readDID(did, targetId, unit) {
     showUDSResponse(`Sending 0x22 ${hexStr(did)} ...`);
     try {
-        const res  = await fetch(`/DID/${did}`);
+        const res  = await fetch(`http://127.0.0.1/DID/${did}`);
         const data = await res.json();
         if (data.status === "success") {
             const val = data.data != null ? data.data : "—";
@@ -603,8 +603,8 @@ function updateLive(d) {
     // Update pre-condition bar in technician mode
     updatePreConditions(d.speed||0);
 
-    bufTime.push(d.time); bufSpeed.push(d.speed||0); bufRpm.push(d.rpm||0);
-    if (bufTime.length > LIVE_BUF) { bufTime.shift(); bufSpeed.shift(); bufRpm.shift(); }
+    // bufTime.push(d.time); bufSpeed.push(d.speed||0); bufRpm.push(d.rpm||0);
+    // if (bufTime.length > LIVE_BUF) { bufTime.shift(); bufSpeed.shift(); bufRpm.shift(); }
     updateLiveChart();
 }
 
@@ -857,27 +857,84 @@ function updateGauge(id, value, min, max, suffix, barColor, bgInner) {
 // ══════════════════════════════════════════════════
 // LIVE TREND CHART
 // ══════════════════════════════════════════════════
-function updateLiveChart() {
-    const rpmScaled = bufRpm.map(r => r / 36);
-    const isDark = document.documentElement.getAttribute("data-theme") !== "light";
-    const gridColor = isDark ? "#1a2e20" : "#d0e8da";
-    const fontColor = isDark ? "#4a7a5a" : "#4a7a5a";
-    Plotly.react("live-chart",
-        [
-            { x:bufTime, y:bufSpeed, name:"Speed (km/h)", mode:"lines", type:"scatter",
-              line:{color:"#00d4aa",width:2.5,shape:"spline",smoothing:1.3},
-              fill:"tozeroy", fillcolor:"rgba(0,212,170,0.10)" },
-            { x:bufTime, y:rpmScaled, name:"RPM ÷ 36", mode:"lines", type:"scatter",
-              line:{color:"#4ade80",width:1.5,dash:"dot",shape:"spline",smoothing:1.3} }
-        ],
-        { margin:{t:10,b:36,l:46,r:16},
-          paper_bgcolor:"transparent", plot_bgcolor:"transparent",
-          font:{color:fontColor,size:11},
-          legend:{orientation:"h",x:0,y:-0.28,font:{size:11}},
-          xaxis:{title:"Time",gridcolor:gridColor,zeroline:false,tickfont:{size:9}},
-          yaxis:{title:"Speed / RPM÷36",gridcolor:gridColor,zeroline:false} },
-        { responsive:true, displayModeBar:false }
-    );
+async function updateLiveChart() {
+    try {
+        const res = await fetch("/history-data");
+        const data = await res.json();
+
+        const time = data.time || [];
+        const speed = data.speed || [];
+        const rpmScaled = (data.rpm || []).map(r => r / 36);
+
+        const isDark = document.documentElement.getAttribute("data-theme") !== "light";
+        const gridColor = isDark ? "#1a2e20" : "#d0e8da";
+        const fontColor = isDark ? "#4a7a5a" : "#4a7a5a";
+
+        Plotly.react(
+            "live-chart",
+            [
+                {
+                    x: time,
+                    y: speed,
+                    name: "Speed (km/h)",
+                    mode: "lines",
+                    type: "scatter",
+                    line: {
+                        color: "#00d4aa",
+                        width: 2.5,
+                        shape: "spline",
+                        smoothing: 1.3
+                    },
+                    fill: "tozeroy",
+                    fillcolor: "rgba(0,212,170,0.10)"
+                },
+                {
+                    x: time,
+                    y: rpmScaled,
+                    name: "RPM ÷ 36",
+                    mode: "lines",
+                    type: "scatter",
+                    line: {
+                        color: "#4ade80",
+                        width: 1.5,
+                        dash: "dot",
+                        shape: "spline",
+                        smoothing: 1.3
+                    }
+                }
+            ],
+            {
+                margin: { t:10, b:36, l:46, r:16 },
+                paper_bgcolor: "transparent",
+                plot_bgcolor: "transparent",
+                font: { color: fontColor, size:11 },
+                legend: {
+                    orientation:"h",
+                    x:0,
+                    y:-0.28,
+                    font:{ size:11 }
+                },
+                xaxis:{
+                    title:"Time",
+                    gridcolor:gridColor,
+                    zeroline:false,
+                    tickfont:{size:9}
+                },
+                yaxis:{
+                    title:"Speed / RPM÷36",
+                    gridcolor:gridColor,
+                    zeroline:false
+                }
+            },
+            {
+                responsive:true,
+                displayModeBar:false
+            }
+        );
+
+    } catch (err) {
+        console.error("Failed to load chart data:", err);
+    }
 }
 
 // ══════════════════════════════════════════════════
@@ -916,15 +973,6 @@ function progCancelFlash() {
     setTimeout(() => progFinishFlash(false), 400);
 }
 
-const SIGNAL_MAP = {
-    speed: { label:"Speed (km/h)", key:"speed", color:"#00d4aa" }, rpm: { label:"Engine RPM", key:"rpm", color:"#4ade80" },
-    coolant: { label:"Coolant Temp (°C)", key:"coolant", color:"#f87171" }, oil_temp: { label:"Oil Temp (°C)", key:"oil_temp", color:"#fb923c" },
-    fuel_pct: { label:"Fuel Level (%)", key:"fuel_pct", color:"#34d399" }, fuel_rate: { label:"Fuel Rate (mL/s)", key:"fuel_rate", color:"#60a5fa" },
-    throttle: { label:"Throttle (%)", key:"throttle", color:"#fbbf24" }, engine_load: { label:"Engine Load (%)", key:"engine_load", color:"#a78bfa" },
-    accel: { label:"Acceleration (m/s²)", key:"accel", color:"#2dd4bf" }, battery: { label:"Battery Voltage (V)", key:"battery", color:"#facc15" },
-    gear_num: { label:"Gear Number", key:"gear_num", color:"#00d4aa" }
-};
-const FILL_MAP = { "#00d4aa":"rgba(0,212,170,0.08)", "#4ade80":"rgba(74,222,128,0.08)", "#f87171":"rgba(248,113,113,0.08)", "#fb923c":"rgba(251,146,60,0.08)", "#34d399":"rgba(52,211,153,0.08)", "#60a5fa":"rgba(96,165,250,0.08)", "#fbbf24":"rgba(251,191,36,0.08)", "#a78bfa":"rgba(167,139,250,0.08)", "#2dd4bf":"rgba(45,212,191,0.08)", "#facc15":"rgba(250,204,21,0.08)" };
 
 async function loadHistory() {
     if (currentMode !== "history") return;
@@ -1005,28 +1053,24 @@ function renderTable(data) {
 }
 
 // ══════════════════════════════════════════════════
-// SSE CONNECTION
+// POLLING
 // ══════════════════════════════════════════════════
-function connectSSE() {
-    const src = new EventSource("/stream");
-    
-    src.onmessage = function(e) {
-        try {
-            const d = JSON.parse(e.data);
-            updateLive(d);
-            updateAdvanced(d);
-            updateTechnician(d);
-            checkAlerts(d);
+
+function pollLive(){
+    fetch('http://127.0.0.1:5000/live-data')
+    .then(res => res.json())
+    .then(data => {
+            updateLive(data);
+            updateAdvanced(data);
+            updateTechnician(data);
+            checkAlerts(data);
             setStatus(true);
-        } catch(err) {
-            console.error("SSE parse error:", err);
-        }
-    };
-    
-    src.onerror = function() {
-        setStatus(false, "Reconnecting…");
-    };
+    })
+    .catch(err => {
+        console.error("Error : ", err)
+    })
 }
+    
 
 // ══════════════════════════════════════════════════════════════
 // PROGRAMMING SESSION TERMINAL  ("pgterm")
@@ -1612,3 +1656,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 setInterval(loadHistory, 3000);
+setInterval(updateLiveChart, 1000);
+setInterval(pollLive, 100);
+
+pollLive()
