@@ -14,6 +14,7 @@ let bufTime = [],
 let advSparkBuf = { x: [], y: [] };
 let techUnlocked = false;
 let progUnlocked = false; // Programming session security granted
+let currentSecurityLevel = 0;
 let secAttemptsLeft = 3;
 let secLockout = false;
 let tpInterval = null; // TesterPresent (0x3E) heartbeat timer
@@ -1585,6 +1586,7 @@ async function enterProgrammingSessionBackdoor() {
 
 async function exitProgrammingSession() {
   progUnlocked = false;
+  currentSecurityLevel = 0;
   try {
     await fetch("/prog/exit_session", { method: "POST" });
   } catch (_) {}
@@ -1657,146 +1659,129 @@ async function pgCmd_ecuId() {
 }
 
 async function pgCmd_securitySeed() {
-  if (lastSpeed > 0) {
-    pgPrint(
-      "0x7F 0x27 0x22 — conditionsNotCorrect: vehicle must be stopped (0 km/h)",
-      "l-red",
-    );
-    return;
-  }
-  pgPrint("Sending 0x27 0x01 — Request Seed...", "l-dim");
-  const res = await fetch("/prog/security_access/1");
-  const data = await res.json();
-  if (data.status === "success") {
-    pgPrint(`0x67 0x01  Seed = ${data.message}`, "l-amber");
-    pgPrint(
-      `Compute key as seed XOR 0x5AA5, then run:  security.key <hex>`,
-      "l-dim",
-    );
-  } else {
-    pgPrint(`0x7F 0x27 — ${data.message}`, "l-red");
-  }
+  pgPrint("⚠ not implemented — backend route for this command does not exist yet", "l-amber");
+  return;
 }
 
-async function pgCmd_securityKey(rawKey) {
-  // Unlock the code editor
-  const overlay = document.getElementById("pg-editor-overlay");
-  const editor = document.getElementById("pg-code-editor");
-  const actions = document.getElementById("pg-editor-actions");
-  const lockLabel = document.getElementById("pg-editor-lock");
-  if (overlay) overlay.style.display = "none";
-  if (editor) {
-    editor.disabled = false;
-    editor.focus();
-  }
-  if (actions) actions.style.display = "flex";
-  if (lockLabel) lockLabel.textContent = "✓ UNLOCKED";
-
-  if (!rawKey) {
-    pgPrint("usage: security.key <hex>   e.g. security.key 0xABCD", "l-dim");
+async function pgCmd_securityKey(levelStr) {
+  if (!levelStr) {
+    pgPrint("usage: security.key <level>   e.g. security.key 2", "l-dim");
     return;
   }
-  pgPrint(`Sending 0x27 0x02  Key = ${rawKey} ...`, "l-dim");
-  const res = await fetch(
-    `/prog/security_access/2?key=${encodeURIComponent(rawKey)}`,
-  );
-  const data = await res.json();
-  if (data.status === "success") {
-    progUnlocked = true;
-    pgPrint(
-      "0x67 0x02 — Security Access GRANTED. Session -> PROGRAMMING (0x02)",
-      "l-bold",
-    );
-    pgProgressLog("Security Access GRANTED — Programming session active.");
-    pgSetProgress(0, "Session ready. Awaiting command.");
-    updateSessionDisplay("PROG 0x02");
-    sendSessionControl(2);
-  } else if (data.message === "exceedNumberOfAttempts") {
-    pgPrint(
-      "0x7F 0x27 0x36 — exceedNumberOfAttempts. Locked for 30s.",
-      "l-red",
-    );
-  } else if (data.message && data.message.startsWith("requiredTimeDelay")) {
-    pgPrint(`0x7F 0x27 0x37 — ${data.message}`, "l-red");
-  } else {
-    pgPrint(
-      `0x7F 0x27 0x35 — invalidKey. ${data.attempts_left ?? ""} attempt(s) remaining.`,
-      "l-red",
-    );
+  const level = parseInt(levelStr, 10);
+  if (![1, 2, 3].includes(level)) {
+    pgPrint("usage error — level must be 1, 2, or 3", "l-red");
+    return;
   }
-  pgRefreshStatusBar();
-}
 
-async function pgCmd_readEcu() {
-  pgPrint("Sending 0x34 0x00 — RequestDownload (read mode)...", "l-dim");
-  pgPrint("Read ECU -> Original.bin  [Backup]", "l-dim");
-  const res = await fetch("/prog/read_ecu", { method: "POST" });
-  const data = await res.json();
+  pgPrint(`Sending 0x27 — Security Access (level ${level}) seed+key handshake...`, "l-dim");
+  let data;
+  try {
+    const res = await fetch(`/security_access/${level}`);
+    data = await res.json();
+  } catch (e) {
+    pgPrint(`Error: ${e.message}`, "l-red");
+    return;
+  }
+
   if (data.status === "success") {
-    const f = data.data;
-    pgPrint(`Saved: ${f.name}`);
-    pgPrint(
-      `Size: ${f.size_kb} KB   Checksum: CRC32 ${f.checksum} (Valid)`,
-      "l-bold",
-    );
-    const origEl = document.getElementById("pg-fw-original");
-    if (origEl) {
-      origEl.textContent = f.name + " (read only)";
-      origEl.classList.add("pg-fw-highlight");
+    currentSecurityLevel = level;
+    progUnlocked = level >= 2;
+
+    const overlay = document.getElementById("pg-editor-overlay");
+    const editor = document.getElementById("pg-code-editor");
+    const actions = document.getElementById("pg-editor-actions");
+    const lockLabel = document.getElementById("pg-editor-lock");
+    if (progUnlocked) {
+      if (overlay) overlay.style.display = "none";
+      if (editor) {
+        editor.disabled = false;
+        editor.focus();
+      }
+      if (actions) actions.style.display = "flex";
+      if (lockLabel) lockLabel.textContent = "✓ UNLOCKED";
     }
-    pgProgressLog(`ECU read complete: ${f.name}  ${f.size_kb} KB`);
-    pgSetProgress(0, "Read complete — file saved");
+
+    pgPrint(`0x67 — Security Access GRANTED at level ${level}.`, "l-bold");
+    pgProgressLog(`Security Access GRANTED — level ${level}.`);
+    if (progUnlocked) {
+      pgSetProgress(0, "Session ready. Awaiting command.");
+      updateSessionDisplay("PROG 0x02");
+      sendSessionControl(2);
+    }
   } else {
-    pgPrint(`0x7F 0x34 — ${data.message}`, "l-red");
+    pgPrint(`0x7F 0x27 — ${data.message || "Security Access Failed"}`, "l-red");
   }
   pgRefreshStatusBar();
+}
+
+
+const DID_LENGTHS = {
+  0xF180: 12, 0xF181: 11, 0xF184: 16, 0xF185: 16, 0xF186: 1,
+  0xF18C: 12, 0xF18E: 8, 0xF190: 17, 0xF197: 16, 0xF19D: 8,
+};
+
+const DID_SECURITY_LEVELS = {
+  0xF180: 0, 0xF181: 0, 0xF186: 0, 0xF18C: 0, 0xF190: 0,
+  0xF18E: 1, 0xF197: 1,
+  0xF19D: 2, 0xF184: 2, 0xF185: 2,
+};
+
+async function pgCmd_didRead(hexStr) {
+  if (!hexStr) { pgPrint("usage: did.read <hex>  e.g. did.read 0xF19D", "l-dim"); return; }
+  const did = parseInt(hexStr, 16);
+  const required = DID_SECURITY_LEVELS[did];
+  if (required != null && currentSecurityLevel < required) {
+    pgPrint(
+      `0x7F 0x22 0x33 — securityAccessDenied. ${hexStr} requires level ${required}, current level is ${currentSecurityLevel}. Run: security.key ${required}`,
+      "l-red",
+    );
+    return;
+  }
+  pgPrint(`Sending 0x22 — ReadDataByIdentifier (${hexStr})...`, "l-dim");
+  const res = await fetch(`/DID/${did}`);
+  const data = await res.json();
+  // data.data is the reslist dict {did: value} from uds_client, or null on NRC
+  const val = data.data ? data.data[did] : null;
+  if (val != null) pgPrint(`0x62 ${hexStr} = "${val}"`, "l-bold");
+  else pgPrint(`0x7F 0x22 — read failed or unsupported DID`, "l-red");
+}
+
+async function pgCmd_didWrite(hexStr, value) {
+  if (!hexStr || value == null) { pgPrint("usage: did.write <hex> <value>", "l-dim"); return; }
+  const did = parseInt(hexStr, 16);
+  const required = DID_SECURITY_LEVELS[did];
+  if (required != null && currentSecurityLevel < required) {
+    pgPrint(
+      `0x7F 0x2E 0x33 — securityAccessDenied. ${hexStr} requires level ${required}, current level is ${currentSecurityLevel}. Run: security.key ${required}`,
+      "l-red",
+    );
+    return;
+  }
+  const expected = DID_LENGTHS[did];
+  if (expected != null && value.length !== expected) {
+    pgPrint(`usage error — ${hexStr} requires exactly ${expected} bytes, got ${value.length}`, "l-red");
+    return;
+  }
+  pgPrint(`Sending 0x2E — WriteDataByIdentifier (${hexStr} = "${value}")...`, "l-dim");
+  const res = await fetch("/DID", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ DID: did, value }),
+  });
+  const data = await res.json();
+  if (data.status === "success") pgPrint(`0x6E ${hexStr} — write acknowledged`, "l-bold");
+  else pgPrint(`0x7F 0x2E — SID 0x${data.sid?.toString(16)} NRC 0x${data.nrc?.toString(16)}`, "l-red");
 }
 
 async function pgCmd_fileSelect(tag) {
-  const label = tag || "Stage1";
-  pgPrint(
-    `Loading modified file (${label}) from tuning suite (e.g. WinOLS)...`,
-    "l-dim",
-  );
-  const res = await fetch("/prog/select_modified_file", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ label }),
-  });
-  const data = await res.json();
-  if (data.status === "success") {
-    const f = data.data;
-    pgPrint(`Modified File : ${f.name}`);
-    pgPrint(`Checksum      : CRC32 ${f.checksum} (Valid)`, "l-bold");
-    pgPrint(
-      `Run 'flash.start' to begin writing this file to the ECU.`,
-      "l-dim",
-    );
-    const modEl = document.getElementById("pg-fw-modified");
-    if (modEl) {
-      modEl.textContent = f.name;
-      modEl.classList.add("pg-fw-highlight");
-    }
-    pgProgressLog(`Modified file selected: ${f.name}`);
-  } else {
-    pgPrint(`Error — ${data.message}`, "l-red");
-  }
-  pgRefreshStatusBar();
+  pgPrint("⚠ not implemented — backend route for this command does not exist yet", "l-amber");
+  return;
 }
 
 async function pgCmd_flashStart() {
-  pgPrint("Sending 0x34 — RequestDownload (write mode)...", "l-dim");
-  const res = await fetch("/prog/start_flash", { method: "POST" });
-  const data = await res.json();
-  if (data.status !== "success") {
-    pgPrint(`Error — ${data.message}`, "l-red");
-    return;
-  }
-  pgPrint(
-    "Flashing started. Do not disconnect power or the OBD-II cable.",
-    "l-amber",
-  );
-  pgStartFlashPolling();
+  pgPrint("⚠ not implemented — backend route for this command does not exist yet", "l-amber");
+  return;
 }
 
 function pgStartFlashPolling() {
@@ -1843,34 +1828,13 @@ function pgStartFlashPolling() {
 }
 
 async function pgCmd_flashStatus() {
-  const res = await fetch("/prog/flash_status");
-  const s = await res.json();
-  pgPrint(`Status: ${s.status.toUpperCase()}   ${pgBar(s.progress)}`);
-  pgPrint(
-    `Operation: ${s.operation || "—"}   Elapsed: ${s.elapsed}s   VBAT: ${s.voltage}V   Link: ${s.connection}`,
-    "l-dim",
-  );
-  if (
-    s.status === "erasing" ||
-    s.status === "writing" ||
-    s.status === "verifying"
-  ) {
-    pgStartFlashPolling();
-  }
+  pgPrint("⚠ not implemented — backend route for this command does not exist yet", "l-amber");
+  return;
 }
 
 async function pgCmd_featureList() {
-  const res = await fetch("/prog/state");
-  const data = await res.json();
-  const f = data.data.features;
-  pgPrint("Feature Coding — current configuration:", "l-bold");
-  Object.entries(f).forEach(([k, v]) => {
-    pgPrint(
-      `  ${k.padEnd(18, " ")} : ${v ? "ENABLED" : "DISABLED"}`,
-      v ? "" : "l-dim",
-    );
-  });
-  pgPrint("Run: feature.set <name> on|off", "l-dim");
+  pgPrint("⚠ not implemented — backend route for this command does not exist yet", "l-amber");
+  return;
 }
 
 async function pgCmd_featureSet(name, state) {
@@ -1912,17 +1876,8 @@ async function pgCmd_securityExtra(action, label) {
 }
 
 async function pgCmd_bench(step, tool) {
-  const res = await fetch("/prog/bench_flash", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ step, tool }),
-  });
-  const data = await res.json();
-  if (data.status === "success") {
-    pgPrint(`bench.${step} OK  ${JSON.stringify(data.data)}`, "l-bold");
-  } else {
-    pgPrint(`Error — ${data.message}`, "l-red");
-  }
+  pgPrint("⚠ not implemented — backend route for this command does not exist yet", "l-amber");
+  return;
 }
 
 async function pgCmd_dtcClear() {
@@ -1961,12 +1916,147 @@ async function pgCmd_report() {
   pgPrint("══════════════════════════════════════════", "l-bold");
 }
 
+function pgTriggerDownload(url, filename) {
+  const a = document.createElement("a");
+  a.href = url;
+  if (filename) a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+async function pgCmd_logsDownload() {
+  pgPrint("Requesting CAN log file from listener/logger...", "l-dim");
+  try {
+    pgTriggerDownload("/download/logger", "can_logs.csv");
+    pgPrint("Download started — check your browser's downloads.", "l-bold");
+    pgProgressLog("Log file download requested.");
+  } catch (e) {
+    pgPrint(`Error: ${e.message}`, "l-red");
+  }
+}
+
+async function pgCmd_sysinfo() {
+  pgPrint("════ SYSTEM STATUS ════", "l-bold");
+
+  // Session / security state — tracked locally, updated by security.key and session changes
+  pgPrint(`Security Level    : ${currentSecurityLevel}`);
+  pgPrint(`Programming Mode  : ${progUnlocked ? "UNLOCKED" : "LOCKED"}`);
+
+  // ECU identity — pulled live from the real DID table via /DID
+  const idFields = [
+    ["0xF180", "Boot SW Version"],
+    ["0xF181", "App SW Version"],
+    ["0xF18C", "Serial Number"],
+    ["0xF190", "VIN"],
+  ];
+  for (const [hex, label] of idFields) {
+    const did = parseInt(hex, 16);
+    try {
+      const res = await fetch(`/DID/${did}`);
+      const data = await res.json();
+      const val = data.data ? data.data[did] : null;
+      pgPrint(`${label.padEnd(18, " ")}: ${val != null ? val : "—"}`);
+    } catch (_) {
+      pgPrint(`${label.padEnd(18, " ")}: — (read failed)`, "l-red");
+    }
+  }
+  pgPrint("════════════════════════", "l-bold");
+}
+
+const HISTORY_FIELDS = {
+  speed: "Speed (km/h)", rpm: "RPM", coolant: "Coolant Temp (°C)",
+  oil_temp: "Oil Temp (°C)", fuel_pct: "Fuel %", fuel_rate: "Fuel Rate",
+  throttle: "Throttle %", engine_load: "Engine Load %", accel: "Accel (m/s²)",
+  battery: "Battery (V)",
+};
+
+async function pgCmd_historySummary(field) {
+  const res = await fetch("/history-data");
+  const data = await res.json();
+  if (!field) {
+    pgPrint("usage: history.summary <field>", "l-dim");
+    pgPrint(`available fields: ${Object.keys(HISTORY_FIELDS).join(", ")}`, "l-dim");
+    return;
+  }
+  const series = data[field];
+  if (!series || !series.length) {
+    pgPrint(`No history data for "${field}" yet.`, "l-red");
+    return;
+  }
+  const nums = series.filter((v) => typeof v === "number");
+  const min = Math.min(...nums);
+  const max = Math.max(...nums);
+  const avg = nums.reduce((a, b) => a + b, 0) / nums.length;
+  pgPrint(`${HISTORY_FIELDS[field] || field} — ${nums.length} samples`, "l-bold");
+  pgPrint(`  min ${min.toFixed(1)}   max ${max.toFixed(1)}   avg ${avg.toFixed(1)}   current ${nums[nums.length - 1].toFixed(1)}`);
+}
+
+const ACTUATOR_IDS = {
+  fan: 0x1001,
+  "fuel.pump": 0x1002,
+  headlamp: 0x1003,
+  "door.lock": 0x1004,
+};
+
+async function pgCmd_ioSet(name, state) {
+  const did = ACTUATOR_IDS[name];
+  if (did == null) {
+    pgPrint(`usage: io.set <actuator> on|off|ecu`, "l-dim");
+    pgPrint(`available actuators: ${Object.keys(ACTUATOR_IDS).join(", ")}`, "l-dim");
+    return;
+  }
+  let control_parameter, control_state;
+  if (state === "ecu") {
+    control_parameter = 0; // return control to ECU
+    control_state = false;
+  } else if (state === "on" || state === "off") {
+    control_parameter = 3; // short-term adjustment
+    control_state = state === "on";
+  } else {
+    pgPrint(`usage: io.set ${name} on|off|ecu`, "l-dim");
+    return;
+  }
+  pgPrint(`Sending 0x2F — IOControl (${name} = ${state})...`, "l-dim");
+  const res = await fetch("/IO_control", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ DID: did, control_parameter, control_state }),
+  });
+  const data = await res.json();
+  if (data.status === "success") pgPrint(`0x6F — ${name} set to ${state.toUpperCase()}`, "l-bold");
+  else pgPrint(`Error — ${data.message}`, "l-red");
+}
+
+async function pgCmd_reportDownload() {
+  pgPrint("Building session report...", "l-dim");
+  const lines = [
+    "════ PROGRAMMING SESSION — REPORT ════",
+    `Generated      : ${new Date().toLocaleString()}`,
+    `Security Level : ${currentSecurityLevel} (${currentSecurityLevel >= 2 ? "PROGRAMMING access" : currentSecurityLevel === 1 ? "EXTENDED access" : "no access"})`,
+    `Prog. Session  : ${progUnlocked ? "UNLOCKED" : "LOCKED"}`,
+    "═══════════════════════════════════════",
+  ];
+  const blob = new Blob([lines.join("\n")], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  pgTriggerDownload(url, "session_report.txt");
+  URL.revokeObjectURL(url);
+  pgPrint("Report downloaded as session_report.txt", "l-bold");
+  pgProgressLog("Session report downloaded.");
+}
+
+
 function pgCmd_help() {
   [
     "ecu.id                       read ECU identification block",
-    "security.seed                request seed (0x27 0x01)",
-    "security.key <hex>           send computed key (0x27 0x02)",
-    "read.ecu                     read & back up original firmware",
+    "did.read <hex>               read any DID (0x22)",
+    "did.write <hex> <value>      write a writable DID (0x2E)",
+    "logs.download                download CAN log file from listener",
+    "report.download              download session report as .txt",
+    "security.key <level>         grant security access 1/2/3 (0x27)",
+    "history.summary <field>      min/max/avg for a logged signal",
+    "io.set <actuator> on|off|ecu force or release an actuator (0x2F)",
+    "sysinfo                       show ECU identity + session/security state",
     "file.select <tag>            load a modified/tuned file (e.g. stage2)",
     "flash.start                  write the modified file to the ECU",
     "flash.status                 check flashing progress",
@@ -1981,6 +2071,7 @@ function pgCmd_help() {
     "dtc.clear                    clear all stored DTCs",
     "report                       print final session report",
     "clear                        clear the screen",
+    "exit                          leave the programming session",
   ].forEach((l) => pgPrint(l, "l-dim"));
 }
 
@@ -2013,14 +2104,32 @@ async function pgRunCommand(raw) {
       case "ecu.id":
         await pgCmd_ecuId();
         break;
+      case "did.read":
+        await pgCmd_didRead(args[0]);
+        break;
+      case "did.write":
+        await pgCmd_didWrite(args[0], args[1]);
+        break;
+      case "logs.download":
+        await pgCmd_logsDownload();
+        break;
+      case "report.download":
+        await pgCmd_reportDownload();
+        break;
+      case "history.summary":
+        await pgCmd_historySummary(args[0]);
+        break;
+      case "io.set":
+        await pgCmd_ioSet(args[0], args[1]);
+        break;
+      case "sysinfo":
+        await pgCmd_sysinfo();
+        break;
       case "security.seed":
         await pgCmd_securitySeed();
         break;
       case "security.key":
         await pgCmd_securityKey(args[0]);
-        break;
-      case "read.ecu":
-        await pgCmd_readEcu();
         break;
       case "file.select":
         await pgCmd_fileSelect(args[0]);
@@ -2079,6 +2188,9 @@ async function pgRunCommand(raw) {
       case "report":
         await pgCmd_report();
         break;
+      case "exit":
+        exitProgrammingSession();
+        break;
       case "ecu.reset": {
         if (
           !confirm("Hard reset will clear session and adaptations. Continue?")
@@ -2097,6 +2209,7 @@ async function pgRunCommand(raw) {
           pgPrint("Error: " + e.message, "l-red");
         }
         break;
+        
       }
       default:
         pgPrint(`command not found: ${head}  (type 'help')`, "l-red");
@@ -2175,7 +2288,6 @@ function pgEditorClear() {
 // ══════════════════════════════════════════════════
 document.addEventListener("DOMContentLoaded", () => {
   startClock();
-  connectSSE();
   setMode("live");
   initProgTerminal();
 
