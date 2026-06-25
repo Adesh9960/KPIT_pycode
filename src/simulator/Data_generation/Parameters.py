@@ -6,6 +6,7 @@ import requests
 import simulator.Data_generation.actuators as actuators
 from simulator.Data_generation.display_data import display_stats
 from simulator.dids.didList import DID_DATABASE
+import random
 # from simulator.Data_generation.UDSHandler import UDSHandler
 from encoder.encoder import encode_frame
 try:
@@ -40,6 +41,12 @@ gear_physics = {
     '5': {'max': 190, 'idle': 45, 'name': '5th Gear', 'k': 0.04}
 }
 
+# ABS PARAMETERS
+brake_force = 0
+wheel_fl = 0
+wheel_fr = 0
+wheel_rl = 0
+wheel_rr = 0
 # Module-level UDS handler — single instance shared via import
 # uds_handler = UDSHandler()
 
@@ -224,7 +231,11 @@ def get_engine_state(is_clutch_down, is_accelerating, physics, is_braking) -> st
     else:
         return "IDLE"
 
-
+def get_abs_parameter():
+    wheel_fl = main.current_speed + random.uniform(-0.5, 0.5)
+    wheel_fr = main.current_speed + random.uniform(-0.5, 0.5)
+    wheel_rl = main.current_speed + random.uniform(-0.5, 0.5)
+    wheel_rr = main.current_speed + random.uniform(-0.5, 0.5)
 # ═══════════════════════════════════════════════════════════════
 # DERIVED PARAMETER CALCULATORS
 # All values simulated/derived from existing physics state.
@@ -620,6 +631,7 @@ def run_vehicle_simulator():
             "Head_Lamp": int(main.head_lamp.state),
             "Radiator_Fan": int(main.radiator_fan.state),
             "Fuel_Pump": int(main.fuel_pump.state),
+            # ABS 
         }
 
         # 4. Transmit the data to encoder
