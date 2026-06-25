@@ -166,5 +166,17 @@ MESSAGE_MAP = {
             "Wheel_Speed_RR_kmh": "Wheel_Speed_RR_kmh",
         },
     },
+    "ChassisDynamics": {
+    "can_id": 0x306,        # Use the CAN ID you've assigned in your DBC
+    "is_extended": False,
+    "is_fd": False,
+    "dlc": 8,
+    "signals": {
+        "Brake_Force_Pct":    "Brake_Force_Pct",
+        "Steering_Angle_deg": "Steering_Angle_deg",
+        "Lateral_Accel_ms2":  "Lateral_Accel_ms2",
+        "Steering_Direction": "Steering_Direction",
+    },
+},
 
 }

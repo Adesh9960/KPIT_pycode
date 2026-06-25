@@ -5,6 +5,7 @@ import listener.listener as listener
 from uds_client.uds_client import UDS, UDSRoles
 import Decoder.decoder_thread as decoder
 import isotp
+from uds_client.UDSError import UDSError
 from utils.frontendFieldMapper import build_analytics_packet
 from utils.files import zip_folder, delete_file
 from utils.updateHistory import history, update_history
@@ -137,11 +138,22 @@ def diagnostics_session_control(session):
 @app.route("/IO_control", methods = ["POST"])
 def IO_control():
     data = request.get_json()
+    print(f"DID : {data.get('DID')}. type: {type(data.get('DID'))}")
+    print(f"control parameter: {data.get('control_parameter')}. type: {type(data.get('control_parameter'))}")
+    print(f"control state : {data.get('control_state')}. type: {type(data.get('control_state'))}")
+
     try:
         uds_client.io_control(data.get('DID'), data.get('control_parameter'), data.get('control_state'))
         return jsonify({
             "status": "success",
             "message": "Control changed"
+        })
+    except UDSError as e:
+        print("UDS Error")
+        print(e)
+        return jsonify({
+            "status": "error",
+            "message": e.message
         })
     except Exception as e:
         print(e)

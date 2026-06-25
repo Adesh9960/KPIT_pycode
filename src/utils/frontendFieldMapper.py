@@ -21,7 +21,21 @@ SIGNAL_MAP = {
     "Clutch_State": "clutch_state",
     "Brake_State": "brake_state",
     "Battery_V": "battery_v",
-    "Battery_V_alt": "battery_v"
+    "Battery_V_alt": "battery_v",
+    #Actuators
+    "Head_Lamp": "head_lamp",
+    "Radiator_Fan": "radiator_fan",
+    "Fuel_Pump": "fuel_pump",
+    #Tyre Pressure
+    "Tyre_P_FL" : "tyre_pressure_fl",
+    "Tyre_P_FR" : "tyre_pressure_fr",
+    "Tyre_P_RL" : "tyre_pressure_rl",
+    "Tyre_P_RR" : "tyre_pressure_rr",
+    #ChassisDynamics
+    "Brake_Force_Pct":    "brake_force_pct",
+    "Steering_Angle_deg": "steering_angle_deg",
+    "Lateral_Accel_ms2":  "lateral_accel_ms2",
+    "Steering_Direction": "steering_direction",
 }
 
 

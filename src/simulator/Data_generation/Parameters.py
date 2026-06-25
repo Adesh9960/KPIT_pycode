@@ -9,6 +9,8 @@ from simulator.dids.didList import DID_DATABASE
 import random
 # from simulator.Data_generation.UDSHandler import UDSHandler
 from encoder.encoder import encode_frame
+from simulator.Data_generation.steering import update_steering, calculate_lateral_accel
+from simulator.Data_generation.tyres import calculate_tire_pressures
 try:
     import keyboard
 except ImportError:
@@ -51,6 +53,7 @@ wheel_rr = 0
 # uds_handler = UDSHandler()
 
 headlamp_switch_timeout = time.time()
+
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -548,6 +551,14 @@ def run_vehicle_simulator():
         if keyboard.is_pressed('r'):
             main.remaining_fuel_ml = MAX_FUEL_ML
 
+        dt = 0.05
+
+        left_pressed = keyboard.is_pressed("<")
+        right_pressed = keyboard.is_pressed(">")
+
+        update_steering(left_pressed, right_pressed, dt)
+
+  
         is_accelerating = keyboard.is_pressed('space')
         is_braking      = keyboard.is_pressed('b')
         is_clutch_down  = keyboard.is_pressed('c')
@@ -566,6 +577,7 @@ def run_vehicle_simulator():
 
         # ── Physics ──
         handle_speed(is_clutch_down, is_accelerating, physics, is_braking)
+        calculate_lateral_accel()
         main.distance_km += (main.current_speed / 3600.0) * main.refresh_rate
         handle_rpm_physics(is_clutch_down, is_accelerating, physics)
         handle_fuel_physics(is_clutch_down, is_accelerating, physics)
@@ -596,7 +608,14 @@ def run_vehicle_simulator():
         except Exception:
             live_vin, live_ecu, live_sw, live_hw = "ERROR", "ERROR", "ERROR", "ERROR"
 
-
+        tyre_pressure, main.tyre_temps = calculate_tire_pressures(
+            main.current_speed,
+            float(telemetry_row.get("Accel_ms2", 0)),
+            main.lateral_accel,
+            brake_force,
+            dt,
+            main.tyre_temps,
+              )
         # 3. Build the final payload containing STATIC ECU info, UI strings, and live DIDs
         payload = {
             # --- STATIC ECU INFO FETCHED FROM didList.py ---
@@ -631,7 +650,18 @@ def run_vehicle_simulator():
             "Head_Lamp": int(main.head_lamp.state),
             "Radiator_Fan": int(main.radiator_fan.state),
             "Fuel_Pump": int(main.fuel_pump.state),
-            # ABS 
+            # Tyres
+            "Tyre_P_FL" : tyre_pressure[0],
+            "Tyre_P_FR" :tyre_pressure[1],
+            "Tyre_P_RL" : tyre_pressure[2],
+            "Tyre_P_RR": tyre_pressure[3],
+            #ChassisDynamics
+            "Brake_Force_Pct": brake_force,
+            "Steering_Angle_deg": main.steering_angle,
+            "Lateral_Accel_ms2": main.lateral_accel,
+            "Steering_Direction": main.steering_direction,
+
+
         }
 
         # 4. Transmit the data to encoder

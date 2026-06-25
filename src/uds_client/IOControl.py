@@ -1,7 +1,4 @@
-class IOControlError(Exception):
-    pass
-
-
+from uds_client.UDSError import UDSError
 class IOControl:
     RETURN_CONTROL_TO_ECU = 0x00
     RESET_TO_DEFAULT = 0x01
@@ -43,27 +40,8 @@ def io_control(
         timeout=5
     )
 
-    if len(response) < 4:
-        raise IOControlError(
-            f"Invalid response: {response.hex()}"
-        )
-
     if response[0] != 0x6F:
-        raise IOControlError(
-            f"Negative response: {response.hex()}"
-        )
-
-    response_did = (response[1] << 8) | response[2]
-
-    if response_did != did:
-        raise IOControlError(
-            f"Unexpected DID in response: {response.hex()}"
-        )
-
-    if response[3] != control_parameter:
-        raise IOControlError(
-            f"Unexpected control parameter: {response.hex()}"
-        )
+        raise UDSError(response)
 
     print(
         f"IO Control successful "

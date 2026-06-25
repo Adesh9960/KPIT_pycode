@@ -3,6 +3,7 @@ import simulator.uds.Session as Session
 security_level: str = 0
 security_key: str = None
 session_level: str = Session.DEFAULT_SESSION
+import math
 # security_expire_time: int
 
 current_gear = 'n'
@@ -30,6 +31,16 @@ target_temp = 90.0
 battery_voltage = 12.6        # volts
 headlamp_switch = False
 
+#STEERING
+steering_angle = 0.0                 # radians
+MAX_STEERING = math.radians(35)      # ±35°
+STEER_RATE = math.radians(90)        # degrees/sec
+CENTER_RATE = math.radians(120)      # self-centering
+WHEELBASE = 2.7                      # m
+lateral_accel = 0
+#Tyres
+tyre_temps = [25, 25, 25, 25]
+
 #Actuators
 radiator_fan = Actuator("Radiator Fan")
 fuel_pump = Actuator("Fuel Pump")
@@ -43,3 +54,10 @@ upload_offset = 0
 firmware_image = bytearray(
     b"Simulator Firmware v1.0"
 )
+
+#STEERING DIRECTION
+STRAIGHT = 0
+LEFT = 1
+RIGHT = 2
+
+steering_direction = STRAIGHT

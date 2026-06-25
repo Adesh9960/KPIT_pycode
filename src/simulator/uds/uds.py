@@ -66,7 +66,7 @@ def validate_session(*allowed_sessions):
         None  -> Session valid
         NRC   -> Session invalid
     """
-
+    print("Session level: ", main.session_level)
     if int(main.session_level) in allowed_sessions:
         return None
 

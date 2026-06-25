@@ -4,7 +4,6 @@ from encoder.msg_map import MESSAGE_MAP
 from listener.TxRequest import TxRequest, TxRequestType
 from listener.listener import send_to_tx_queue
 from data_structures.CANFrame import CANFrame
-import testm as main
 import time
 
 db = cantools.database.load_file("encoder/Vehicle.dbc")

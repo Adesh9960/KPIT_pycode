@@ -421,11 +421,6 @@
           <div class="adv-sensor-list">
             <div class="adv-sr">
               <div class="adv-sr-name">
-                <div class="adv-sr-chk">✓</div>Fuel Level
-              </div>
-            </div>
-            <div class="adv-sr">
-              <div class="adv-sr-name">
                 <div class="adv-sr-chk">✓</div>Oil Temp
               </div>
               <div class="adv-sr-val" id="sn-oil">—</div>
@@ -447,11 +442,6 @@
                 <div class="adv-sr-chk">✓</div>Engine RPM
               </div>
               <div class="adv-sr-val" id="sn-rpm">—</div>
-            </div>
-            <div class="adv-sr">
-              <div class="adv-sr-name">
-                <div class="adv-sr-chk">✓</div>Fuel Rate
-              </div>
             </div>
             <div class="adv-sr">
               <div class="adv-sr-name">
@@ -703,32 +693,32 @@
     <div class="tech-io-grid">
 
       <div class="tech-io-card">
-        <div class="tech-io-name">HEAD LAMP <span class="tech-io-did">0xF410</span></div>
+        <div class="tech-io-name">HEAD LAMP <span class="tech-io-did">0x1003</span></div>
         <div class="tech-io-state" id="io-headlamp-state">ECU CONTROL</div>
         <div class="tech-io-btns">
-          <button class="tech-io-btn tech-io-on" onclick="ioControl(0xF410,1,1)">FORCE ON</button>
-          <button class="tech-io-btn tech-io-off" onclick="ioControl(0xF410,1,0)">FORCE OFF</button>
-          <button class="tech-io-btn tech-io-ecu" onclick="ioControl(0xF410,0,0)">RETURN TO ECU</button>
+          <button class="tech-io-btn tech-io-on" onclick="ioControl(0x1003,3,1)">FORCE ON</button>
+          <button class="tech-io-btn tech-io-off" onclick="ioControl(0x1003,3,0)">FORCE OFF</button>
+          <button class="tech-io-btn tech-io-ecu" onclick="ioControl(0x1003,0,0)">RETURN TO ECU</button>
         </div>
       </div>
 
       <div class="tech-io-card">
-        <div class="tech-io-name">RADIATOR FAN <span class="tech-io-did">0xF411</span></div>
+        <div class="tech-io-name">RADIATOR FAN <span class="tech-io-did">0x1001</span></div>
         <div class="tech-io-state" id="io-radfan-state">ECU CONTROL</div>
         <div class="tech-io-btns">
-          <button class="tech-io-btn tech-io-on" onclick="ioControl(0xF411,1,1)">FORCE ON</button>
-          <button class="tech-io-btn tech-io-off" onclick="ioControl(0xF411,1,0)">FORCE OFF</button>
-          <button class="tech-io-btn tech-io-ecu" onclick="ioControl(0xF411,0,0)">RETURN TO ECU</button>
+          <button class="tech-io-btn tech-io-on" onclick="ioControl(0x1001,3,1)">FORCE ON</button>
+          <button class="tech-io-btn tech-io-off" onclick="ioControl(0x1001,3,0)">FORCE OFF</button>
+          <button class="tech-io-btn tech-io-ecu" onclick="ioControl(0x1001,0,0)">RETURN TO ECU</button>
         </div>
       </div>
 
       <div class="tech-io-card">
-        <div class="tech-io-name">FUEL PUMP <span class="tech-io-did">0xF412</span></div>
+        <div class="tech-io-name">FUEL PUMP <span class="tech-io-did">0x1002</span></div>
         <div class="tech-io-state" id="io-fuelpump-state">ECU CONTROL</div>
         <div class="tech-io-btns">
-          <button class="tech-io-btn tech-io-on" onclick="ioControl(0xF412,1,1)">FORCE ON</button>
-          <button class="tech-io-btn tech-io-off" onclick="ioControl(0xF412,1,0)">FORCE OFF</button>
-          <button class="tech-io-btn tech-io-ecu" onclick="ioControl(0xF412,0,0)">RETURN TO ECU</button>
+          <button class="tech-io-btn tech-io-on" onclick="ioControl(0x1002,3,1)">FORCE ON</button>
+          <button class="tech-io-btn tech-io-off" onclick="ioControl(0x1002,3,0)">FORCE OFF</button>
+          <button class="tech-io-btn tech-io-ecu" onclick="ioControl(0x1002,0,0)">RETURN TO ECU</button>
         </div>
       </div>
 
@@ -1091,7 +1081,6 @@
 
   <!-- Alert toasts -->
   <div id="alert-toast-stack"></div>
-
   <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 

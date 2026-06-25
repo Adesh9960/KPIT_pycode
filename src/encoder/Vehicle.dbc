@@ -80,3 +80,10 @@ BO_ 1536 ActuatorData: 3 ECU8
  SG_ Head_Lamp     : 0|8@1+  (1,0) [0|1] "" ECU8
  SG_ Radiator_Fan  : 8|8@1+  (1,0) [0|1] "" ECU8
  SG_ Fuel_Pump     : 16|8@1+ (1,0) [0|1] "" ECU8
+
+
+BO_ 774 ChassisDynamics: 8 ECU13
+ SG_ Brake_Force_Pct      : 0|8@1+   (0.5,0)   [0|100]   "%"      ECU13
+ SG_ Steering_Angle_deg   : 8|16@1-  (0.1,0)   [-45|45]  "deg"    ECU13
+ SG_ Lateral_Accel_ms2    : 24|16@1- (0.01,0)  [-20|20]  "m/s2"   ECU13
+ SG_ Steering_Direction   : 40|2@1+  (1,0)     [0|2]     ""       ECU13

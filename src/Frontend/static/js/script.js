@@ -4,7 +4,6 @@
 // UDS REST endpoints: /DID, /security_access, /diagnostics_session_control, /IO_control
 // ═══════════════════════════════════════════════════════════════
 "use strict";
-
 // ── State ──
 let currentMode = "live";
 const LIVE_BUF = 80;
@@ -37,7 +36,17 @@ document.addEventListener("keydown", (e) => {
   if (udsBuffer.length > UDS_SEQUENCE.length) udsBuffer.shift();
   if (udsBuffer.join("") === UDS_SEQUENCE.join("")) {
     udsBuffer = [];
-    if (!techUnlocked) showUDSModal();
+    if (!techUnlocked) {
+      sendSessionControl(3)
+      .then(res => res.json())
+    .then(data => {
+      if (data.status === "success")
+        showUDSModal();
+      else
+        showToastMessage(data.message)
+    })
+    .catch(e => showToastMessage(e.message))
+    }
   }
   // Way B — Backdoor for Programming Session (only you know this)
   // Sequence: p r o g 1 2 3  (typed while in technician mode)
@@ -80,6 +89,7 @@ function showUDSModal() {
 
 function confirmTechUnlock() {
   techUnlocked = true;
+
   document.getElementById("uds-overlay").classList.remove("visible");
   const techBtn = document.getElementById("tech-tab-btn");
   if (techBtn) techBtn.classList.remove("hidden");
@@ -254,6 +264,7 @@ async function ioControl(did, controlParam, controlState) {
     `Sending 0x2F ${hexStr(did)} ${controlParam} ${controlState} ...`,
   );
   try {
+    
     const res = await fetch("/IO_control", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -277,9 +288,7 @@ async function ioControl(did, controlParam, controlState) {
 
 // GET /diagnostics_session_control/<int:session>
 async function sendSessionControl(session) {
-  try {
-    await fetch(`/diagnostics_session_control/${session}`);
-  } catch (_) {}
+    return await fetch(`/diagnostics_session_control/${session}`);
 }
 
 // ECU Reset (0x11) — only in Programming session
@@ -759,12 +768,24 @@ function updateLive(d) {
   }
 
   // Headlights
-  document
-    .getElementById("chip-lowbeam")
-    .classList.toggle("active", !!d.head_lamp);
-  document
+  if(d.head_lamp){
+    document
     .getElementById("chip-highbeam")
-    .classList.toggle("active", !!d.high_beam);
+    .classList.toggle("active", true);
+    document
+    .getElementById("chip-lowbeam")
+    .classList.toggle("active", false);
+  }
+  else{
+      document
+    .getElementById("chip-lowbeam")
+    .classList.toggle("active",true);
+    document
+    .getElementById("chip-highbeam")
+    .classList.toggle("active", false);
+  }
+
+
 
   // Indicators — assumes d.indicator_state is "LEFT" | "RIGHT" | "HAZARD" | "OFF"
   const leftEl = document.getElementById("ind-left");
@@ -853,7 +874,32 @@ function updatePreConditions(speed) {
   // Pre-condition gating (vehicle must be stopped) is enforced inside
   // the pgterm engine's `security.seed` command — see lastSpeed usage there.
 }
+function updateTyrePressure(id, barId, pressure) {
+    const valueEl = document.getElementById(id);
+    const barEl = document.getElementById(barId);
 
+    if (pressure == null || isNaN(pressure)) {
+        valueEl.innerHTML = `— <span class="adv-tyre-unit">psi</span>`;
+        barEl.style.width = "0%";
+        return;
+    }
+
+    valueEl.innerHTML = `${pressure.toFixed(1)} <span class="adv-tyre-unit">psi</span>`;
+
+    // Scale 20–40 psi to 0–100%
+    const percent = Math.max(0, Math.min(100, (pressure - 20) / 20 * 100));
+    barEl.style.width = `${percent}%`;
+
+    // Optional color indication
+    if (pressure < 28)
+        barEl.style.background = "#ef4444";      // Red
+    else if (pressure < 30)
+        barEl.style.background = "#f59e0b";      // Orange
+    else if (pressure <= 36)
+        barEl.style.background = "#22c55e";      // Green
+    else
+        barEl.style.background = "#3b82f6";      // Blue
+}
 // ══════════════════════════════════════════════════
 // ADVANCED PAGE UPDATE
 // ══════════════════════════════════════════════════
@@ -867,6 +913,7 @@ function updateAdvanced(d) {
   const fr = d.fuel_rate || 0;
   const sp = d.speed || 0;
   const fuelL = d.remaining_fuel_l || d.fuel_l || 0;
+  const fuel_pump = d.fuel_pump
 
   setText("adv-rpm-hero", (d.rpm || 0).toLocaleString());
   setText("adv-load-hero", (d.engine_load || 0).toFixed(1) + "%");
@@ -903,6 +950,33 @@ function updateAdvanced(d) {
 
   if (d.date) setText("adv-date-display", d.date);
 
+
+  // Fuel 
+      // Clamp percentage to 0-100
+    const pct = Math.max(0, Math.min(100, fuel ?? 0));
+
+    // Fuel bar
+    document.getElementById("adv-fuel-bar").style.width = `${pct}%`;
+    document.getElementById("adv-fuel-pct-val").textContent = `${pct.toFixed(0)}%`;
+
+    // Remaining fuel
+    document.getElementById("adv-fuel-l-val").textContent =
+        (fuelL ?? 0).toFixed(1);
+
+    // Fuel consumption rate
+    document.getElementById("adv-fuel-rate-val").textContent =
+        (fr ?? 0).toFixed(1);
+
+    // Fuel pump status
+    document.getElementById("adv-fuel-pump-val").textContent =
+        fuel_pump? 'ON': 'OFF';
+
+  //Tyre Pressure
+  updateTyrePressure("t-fl", "t-fl-bar", d.tyre_pressure_fl);
+updateTyrePressure("t-fr", "t-fr-bar", d.tyre_pressure_fr);
+updateTyrePressure("t-rl", "t-rl-bar", d.tyre_pressure_rl);
+updateTyrePressure("t-rr", "t-rr-bar", d.tyre_pressure_rr);
+
   // KPIs
   setText("adv-batt", bsoc.toFixed(1) + "%");
   setText(
@@ -929,18 +1003,17 @@ function updateAdvanced(d) {
     otBar.style.width = Math.min(100, ((ot - 40) / 80) * 100).toFixed(0) + "%";
     otBar.style.background = ot > 110 ? "#ef4444" : "#f59e0b";
   }
-  setText("adv-fuelrate-kpi", fr.toFixed(2) + " mL/s");
-  const frBar = document.getElementById("adv-fuelrate-bar");
-  if (frBar) {
-    frBar.style.width = Math.min(100, (fr / 12) * 100).toFixed(0) + "%";
-    frBar.style.background = fr > 8 ? "#ef4444" : "#f59e0b";
-  }
+    document.getElementById("adv-engload-kpi").textContent =
+        `${d.engine_load.toFixed(0)}%`;
+    document.getElementById("adv-engload-bar").style.width =
+        `${d.engine_load}%`;
   const estKm =
     fr > 0.01 && sp > 0 ? Math.round(((fuelL * 1000) / fr / 3600) * sp) : 0;
   setText("adv-range-kpi", estKm > 0 ? estKm + " km" : "—");
   const rngBar = document.getElementById("adv-range-bar");
   if (rngBar)
     rngBar.style.width = Math.min(100, (estKm / 400) * 100).toFixed(0) + "%";
+
 
   if (tyres.fl != null) {
     setTyre("t-fl", "t-fl-bar", tyres.fl);
@@ -2175,7 +2248,6 @@ function pgEditorClear() {
 // ══════════════════════════════════════════════════
 document.addEventListener("DOMContentLoaded", () => {
   startClock();
-  connectSSE();
   setMode("live");
   initProgTerminal();
 
