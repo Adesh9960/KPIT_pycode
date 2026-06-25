@@ -7,6 +7,7 @@
 // ── State ──
 let currentMode = "live";
 const LIVE_BUF = 80;
+let time_count = 0
 let bufTime = [],
   bufSpeed = [],
   bufRpm = [];
@@ -846,7 +847,8 @@ function updateLive(d) {
   // Update pre-condition bar in technician mode
   updatePreConditions(d.speed || 0);
 
-  bufTime.push(d.time);
+  bufTime.push(time_count);
+  time_count += 1
   bufSpeed.push(d.speed || 0);
   bufRpm.push(d.rpm || 0);
   if (bufTime.length > LIVE_BUF) {
@@ -973,6 +975,11 @@ function updateAdvanced(d) {
         fuel_pump? 'ON': 'OFF';
 
   //Tyre Pressure
+  updateTyrePressure("tech-tfl", null, data.tyre_fl);
+updateTyrePressure("tech-tfr", null, data.tyre_fr);
+updateTyrePressure("tech-trl", null, data.tyre_rl);
+updateTyrePressure("tech-trr", null, data.tyre_rr);
+
   updateTyrePressure("t-fl", "t-fl-bar", d.tyre_pressure_fl);
 updateTyrePressure("t-fr", "t-fr-bar", d.tyre_pressure_fr);
 updateTyrePressure("t-rl", "t-rl-bar", d.tyre_pressure_rl);
@@ -1289,6 +1296,7 @@ function updateLiveChart() {
     document.documentElement.getAttribute("data-theme") !== "light";
   const gridColor = isDark ? "#1a2e20" : "#d0e8da";
   const fontColor = isDark ? "#4a7a5a" : "#4a7a5a";
+
   Plotly.react(
     "live-chart",
     [
@@ -1389,6 +1397,7 @@ async function loadHistory() {
       setStatus(false, data.error);
       return;
     }
+    // console.log(data)
     renderHistoryChart(data);
     renderTable(data);
     const sig = document.getElementById("signal-select").value;
@@ -1428,9 +1437,11 @@ function renderHistoryChart(data) {
     document.documentElement.getAttribute("data-theme") !== "light";
   const gridColor = isDark ? "#111828" : "#dde5f0";
   const fontColor = isDark ? "#4a5568" : "#6a7890";
-  const x = getSlice(data.time || [], range);
   const y = getSlice(data[meta.key] || [], range);
+  const x = y.map((_, i) => i);
   const isStep = sig === "gear_num";
+  console.log(x.slice(0,20));
+  console.log(y.slice(0,20));
   Plotly.react(
     "history-chart",
     [
@@ -1645,7 +1656,7 @@ async function enterProgrammingSessionBackdoor() {
     "l-amber",
   );
   try {
-    const res = await fetch("/prog/security_access/1");
+    const res = await fetch("/diagnostics_session_control/2");
     const seedData = await res.json();
     const seedHex = seedData.message;
     const seedInt = parseInt(seedHex, 16);
@@ -1831,11 +1842,11 @@ async function pgCmd_didWrite(hexStr, value) {
     );
     return;
   }
-  const expected = DID_LENGTHS[did];
-  if (expected != null && value.length !== expected) {
-    pgPrint(`usage error — ${hexStr} requires exactly ${expected} bytes, got ${value.length}`, "l-red");
-    return;
-  }
+  // const expected = DID_LENGTHS[did];
+  // if (expected != null && value.length !== expected) {
+  //   pgPrint(`usage error — ${hexStr} requires exactly ${expected} bytes, got ${value.length}`, "l-red");
+  //   return;
+  // }
   pgPrint(`Sending 0x2E — WriteDataByIdentifier (${hexStr} = "${value}")...`, "l-dim");
   const res = await fetch("/DID", {
     method: "POST",
@@ -1863,7 +1874,7 @@ function pgStartFlashPolling() {
   let lastLoggedPct = -1;
   const poll = async () => {
     try {
-      const res = await fetch("/prog/flash_status");
+      const res = await fetch("/flash_status");
       const s = await res.json();
       pgRefreshStatusBar();
       if (
@@ -2375,5 +2386,5 @@ document.addEventListener("DOMContentLoaded", () => {
 setInterval(loadHistory, 3000);
 setInterval(updateLiveChart, 1000);
 setInterval(pollLive, 100);
-
+loadHistory()
 pollLive();

@@ -17,27 +17,25 @@ history = {
     "engine_state": []
 }
 
+def append_or_repeat(key, value):
+    if value is None:
+        value = history[key][-1] if history[key] else 0
+    history[key].append(value)
 
 def update_history(data):
-    history["time"].append(data.get("time"))
-    history["speed"].append(data.get("speed", 0))
-    history["rpm"].append(data.get("rpm", 0))
-    history["coolant"].append(data.get("coolant", 0))
-    history["oil_temp"].append(data.get("oil_temp", 0))
-    history["fuel_pct"].append(data.get("fuel_pct", 0))
-    history["fuel_rate"].append(data.get("fuel_rate", 0))
-    history["throttle"].append(data.get("throttle_pct", 0))
-    history["engine_load"].append(data.get("engine_load", 0))
-    history["accel"].append(data.get("accel_ms2", 0))
-    history["battery"].append(
-        data.get("battery_v", data.get("voltage", 0))
-    )
-    history["gear_num"].append(data.get("gear_num", 0))
-    history["gear"].append(data.get("gear", "N"))
-    history["engine_state"].append(
-        data.get("engine_state", "UNKNOWN")
-    )
-
+    append_or_repeat("speed", data.get("speed"))
+    append_or_repeat("rpm", data.get("rpm"))
+    append_or_repeat("coolant", data.get("coolant"))
+    append_or_repeat("oil_temp", data.get("oil_temp"))
+    append_or_repeat("fuel_pct", data.get("fuel_pct"))
+    append_or_repeat("fuel_rate", data.get("fuel_rate"))
+    append_or_repeat("throttle", data.get("throttle_pct"))
+    append_or_repeat("engine_load", data.get("engine_load"))
+    append_or_repeat("accel", data.get("accel_ms2"))
+    append_or_repeat("battery", data.get("battery_v", data.get("voltage")))
+    append_or_repeat("gear_num", data.get("gear_num"))
+    append_or_repeat("gear", data.get("gear"))
+    append_or_repeat("engine_state", data.get("engine_state"))
     # keep fixed size
     for key in history:
         if len(history[key]) > MAX_HISTORY:
