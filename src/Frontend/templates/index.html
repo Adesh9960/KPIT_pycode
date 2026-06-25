@@ -632,65 +632,64 @@
     <div class="tech-did-grid">
       <!-- These match DIDs from your ECU simulator telemetry -->
       <div class="tech-did-row">
-        <span class="tech-did-lbl">Speed (0xF401)</span>
-        <span class="tech-did-val" id="did-speed">—</span>
-        <button class="tech-did-btn" onclick="readDID(0xF401,'did-speed','km/h')">READ</button>
-      </div>
-      <div class="tech-did-row">
-        <span class="tech-did-lbl">Engine RPM (0xF402)</span>
-        <span class="tech-did-val" id="did-rpm">—</span>
-        <button class="tech-did-btn" onclick="readDID(0xF402,'did-rpm','RPM')">READ</button>
-      </div>
-      <div class="tech-did-row">
-        <span class="tech-did-lbl">Coolant Temp (0xF403)</span>
-        <span class="tech-did-val" id="did-coolant">—</span>
-        <button class="tech-did-btn" onclick="readDID(0xF403,'did-coolant','°C')">READ</button>
-      </div>
-      <div class="tech-did-row">
-        <span class="tech-did-lbl">Oil Temp (0xF404)</span>
-        <span class="tech-did-val" id="did-oiltemp">—</span>
-        <button class="tech-did-btn" onclick="readDID(0xF404,'did-oiltemp','°C')">READ</button>
-      </div>
-      <div class="tech-did-row">
-        <span class="tech-did-lbl">Fuel % (0xF405)</span>
-        <span class="tech-did-val" id="did-fuelpct">—</span>
-        <button class="tech-did-btn" onclick="readDID(0xF405,'did-fuelpct','%')">READ</button>
-      </div>
-      <div class="tech-did-row">
-        <span class="tech-did-lbl">Battery V (0xF406)</span>
-        <span class="tech-did-val" id="did-batt">—</span>
-        <button class="tech-did-btn" onclick="readDID(0xF406,'did-batt','V')">READ</button>
-      </div>
-      <div class="tech-did-row">
-        <span class="tech-did-lbl">Engine Load (0xF407)</span>
-        <span class="tech-did-val" id="did-load">—</span>
-        <button class="tech-did-btn" onclick="readDID(0xF407,'did-load','%')">READ</button>
-      </div>
-      <div class="tech-did-row">
-        <span class="tech-did-lbl">Throttle % (0xF408)</span>
-        <span class="tech-did-val" id="did-throttle">—</span>
-        <button class="tech-did-btn" onclick="readDID(0xF408,'did-throttle','%')">READ</button>
-      </div>
-      <div class="tech-did-row">
-        <span class="tech-did-lbl">Gear Num (0xF409)</span>
-        <span class="tech-did-val" id="did-gear">—</span>
-        <button class="tech-did-btn" onclick="readDID(0xF409,'did-gear','')">READ</button>
-      </div>
-      <div class="tech-did-row">
-        <span class="tech-did-lbl">Fuel Rate (0xF40A)</span>
-        <span class="tech-did-val" id="did-fuelrate">—</span>
-        <button class="tech-did-btn" onclick="readDID(0xF40A,'did-fuelrate','mL/s')">READ</button>
-      </div>
-      <div class="tech-did-row">
-        <span class="tech-did-lbl">VIN (0xF190)</span>
-        <span class="tech-did-val" id="did-vin">—</span>
-        <button class="tech-did-btn" onclick="readDID(0xF190,'did-vin','')">READ</button>
-      </div>
-      <div class="tech-did-row">
-        <span class="tech-did-lbl">SW Version (0xF189)</span>
-        <span class="tech-did-val" id="did-swver">—</span>
-        <button class="tech-did-btn" onclick="readDID(0xF189,'did-swver','')">READ</button>
-      </div>
+    <span class="tech-did-lbl">Boot Software Version (0xF180)</span>
+    <span class="tech-did-val" id="did-f180">—</span>
+    <button class="tech-did-btn" onclick="readDID(0xF180,'did-f180','')">READ</button>
+</div>
+
+<div class="tech-did-row">
+    <span class="tech-did-lbl">Application Software Version (0xF181)</span>
+    <span class="tech-did-val" id="did-f181">—</span>
+    <button class="tech-did-btn" onclick="readDID(0xF181,'did-f181','')">READ</button>
+</div>
+
+<div class="tech-did-row">
+    <span class="tech-did-lbl">Application Software Fingerprint (0xF184)</span>
+    <span class="tech-did-val" id="did-f184">—</span>
+    <button class="tech-did-btn" onclick="readDID(0xF184,'did-f184','')">READ</button>
+</div>
+
+<div class="tech-did-row">
+    <span class="tech-did-lbl">Application Data Fingerprint (0xF185)</span>
+    <span class="tech-did-val" id="did-f185">—</span>
+    <button class="tech-did-btn" onclick="readDID(0xF185,'did-f185','')">READ</button>
+</div>
+
+<div class="tech-did-row">
+    <span class="tech-did-lbl">Active Diagnostic Session (0xF186)</span>
+    <span class="tech-did-val" id="did-f186">—</span>
+    <button class="tech-did-btn" onclick="readDID(0xF186,'did-f186','')">READ</button>
+</div>
+
+<div class="tech-did-row">
+    <span class="tech-did-lbl">Repair Shop Code (0xF18E)</span>
+    <span class="tech-did-val" id="did-f18e">—</span>
+    <button class="tech-did-btn" onclick="readDID(0xF18E,'did-f18e','')">READ</button>
+</div>
+
+<div class="tech-did-row">
+    <span class="tech-did-lbl">ECU Serial Number (0xF18C)</span>
+    <span class="tech-did-val" id="did-f18c">—</span>
+    <button class="tech-did-btn" onclick="readDID(0xF18C,'did-f18c','')">READ</button>
+</div>
+
+<div class="tech-did-row">
+    <span class="tech-did-lbl">Vehicle Identification Number (0xF190)</span>
+    <span class="tech-did-val" id="did-f190">—</span>
+    <button class="tech-did-btn" onclick="readDID(0xF190,'did-f190','')">READ</button>
+</div>
+
+<div class="tech-did-row">
+    <span class="tech-did-lbl">Workshop Data (0xF197)</span>
+    <span class="tech-did-val" id="did-f197">—</span>
+    <button class="tech-did-btn" onclick="readDID(0xF197,'did-f197','')">READ</button>
+</div>
+
+<div class="tech-did-row">
+    <span class="tech-did-lbl">ECU Programming Date (0xF19D)</span>
+    <span class="tech-did-val" id="did-f19d">—</span>
+    <button class="tech-did-btn" onclick="readDID(0xF19D,'did-f19d','')">READ</button>
+</div>
     </div>
 
     <!-- UDS response log -->

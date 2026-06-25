@@ -10,6 +10,7 @@ from utils.files import zip_folder, delete_file
 from utils.updateHistory import history, update_history
 from flask import Flask, request, jsonify, render_template, send_file, after_this_request
 import os
+import logging
 
 latest_analytics = {}
 analytics_lock = Lock()
@@ -20,6 +21,18 @@ app = Flask(
     template_folder="Frontend/templates",
     static_folder="Frontend/static"
 )
+
+
+class RouteFilter(logging.Filter):
+    def filter(self, record):
+        msg = record.getMessage()
+        # Suppress logs for this route
+        if "GET /live-data" in msg:
+            return False
+        return True
+
+werkzeug_logger = logging.getLogger("werkzeug")
+werkzeug_logger.addFilter(RouteFilter())
 
 @app.route("/")
 def home():
@@ -166,8 +179,8 @@ if __name__ == "__main__":
     txid=0x22,
     rxid=0x62
     )
-    # uds_client = UDS(UDSRoles.USER)
-    # listener.start(address, uds_client.on_response)
-    # decoder.start(send_realtime_data)
-    # logger.start()
+    uds_client = UDS(UDSRoles.USER)
+    listener.start(address, uds_client.on_response)
+    decoder.start(send_realtime_data)
+    logger.start()
     app.run()

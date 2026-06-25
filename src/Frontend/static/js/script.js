@@ -126,14 +126,14 @@ function exitTechMode() {
 // S3 timeout on ECU side is 5s — we send every 4s to stay safe
 // Stopped immediately on session exit or page hide
 // ══════════════════════════════════════════════════
-function startTesterPresent() {
-  if (tpInterval) return;
-  const tpIndicator = document.getElementById("tp-indicator");
-  if (tpIndicator) tpIndicator.classList.remove("hidden");
-  tpInterval = setInterval(() => {
-    sendTesterPresent();
-  }, 4000);
-}
+// function startTesterPresent() {
+//   if (tpInterval) return;
+//   const tpIndicator = document.getElementById("tp-indicator");
+//   if (tpIndicator) tpIndicator.classList.remove("hidden");
+//   tpInterval = setInterval(() => {
+//     sendTesterPresent();
+//   }, 4000);
+// }
 
 function stopTesterPresent() {
   if (tpInterval) {
@@ -190,10 +190,12 @@ function updateSessionDisplay(label) {
 async function readDID(did, targetId, unit) {
   showUDSResponse(`Sending 0x22 ${hexStr(did)} ...`);
   try {
-    const res = await fetch(`http://127.0.0.1/DID/${did}`);
+    const res = await fetch(`http://127.0.0.1:5000/DID/${did}`);
     const data = await res.json();
     if (data.status === "success") {
-      const val = data.data != null ? data.data : "—";
+
+      const val = data.data[did] != null ? data.data[did] : "—";
+      console.log(val)
       setText(targetId, val + (unit ? " " + unit : ""));
       showUDSResponse(
         `0x62 ${hexStr(did)} → ${val} ${unit}  [Positive Response]`,
@@ -988,6 +990,7 @@ function updateAdvanced(d) {
     advSparkBuf.x.shift();
     advSparkBuf.y.shift();
   }
+  if(document.getElementById("adv-speed-chart"))
   Plotly.react(
     "adv-speed-chart",
     [
