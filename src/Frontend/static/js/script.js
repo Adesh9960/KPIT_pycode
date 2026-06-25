@@ -1176,15 +1176,15 @@ function updateTechnician(d) {
   }
 
   // CAN bus stats
-const msgRate = 40 + Math.floor(Math.random() * 20);
-setText("tech-can-status", "OK");
-setText("tech-can-errcount", "0");
-setText("tech-can-msgrate", msgRate + " msg/s");
-setText("tech-can-fps", "10 Hz");
-setText("tech-can-session", techUnlocked
-  ? (progUnlocked ? "PROG 0x02" : "EXT 0x03")
-  : "DEFAULT 0x01"
-);
+  const msgRate = 40 + Math.floor(Math.random() * 20);
+  setText("tech-can-status", "OK");
+  setText("tech-can-errcount", "0");
+  setText("tech-can-msgrate", msgRate + " msg/s");
+  setText("tech-can-fps", "10 Hz");
+  setText("tech-can-session", techUnlocked
+    ? (progUnlocked ? "PROG 0x02" : "EXT 0x03")
+    : "DEFAULT 0x01"
+  );
 
   addSnifferRow(d);
 }
