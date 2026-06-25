@@ -304,7 +304,7 @@
         <div id="live-chart" class="lv-chart-box"></div>
       </div>
 
-      <div class="lv-infotainment-card">
+        <div class="lv-infotainment-card">
         <div class="lv-weather-block">
           <span class="lv-weather-emoji">🌤️</span>
           <span class="lv-weather-label" id="weather-temp">28°C</span>
@@ -822,34 +822,6 @@
       </div>
     </div>
 
-    <!-- ── SECTION E: CAN Bus Monitor ── -->
-    <div class="tech-section-label" style="margin-top:20px">CAN BUS NETWORK MONITOR</div>
-    <div class="tech-can-grid">
-      <div class="tech-can-stat"><span class="tech-can-lbl">BUS LOAD</span><span class="tech-can-val"
-          id="tech-can-load">35%</span></div>
-      <div class="tech-can-stat"><span class="tech-can-lbl">MSG RATE</span><span class="tech-can-val"
-          id="tech-can-msgrate">50 msg/s</span></div>
-      <div class="tech-can-stat"><span class="tech-can-lbl">ERROR RATE</span><span class="tech-can-val"
-          id="tech-can-errrate">0 err/s</span></div>
-      <div class="tech-can-stat"><span class="tech-can-lbl">LATENCY</span><span class="tech-can-val"
-          id="tech-can-latency">&lt;10 ms</span></div>
-      <div class="tech-can-stat"><span class="tech-can-lbl">BUS VOLTAGE</span><span class="tech-can-val">2.48 V</span>
-      </div>
-      <div class="tech-can-stat"><span class="tech-can-lbl">TERMINATION</span><span class="tech-can-val ok-text">120Ω
-          OK</span></div>
-      <div class="tech-can-stat"><span class="tech-can-lbl">MSG LOSS</span><span class="tech-can-val">0.0%</span></div>
-      <div class="tech-can-stat"><span class="tech-can-lbl">SESSION</span><span class="tech-can-val ok-text"
-          id="can-session-display">0x03 EXT</span></div>
-    </div>
-
-    <!-- ── CAN Sniffer ── -->
-    <div class="tech-section-label" style="margin-top:20px">CAN MESSAGE SNIFFER (LIVE)</div>
-    <div class="tech-sniffer-wrap">
-      <div class="tech-sniffer-head">
-        <span>TIMESTAMP</span><span>CAN ID</span><span>DATA (HEX)</span><span>SIGNAL</span><span>VALUE</span>
-      </div>
-      <div class="tech-sniffer-body" id="tech-sniffer-body"></div>
-    </div>
 
     <!-- Security access lives on the dedicated Programming tab now -->
   </section> <!-- End of Technician Section -->
@@ -925,6 +897,35 @@
 
     <div class="pgterm-titlebar">
     </div>
+
+
+        <!-- ── SECTION E: CAN Bus Monitor ── -->
+    <div class="tech-section-label" style="margin-top:20px">CAN BUS NETWORK MONITOR</div>
+    <div class="tech-can-grid">
+      <div class="tech-can-stat"><span class="tech-can-lbl">BUS STATUS</span><span class="tech-can-val"
+          id="tech-can-load">35%</span></div>
+      <div class="tech-can-stat"><span class="tech-can-lbl">MSG RATE</span><span class="tech-can-val"
+          id="tech-can-msgrate">50 msg/s</span></div>
+      <div class="tech-can-stat"><span class="tech-can-lbl">ERROR COUNT</span><span class="tech-can-val"
+          id="tech-can-errrate">0 err/s</span></div>
+      <div class="tech-can-stat"><span class="tech-can-lbl">SCREEN REFRESH RATE</span><span class="tech-can-val"
+          id="tech-can-latency">&lt;10 ms</span></div>
+      <div class="tech-can-stat"><span class="tech-can-lbl">TERMINATION</span><span class="tech-can-val ok-text">120Ω
+          OK</span></div>
+      <div class="tech-can-stat"><span class="tech-can-lbl">SESSION</span><span class="tech-can-val ok-text"
+          id="can-session-display">0x03 EXT</span></div>
+    </div>
+
+    <!-- ── CAN Sniffer ── -->
+    <div class="tech-section-label" style="margin-top:20px">CAN MESSAGE SNIFFER (LIVE)</div>
+    <div class="tech-sniffer-wrap">
+      <div class="tech-sniffer-head">
+        <span>TIMESTAMP</span><span>CAN ID</span><span>DATA (HEX)</span><span>SIGNAL</span><span>VALUE</span>
+      </div>
+      <div class="tech-sniffer-body" id="tech-sniffer-body"></div>
+    </div>
+
+    
     <!-- ── Firmware & File  +  Programming Progress (side by side, full width) ── -->
     <!-- <div class="pg-main-row">
 
