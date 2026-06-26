@@ -42,8 +42,6 @@ werkzeug_logger.addFilter(RouteFilter())
 @app.route("/")
 def home():
     try:
-        uds_client.diagnostic_session_control(1)
-        uds_client.security_access(0)
         return render_template('index.html')
     except Exception as e:
         print(e)
@@ -231,7 +229,7 @@ def history_data():
     with analytics_lock:
         return jsonify(history)
 
-@app.route("/state", method= ["GET"])
+@app.route("/state", methods= ["GET"])
 def get_state():
     return {
         "status": "success",

@@ -903,10 +903,10 @@ function updatePreConditions(speed) {
 function updateTyrePressure(id, barId, pressure) {
     const valueEl = document.getElementById(id);
     const barEl = document.getElementById(barId);
-
+    
     if (pressure == null || isNaN(pressure)) {
         valueEl.innerHTML = `— <span class="adv-tyre-unit">psi</span>`;
-        barEl.style.width = "0%";
+        if (barEl) barEl.style.width = "0%";
         return;
     }
 
@@ -914,17 +914,17 @@ function updateTyrePressure(id, barId, pressure) {
 
     // Scale 20–40 psi to 0–100%
     const percent = Math.max(0, Math.min(100, (pressure - 20) / 20 * 100));
-    barEl.style.width = `${percent}%`;
+    if (barEl) barEl.style.width = `${percent}%`;
 
     // Optional color indication
     if (pressure < 28)
-        barEl.style.background = "#ef4444";      // Red
+        if (barEl) barEl.style.background = "#ef4444";      // Red
     else if (pressure < 30)
-        barEl.style.background = "#f59e0b";      // Orange
+        if (barEl) barEl.style.background = "#f59e0b";      // Orange
     else if (pressure <= 36)
-        barEl.style.background = "#22c55e";      // Green
+        if (barEl) barEl.style.background = "#22c55e";      // Green
     else
-        barEl.style.background = "#3b82f6";      // Blue
+        if (barEl) barEl.style.background = "#3b82f6";      // Blue
 }
 // ══════════════════════════════════════════════════
 // ADVANCED PAGE UPDATE
@@ -998,15 +998,11 @@ function updateAdvanced(d) {
         fuel_pump? 'ON': 'OFF';
 
   //Tyre Pressure
-  updateTyrePressure("tech-tfl", null, d.tyre_fl);
-updateTyrePressure("tech-tfr", null, d.tyre_fr);
-updateTyrePressure("tech-trl", null, d.tyre_rl);
-updateTyrePressure("tech-trr", null, d.tyre_rr);
 
   updateTyrePressure("t-fl", "t-fl-bar", d.tyre_pressure_fl);
-updateTyrePressure("t-fr", "t-fr-bar", d.tyre_pressure_fr);
-updateTyrePressure("t-rl", "t-rl-bar", d.tyre_pressure_rl);
-updateTyrePressure("t-rr", "t-rr-bar", d.tyre_pressure_rr);
+  updateTyrePressure("t-fr", "t-fr-bar", d.tyre_pressure_fr);
+  updateTyrePressure("t-rl", "t-rl-bar", d.tyre_pressure_rl);
+  updateTyrePressure("t-rr", "t-rr-bar", d.tyre_pressure_rr);
 
   // KPIs
   setText("adv-batt", bsoc.toFixed(1) + "%");
@@ -1123,6 +1119,7 @@ updateTyrePressure("t-rr", "t-rr-bar", d.tyre_pressure_rr);
 function setTyre(valId, barId, psi) {
   const el = document.getElementById(valId);
   const barEl = document.getElementById(barId);
+  if (barEl == null) return;
   if (psi == null) return;
   const color = psi < 26 ? "#ef4444" : psi < 29 ? "#f59e0b" : "#10b981";
   if (el) {
@@ -1188,12 +1185,10 @@ function updateTechnician(d) {
     "tech-fuelpump",
     d.fuel_pump != null ? (d.fuel_pump ? "ON" : "OFF") : "—",
   );
-  if (tyres.fl != null) {
-    setText("tech-tfl", tyres.fl.toFixed(1) + " psi");
-    setText("tech-tfr", tyres.fr.toFixed(1) + " psi");
-    setText("tech-trl", tyres.rl.toFixed(1) + " psi");
-    setText("tech-trr", tyres.rr.toFixed(1) + " psi");
-  }
+  updateTyrePressure("tech-tfl", null, d.tyre_pressure_fl);
+  updateTyrePressure("tech-tfr", null, d.tyre_pressure_fr);
+  updateTyrePressure("tech-trl", null, d.tyre_pressure_rl);
+  updateTyrePressure("tech-trr", null, d.tyre_pressure_rr);
 
   // CAN bus stats
   updateCANStatus(d)
@@ -2086,7 +2081,7 @@ async function pgCmd_firmwareDownload(){
 async function pgCmd_logsDownload() {
   pgPrint("Requesting CAN log file from listener/logger...", "l-dim");
   try {
-    window.location.href = "/download/logger"
+    window.location.href = "/download/firmware"
     pgPrint("Download started — check your browser's downloads.", "l-bold");
     pgProgressLog("Log file download requested.");
   } catch (e) {
