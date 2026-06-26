@@ -18,6 +18,8 @@ latest_analytics = {}
 analytics_lock = Lock()
 uds_client: UDS
 
+current_session = 1
+current_security_level = 0
 app = Flask(
     __name__,
     template_folder="Frontend/templates",
@@ -39,7 +41,17 @@ werkzeug_logger.addFilter(RouteFilter())
 
 @app.route("/")
 def home():
-    return render_template('index.html')
+    try:
+        uds_client.diagnostic_session_control(1)
+        uds_client.security_access(0)
+        return render_template('index.html')
+    except Exception as e:
+        print(e)
+        return jsonify({
+            "status": "error",
+            "message": "Session Access Failed"
+        })
+    
 
 @app.route("/DID/<int:DID>", methods = ["GET"])
 def get_DID(DID):
@@ -196,7 +208,6 @@ def IO_control():
 @app.route("/live-data", methods = ["GET"])
 def live_data():
     stats = listener.get_stats()
-   
     with analytics_lock:
         latest_analytics["error_frames"] = stats.error_frames
         delta_time = time.monotonic() - start_time_flag
@@ -220,6 +231,13 @@ def history_data():
     with analytics_lock:
         return jsonify(history)
 
+@app.route("/state", method= ["GET"])
+def get_state():
+    return {
+        "status": "success",
+        "current_session": current_session,
+        "current_security_level": current_security_level
+    }
 
 if __name__ == "__main__":
     address = isotp.Address(

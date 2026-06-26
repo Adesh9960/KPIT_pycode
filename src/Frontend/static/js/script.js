@@ -1734,7 +1734,7 @@ async function exitProgrammingSession() {
   progUnlocked = false;
   currentSecurityLevel = 0;
   try {
-    await fetch("/prog/exit_session", { method: "POST" });
+    await fetch("/diagnostics_session_control/3", { method: "GET" });
   } catch (_) {}
   updateSessionDisplay("EXT 0x03");
   sendSessionControl(3);
@@ -2041,14 +2041,14 @@ async function pgCmd_dtcClear() {
 }
 
 async function pgCmd_report() {
-  const res = await fetch("/prog/state");
+  const res = await fetch("/state");
   const data = await res.json();
   const s = data.data;
   pgPrint("════ PROGRAMMING SESSION — FINAL REPORT ════", "l-bold");
   pgPrint(
     `Session        : ${s.session === 2 ? "PROGRAMMING (0x02)" : "DEFAULT (0x01)"}`,
   );
-  pgPrint(`Security       : ${s.security.level >= 2 ? "UNLOCKED" : "LOCKED"}`);
+  pgPrint(`Security Level      : ${s.security.level >= 2 ? "UNLOCKED" : "LOCKED"}`);
   pgPrint(`Original File  : ${s.files.original ? s.files.original.name : "—"}`);
   pgPrint(`Modified File  : ${s.files.modified ? s.files.modified.name : "—"}`);
   pgPrint(
@@ -2073,11 +2073,20 @@ function pgTriggerDownload(url, filename) {
   a.click();
   a.remove();
 }
-
+async function pgCmd_firmwareDownload(){
+  pgPrint("Requesting firmware bin file from ECU...", "l-dim");
+  try {
+    window.location.href = "/download/firmware"
+    pgPrint("Download started — check your browser's downloads.", "l-bold");
+    pgProgressLog("firmware file download requested.");
+  } catch (e) {
+    pgPrint(`Error: ${e.message}`, "l-red");
+  }
+}
 async function pgCmd_logsDownload() {
   pgPrint("Requesting CAN log file from listener/logger...", "l-dim");
   try {
-    pgTriggerDownload("/download/logger", "can_logs.csv");
+    window.location.href = "/download/logger"
     pgPrint("Download started — check your browser's downloads.", "l-bold");
     pgProgressLog("Log file download requested.");
   } catch (e) {

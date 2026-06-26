@@ -106,6 +106,42 @@ class SocketCANAdapter:
 
     def set_filter(self, filter_list: list):
         self.bus.set_filters(filter_list)
+
+    def get_statistics(self) -> BusStatistics:
+        result = subprocess.run(
+            ["ip", "-details", "-statistics", "link", "show", self.config.channel],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+
+        output = result.stdout
+
+        # Bus state
+        state_match = re.search(r"can state (\S+)", output)
+        if state_match:
+            self.stats.bus_state = state_match.group(1)
+    
+        # RX/TX packets
+        rx_match = re.search(r"RX:\s+bytes\s+packets\s+errors.*?\n\s*\d+\s+(\d+)\s+(\d+)",
+                             output, re.DOTALL)
+        tx_match = re.search(r"TX:\s+bytes\s+packets\s+errors.*?\n\s*\d+\s+(\d+)\s+(\d+)",
+                             output, re.DOTALL)
+    
+        if rx_match:
+            self.stats.rx_frames = int(rx_match.group(1))
+            self.stats.rx_errors = int(rx_match.group(2))
+    
+        if tx_match:
+            self.stats.tx_frames = int(tx_match.group(1))
+            self.stats.tx_errors = int(tx_match.group(2))
+    
+        # Bus-off counter
+        busoff_match = re.search(r"bus-off\s+(\d+)", output)
+        if busoff_match:
+            self.stats.bus_off_count = int(busoff_match.group(1))
+    
+        return self.stats
     
     
         
