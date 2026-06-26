@@ -8,15 +8,14 @@
 ═══════════════════════════════════════════════════════════════ */
 
 /* ── Google Fonts ── */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
 /* ═══════════════════════════════════
    CSS VARIABLES — dark mode (default)
 ═══════════════════════════════════ */
 :root {
   /* Global */
-  --font: 'Inter', system-ui, sans-serif;
-  --mono: 'JetBrains Mono', monospace;
+  --font: 'Archivo', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --mono: 'Space Mono', 'Helvetica Neue', monospace;
   --radius: 14px;
   --radius-sm: 8px;
   --transition: 0.28s cubic-bezier(0.4, 0, 0.2, 1);
@@ -75,7 +74,7 @@
   --hs-muted:      #4a5568;
 
   /* Header (neutral, adapts per page) */
-  --hdr-bg:        rgba(10,12,16,0.92);
+  --hdr-bg:        rgba(10,12,16,0.55);
   --hdr-border:    rgba(255,255,255,0.07);
   --hdr-text:      #e8edf5;
   --hdr-muted:     #5a6478;
@@ -135,6 +134,67 @@ body.mode-technician  { background: var(--tech-bg); color: var(--tech-text); }
 body.mode-history     { background: var(--hs-bg);   color: var(--hs-text); }
 
 /* ═══════════════════════════════════
+   AMBIENT BACKGROUND — drifting per-theme glow
+═══════════════════════════════════ */
+#ambient-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.ambient-blob {
+  position: absolute;
+  width: 60vw;
+  height: 60vw;
+  max-width: 900px;
+  max-height: 900px;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.35;
+  will-change: transform;
+}
+
+.ambient-blob-a { top: -10%;  left: -10%; animation: ambientDriftA 32s ease-in-out infinite; }
+.ambient-blob-b { top: 30%;   right: -15%; animation: ambientDriftB 38s ease-in-out infinite; }
+.ambient-blob-c { bottom: -15%; left: 25%;  animation: ambientDriftC 44s ease-in-out infinite; }
+
+@keyframes ambientDriftA {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(8vw, 6vh) scale(1.15); }
+}
+@keyframes ambientDriftB {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(-7vw, 8vh) scale(1.1); }
+}
+@keyframes ambientDriftC {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(6vw, -7vh) scale(1.2); }
+}
+
+/* Per-mode color sets — all blobs stay within that page's own hue family */
+body.mode-live .ambient-blob-a       { background: var(--lv-blue); }
+body.mode-live .ambient-blob-b       { background: #1e5fcc; }
+body.mode-live .ambient-blob-c       { background: var(--lv-blue); }
+
+body.mode-advanced .ambient-blob-a   { background: var(--adv-purple); }
+body.mode-advanced .ambient-blob-b   { background: var(--adv-purple-lt); }
+body.mode-advanced .ambient-blob-c   { background: #4c1d95; }
+
+body.mode-technician .ambient-blob-a { background: var(--tech-green); }
+body.mode-technician .ambient-blob-b { background: var(--tech-green-dim); }
+body.mode-technician .ambient-blob-c { background: var(--tech-green); }
+
+body.mode-history .ambient-blob-a    { background: var(--hs-orange); }
+body.mode-history .ambient-blob-b    { background: #c2530f; }
+body.mode-history .ambient-blob-c    { background: var(--hs-orange); }
+
+body.mode-programming .ambient-blob-a { background: var(--tech-amber); }
+body.mode-programming .ambient-blob-b { background: #c9a227; }
+body.mode-programming .ambient-blob-c { background: var(--tech-amber); }
+
+/* ═══════════════════════════════════
    HEADER
 ═══════════════════════════════════ */
 #app-header {
@@ -146,29 +206,30 @@ body.mode-history     { background: var(--hs-bg);   color: var(--hs-text); }
   position: sticky; top: 0; z-index: 200;
   background: var(--hdr-bg);
   border-bottom: 1px solid var(--hdr-border);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
   transition: background var(--transition), border-color var(--transition);
   gap: 16px;
 }
 
 [data-theme="light"] body.mode-advanced #app-header {
-  background: rgba(255,255,255,0.96);
+  background: rgba(255,255,255,0.55);   /* was 0.96 */
   border-bottom-color: var(--adv-border);
 }
 [data-theme="dark"] body.mode-advanced #app-header {
-  background: rgba(26,31,46,0.92);
+  background: rgba(26,31,46,0.5);        /* was 0.92 */
   border-bottom-color: var(--adv-border);
 }
 
 body.mode-technician #app-header {
-  background: rgba(7,10,7,0.95);
+  background: rgba(7,10,7,0.5);          /* was 0.95 */
   border-bottom-color: var(--tech-border);
 }
 [data-theme="light"] body.mode-live #app-header {
-  background: rgba(240,244,252,0.96);
+  background: rgba(240,244,252,0.6);     /* was 0.96 */
   border-bottom-color: rgba(0,0,0,0.08);
 }
+
 
 /* Brand */
 .header-brand { display:flex; align-items:center; gap:10px; flex-shrink:0; }
