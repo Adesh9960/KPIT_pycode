@@ -713,7 +713,6 @@ def run_vehicle_simulator():
             save_fuel_state(main.remaining_fuel_ml)
             main.fuel_save_counter = 0
 
-        # display_stats(is_clutch_down, is_accelerating, physics, is_braking, engine_state)
         time.sleep(main.refresh_rate)
 
 

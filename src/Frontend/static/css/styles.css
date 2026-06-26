@@ -1043,6 +1043,7 @@ body.mode-advanced .alert-toast-body { color:var(--adv-text); }
 .tp-dot.tp-flash { background: #fff; animation: none; }
 .tp-label { font-size: 10px; font-weight: 600; }
 
+
 /* ══════════════════════════════════════════════
    TECHNICIAN — Pre-condition status bar
 ══════════════════════════════════════════════ */

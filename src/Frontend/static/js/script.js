@@ -691,6 +691,7 @@ function checkAlerts(d) {
 // ══════════════════════════════════════════════════
 // LIVE PAGE UPDATE
 // ══════════════════════════════════════════════════
+
 function updateLive(d) {
   lastSpeed = d.speed || 0;
   if (d.date) setText("live-date-display", d.date);
@@ -726,7 +727,7 @@ function updateLive(d) {
   );
 
   setText("distance-main-val", (d.distance_km || 0).toFixed(2));
-
+  setText()
   // Derived
   const fr = d.fuel_rate || 0;
   const sp = d.speed || 0;
@@ -760,13 +761,13 @@ function updateLive(d) {
 
   const clutchEl = document.getElementById("chip-clutch");
   const clutchVal = document.getElementById("clutch-val");
-  const clutchState = d.clutch_state || d.clutch || "UP";
+  const clutchState = d.clutch_state? "DOWN" : "UP";
   if (clutchVal) clutchVal.textContent = clutchState;
   if (clutchEl) clutchEl.classList.toggle("active", clutchState === "DOWN");
 
   const brakeEl = document.getElementById("chip-brake");
   const brakeVal = document.getElementById("brake-val");
-  const brakeState = d.brake_state || d.brake || "OFF";
+  const brakeState = d.brake_state? "DOWN" : "UP";
   if (brakeVal) brakeVal.textContent = brakeState;
   if (brakeEl) brakeEl.classList.toggle("active", brakeState === "PRESSED");
 
@@ -816,10 +817,8 @@ function updateLive(d) {
   // Indicators — assumes d.indicator_state is "LEFT" | "RIGHT" | "HAZARD" | "OFF"
   const leftEl = document.getElementById("ind-left");
   const rightEl = document.getElementById("ind-right");
-  const hazardEl = document.getElementById("ind-hazard");
-  leftEl.classList.toggle("active", d.indicator_state === "LEFT");
-  rightEl.classList.toggle("active", d.indicator_state === "RIGHT");
-  hazardEl.classList.toggle("active", d.indicator_state === "HAZARD");
+  leftEl.classList.toggle("active", d.steering_direction === 1);
+  rightEl.classList.toggle("active", d.steering_direction === 2);
 
   // Fuel panel
   const fp = Math.max(0, Math.min(100, d.fuel || d.fuel_pct || 0));
@@ -949,8 +948,8 @@ function updateAdvanced(d) {
 
   setText("adv-engine-state-chip", d.engine_state || "IDLE");
   setText("adv-gear-chip", (d.gear_num || 0) === 0 ? "N" : String(d.gear_num));
-  setText("adv-brake-chip", "BRAKE: " + (d.brake_state || d.brake || "OFF"));
-  setText("adv-clutch-chip", "CLUTCH: " + (d.clutch_state || d.clutch || "UP"));
+  setText("adv-brake-chip", "BRAKE: " + (d.brake_state? "DOWN": "UP"));
+  setText("adv-clutch-chip", "CLUTCH: " + (d.clutch_state? "DOWN" : "UP"));
 
   setText("adv-speed-big", sp + " km/h");
   setText("adv-accel-mini", (d.accel_ms2 || d.accel || 0).toFixed(2));
@@ -1160,8 +1159,8 @@ function updateTechnician(d) {
   // TCM
   setText("tech-gear", d.gear || "Neutral");
   setText("tech-gearnum", (d.gear_num || 0) === 0 ? "N" : String(d.gear_num));
-  setText("tech-clutch", d.clutch_state || d.clutch || "UP");
-  setText("tech-brake", d.brake_state || d.brake || "OFF");
+  setText("tech-clutch", d.clutch_state? "DOWN": "UP");
+  setText("tech-brake", d.brake_state? "DOWN" : "UP");
   setText("tech-transtemp", (d.oil_temp || 0).toFixed(1) + "°C");
 
   // ABS
@@ -1171,10 +1170,7 @@ function updateTechnician(d) {
   setText("tech-wfr", wsp + " km/h");
   setText("tech-wrl", wsp + " km/h");
   setText("tech-wrr", wsp + " km/h");
-  setText(
-    "tech-brakepsi",
-    (d.brake_state || d.brake) === "PRESSED" ? "12 bar" : "0 bar",
-  );
+  setText("tech-brakepct", d.brake_force_pct + "%")
 
   // BCM — now includes actuator states
   setText("tech-batt", bv.toFixed(2) + " V");
