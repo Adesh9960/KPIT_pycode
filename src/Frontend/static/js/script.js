@@ -295,10 +295,10 @@ async function sendSessionControl(session) {
 
 // ECU Reset (0x11) — only in Programming session
 async function ecuReset() {
-  if (!progUnlocked) {
-    showUDSResponse("0x7F 0x11 0x33 — Security access denied");
-    return;
-  }
+  // if (!progUnlocked) {
+  //   showUDSResponse("0x7F 0x11 0x33 — Security access denied");
+  //   return;
+  // }
   if (
     !confirm(
       "Hard reset will clear session, adaptations and restart signal generation. Continue?",
@@ -308,8 +308,8 @@ async function ecuReset() {
   showUDSResponse("Sending 0x11 0x01 — Hard Reset ...");
   try {
     // Reuse session control endpoint as proxy for reset signal
-    const res = await fetch("/diagnostics_session_control/1");
-    const data = await res.json();
+    await fetch("/diagnostics_session_control/1");
+    await fetch("/security_access/0")
     showUDSResponse(
       "0x51 0x01 — ECU Reset acknowledged. Returning to Default session.",
     );
@@ -320,21 +320,45 @@ async function ecuReset() {
     showUDSResponse(`Error: ${e.message}`);
   }
 }
+function updateCANStatus(data) {
+    document.getElementById("tech-can-load").textContent =
+        data.bus_status ?? "UNKNOWN";
 
+    document.getElementById("tech-can-msgrate").textContent =
+        `${data.message_speed ?? 0} frames/s`;
+
+    document.getElementById("tech-can-errrate").textContent =
+        data.error_frames ?? 0;
+}
+async function loadDTCs() {
+    try {
+        const res = await fetch("/DTC");
+        const data = await res.json();
+        if(data.status === "success")
+          renderDTCs(data.dtcs);
+        else 
+          showToastMessage(data.message)
+
+    } catch (err) {
+        console.error(err);
+    }
+}
 async function clearDTCs() {
-  if (!progUnlocked) {
-    showUDSResponse("0x7F 0x14 0x33 — Security access denied");
-    return;
-  }
+  // if (!progUnlocked) {
+  //   showUDSResponse("0x7F 0x14 0x33 — Security access denied");
+  //   return;
+  // }
   showUDSResponse("Sending 0x14 0xFF 0xFF 0xFF — Clear all DTCs ...");
-  // Placeholder — backend would handle actual DTC clearing
-  setTimeout(() => {
-    document.getElementById("tech-dtc-list").innerHTML =
-      '<div class="tech-dtc-empty">No DTCs stored. All systems nominal.</div>';
-    setText("dtc-count-badge", "No Active DTCs");
-    document.getElementById("dtc-count-badge").className = "dtc-count-badge ok";
-    showUDSResponse("0x54 — DTCs cleared successfully [Positive Response]");
-  }, 600);
+
+  is_cleared = await pgCmd_dtcClear()
+  if(is_cleared)
+    setTimeout(() => {
+      document.getElementById("tech-dtc-list").innerHTML =
+        '<div class="tech-dtc-empty">No DTCs stored. All systems nominal.</div>';
+      setText("dtc-count-badge", "No Active DTCs");
+      document.getElementById("dtc-count-badge").className = "dtc-count-badge ok";
+      showUDSResponse("0x54 — DTCs cleared successfully [Positive Response]");
+    }, 600);
 }
 
 // ── Helper: show response in UDS response bar ──
@@ -975,10 +999,10 @@ function updateAdvanced(d) {
         fuel_pump? 'ON': 'OFF';
 
   //Tyre Pressure
-  updateTyrePressure("tech-tfl", null, data.tyre_fl);
-updateTyrePressure("tech-tfr", null, data.tyre_fr);
-updateTyrePressure("tech-trl", null, data.tyre_rl);
-updateTyrePressure("tech-trr", null, data.tyre_rr);
+  updateTyrePressure("tech-tfl", null, d.tyre_fl);
+updateTyrePressure("tech-tfr", null, d.tyre_fr);
+updateTyrePressure("tech-trl", null, d.tyre_rl);
+updateTyrePressure("tech-trr", null, d.tyre_rr);
 
   updateTyrePressure("t-fl", "t-fl-bar", d.tyre_pressure_fl);
 updateTyrePressure("t-fr", "t-fr-bar", d.tyre_pressure_fr);
@@ -1176,15 +1200,7 @@ function updateTechnician(d) {
   }
 
   // CAN bus stats
-  const msgRate = 40 + Math.floor(Math.random() * 20);
-  setText("tech-can-status", "OK");
-  setText("tech-can-errcount", "0");
-  setText("tech-can-msgrate", msgRate + " msg/s");
-  setText("tech-can-fps", "10 Hz");
-  setText("tech-can-session", techUnlocked
-    ? (progUnlocked ? "PROG 0x02" : "EXT 0x03")
-    : "DEFAULT 0x01"
-  );
+  updateCANStatus(d)
 
   addSnifferRow(d);
 }
@@ -1514,6 +1530,53 @@ function renderTable(data) {
       .join("");
     tbody.appendChild(tr);
   }
+}
+function renderDTCs(dtcs) {
+    const list = document.getElementById("tech-dtc-list");
+    const badge = document.getElementById("dtc-count-badge");
+    const clearBtn = document.getElementById("dtc-clear-btn");
+
+    list.innerHTML = "";
+
+    if (!dtcs || dtcs.length === 0) {
+        badge.textContent = "No Active DTCs";
+        badge.className = "dtc-count-badge ok";
+
+        clearBtn.disabled = true;
+
+        list.innerHTML = `
+            <div class="tech-dtc-empty">
+                No DTCs stored. All systems nominal.
+            </div>
+        `;
+        return;
+    }
+
+    badge.textContent = `${dtcs.length} DTC${dtcs.length > 1 ? "s" : ""} Found`;
+    badge.className = "dtc-count-badge fault";
+
+    clearBtn.disabled = false;
+
+    dtcs.forEach(dtc => {
+
+        const code = dtc.code.toString(16).toUpperCase().padStart(6, "0");
+        const status = "0x" + dtc.status.toString(16).toUpperCase().padStart(2, "0");
+
+        const row = document.createElement("div");
+        row.className = "tech-dtc-item";
+
+        row.innerHTML = `
+            <div class="tech-dtc-main">
+                <div class="tech-dtc-code">${code}</div>
+            </div>
+
+            <div class="tech-dtc-status">
+                ${status}
+            </div>
+        `;
+
+        list.appendChild(row);
+    });
 }
 
 // ══════════════════════════════════════════════════
@@ -1969,13 +2032,16 @@ async function pgCmd_bench(step, tool) {
 
 async function pgCmd_dtcClear() {
   pgPrint("Sending 0x14 0xFF 0xFF 0xFF — Clear all DTCs...", "l-dim");
-  const res = await fetch("/prog/clear_dtc", { method: "POST" });
+  const res = await fetch("/DTC", { method: "DELETE" });
   const data = await res.json();
   if (data.status === "success") {
     pgPrint("0x54 — DTCs cleared successfully [Positive Response]", "l-bold");
+    return true
   } else {
     pgPrint(`Error — ${data.message}`, "l-red");
+    return false
   }
+
 }
 
 async function pgCmd_report() {

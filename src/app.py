@@ -12,6 +12,7 @@ from utils.updateHistory import history, update_history
 from flask import Flask, request, jsonify, render_template, send_file, after_this_request
 import os
 import logging
+import time
 
 latest_analytics = {}
 analytics_lock = Lock()
@@ -22,7 +23,8 @@ app = Flask(
     template_folder="Frontend/templates",
     static_folder="Frontend/static"
 )
-
+start_time_flag: float = 0
+prev_count: int = 0
 
 class RouteFilter(logging.Filter):
     def filter(self, record):
@@ -46,11 +48,18 @@ def get_DID(DID):
             "status": "error",
             "message": "UDS client not initialized"
         })
-    response = uds_client.readDataByIdentifier(DID)
-    return jsonify({
-        "status": "success",
-        "data": response 
-    })
+    try:
+        response = uds_client.readDataByIdentifier(DID)
+        return jsonify({
+            "status": "success",
+            "data": response 
+        })
+    except UDSError as e:
+        print(e)
+        return jsonify({
+            "status": "error",
+            "message": e.message
+        })
 
 @app.route("/DID", methods = ["POST"])
 def set_DID():
@@ -70,7 +79,29 @@ def set_DID():
             "status": "error",
             "data": "Data could not be written"
         })
-
+@app.route("/DTC", methods = ["GET"])
+def get_all_DTC():
+    try:
+        response = uds_client.read_dtcs()
+        return jsonify(response)
+    except UDSError as e:
+        print(e)
+        return jsonify({
+            "status": "error",
+            "message": e.message
+        })
+@app.route("/DTC", methods=["DELETE"])
+def clearDTC():
+    try:
+        response = uds_client.clear_all_dtcs()
+        return jsonify(response)
+    except UDSError as e:
+        print(e)
+        return jsonify({
+            "status": "error",
+            "message": e.message
+        })
+    
 @app.route("/download/<file>")
 def download(file):
     if file == "logger":
@@ -162,15 +193,20 @@ def IO_control():
             "message": "Could not change control"
         })
 
-
 @app.route("/live-data", methods = ["GET"])
 def live_data():
+    stats = listener.get_stats()
+   
     with analytics_lock:
+        latest_analytics["error_frames"] = stats.error_frames
+        delta_time = time.monotonic() - start_time_flag
+        latest_analytics["message_speed"] = (stats.rx_frames - prev_count) / delta_time
         return jsonify(latest_analytics)
 
 
 def send_realtime_data(frame):
-
+    frame["bus_status"] = listener.get_bus_status()
+    
     analytics = build_analytics_packet(frame)
 
     if analytics:
@@ -193,6 +229,7 @@ if __name__ == "__main__":
     )
     uds_client = UDS(UDSRoles.USER)
     listener.start(address, uds_client.on_response)
+    start_time_flag = time.monotonic()
     decoder.start(send_realtime_data)
     logger.start()
     app.run()

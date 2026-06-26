@@ -1,5 +1,5 @@
 import listener.main as main
-from .driver.SocketCANAdapter import SocketCANAdapter
+from .driver.SocketCANAdapter import SocketCANAdapter, BusState
 from .driver.CANconfig import CANConfig
 from .tranmitter import transmitter
 from .iso_receiver import iso_receiver
@@ -13,6 +13,7 @@ import can
 import time
 import isotp
 from listener.iso_tp_error_decoder import IsoTpErrorHandler
+from data_structures.BusStatistics import BusStatistics
 
 def start(address, uds_response_event = None, channel = "can0", enable_logger = True):
     adapter_config = CANConfig(
@@ -60,6 +61,21 @@ def start(address, uds_response_event = None, channel = "can0", enable_logger = 
     print("Listener Started")
     print("Ready to receive and send messages")
 
+
+def get_bus_status():
+    state = main.adapter.get_bus_state()
+    match state:
+        case BusState.ACTIVE:
+            return "ACTIVE"
+        case BusState.PASSIVE:
+            return "PASSIVE"
+        case BusState.ERROR:
+            return "ERROR"
+    return "OFF"
+
+def get_stats() -> BusStatistics:
+    return main.adapter.stats()
+
 def stop():
     print("Stopping listener...")
     main.running = False
@@ -72,6 +88,7 @@ def stop():
 
 def send_to_tx_queue(request: TxRequest):
     main.tx_queue.put(request)
+
 def test_transmission():
     test_frame = can.Message(
         arbitration_id=102,      # ← still use the raw ID here

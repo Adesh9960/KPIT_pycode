@@ -130,6 +130,18 @@ def handle_rpm_physics(is_clutch_down, is_accelerating, physics):
         else:
             speed_ratio      = main.current_speed / physics['max']
             main.current_rpm = max(main.IDLE_RPM, 1000 + (speed_ratio * (main.MAX_RPM - 1000)))
+    
+    if(main.current_rpm >= 7000):
+        main.dtc_manager.set_dtc(
+            code=0x200003,
+            description="Engine OverSpeed",
+            snapshot={
+                "battery": main.battery_voltage,
+                "speed": main.current_speed,
+                "rpm": main.current_rpm,
+                "gear": main.current_gear
+            }
+        )
 
 
 def handle_fuel_physics(is_clutch_down, is_accelerating, physics):
@@ -212,6 +224,25 @@ def handle_battery_and_temp(is_clutch_down, is_accelerating, physics):
         main.battery_voltage = min(14.4, main.battery_voltage + 0.01 * main.refresh_rate)
     else:
         main.battery_voltage = max(11.8, main.battery_voltage - 0.005 * main.refresh_rate)
+
+    if main.battery_voltage < 10.5:
+        main.dtc_manager.set_dtc(
+            code=0x100001,
+            description="Battery Voltage Low",
+            snapshot={
+                "battery": main.battery_voltage,
+                "speed": main.current_speed
+            }
+        )
+    if main.battery_voltage > 15:
+        main.dtc_manager.set_dtc(
+            code=0x100002,
+            description="Battery Voltage High",
+            snapshot={
+                "battery": main.battery_voltage,
+                "speed": main.current_speed
+            }
+        )
 
 
 def get_engine_state(is_clutch_down, is_accelerating, physics, is_braking) -> str:
@@ -429,6 +460,14 @@ def get_telemetry_entry(is_clutch_down, physics, is_braking: bool = False) -> di
     # ── Base calculations ──
     accel_ms2   = round((main.current_speed - main.prev_speed) / 0.1, 2)
     fuel_pct    = round((main.remaining_fuel_ml / MAX_FUEL_ML) * 100.0, 1)
+    if fuel_pct < 5:
+        main.dtc_manager.set_dtc(
+            code=0x500001,
+            description="Fuel low",
+            snapshot={
+                fuel_pct: fuel_pct,
+            }
+        )
     raw_load    = _derive_raw_load(is_clutch_down, physics)
     engine_load_pct = round(min(100.0, raw_load / 1.5 * 100.0), 1)
 

@@ -11,7 +11,7 @@ from .DiagonisticSessionControl import handleDiagonisticSessionControl
 from .IOControl import handleInputOutputControl
 from .uds_crypto import encrypt_uds_payload, decrypt_uds_payload, UDSCryptoError
 from .uds_aes_key import UDS_AES_KEY
-
+import simulator.uds.handleDTC as handleDTC
 
 import simulator.uds.Session as Session
 import simulator.uds.uploadFirmware as uploadFirmware
@@ -125,7 +125,27 @@ def handle_tester_request(wire_payload: bytearray):
                 return send_to_tx_queue(createTXRequest(negative_response.create_negative_response(0x2F, nrc)))
             response = handleInputOutputControl(payload)
             send_response(response)
-          
+        case 0x14:
+            print("Clear DTC")
+            nrc = validate_session(
+                Session.PROGRAMMING_SESSION
+            )
+            if nrc is not None:
+                return send_to_tx_queue(createTXRequest(negative_response.create_negative_response(0x2F, nrc)))
+            response = handleDTC.handle_clear_dtc()
+            send_response(response)
+
+        case 0x19:
+            print("Read DTC")
+            nrc = validate_session(
+                Session.PROGRAMMING_SESSION,
+                Session.EXTENDED_SESSION
+            )
+            if nrc is not None:
+                return send_to_tx_queue(createTXRequest(negative_response.create_negative_response(0x2F, nrc)))
+            response = handleDTC.handle_read_dtc()
+            send_response(response)
+            
         #Firware upload
         case 0x35:
             print("Upload firmware")
@@ -151,7 +171,6 @@ def handle_tester_request(wire_payload: bytearray):
             print("Exit upload")
             response = uploadFirmware.handleTransferExitUpload(payload)
             send_response(response)
-            
         case 0x3E:
             print("TesterPresent")
       

@@ -1,4 +1,3 @@
-import time
 import listener.main as main
 
 def iso_receiver(receive_callback):

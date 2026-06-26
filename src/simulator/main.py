@@ -4,7 +4,7 @@ security_level: str = 0
 security_key: str = None
 session_level: str = Session.DEFAULT_SESSION
 import math
-# security_expire_time: int
+from simulator.DTC.DTCManager import DTCManager
 
 current_gear = 'n'
 time_held = 0.0
@@ -61,3 +61,6 @@ LEFT = 1
 RIGHT = 2
 
 steering_direction = STRAIGHT
+
+#DTC MANAGER
+dtc_manager = DTCManager()

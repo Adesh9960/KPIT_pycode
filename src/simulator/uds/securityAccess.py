@@ -27,7 +27,11 @@ def level3key(seed: bytes):
 def handleSecurityAccess(payload):
     req = payload[1]
     print("inside handle security")
-    if req % 2 == 1:
+    if req == 0:
+        main.security_level = 0
+        response = bytearray([payload[0] + 0x40])
+        response.append(payload[1])
+    elif req % 2 == 1:
         seed = generate_seed()
         response = bytearray([0x67])
         response.append(req)

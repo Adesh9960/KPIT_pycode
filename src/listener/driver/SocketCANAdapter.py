@@ -7,9 +7,9 @@ import can
 import re
 from enum import Enum, auto
 class BusState(Enum):
-    ACTIVE = auto()
-    PASSIVE = auto()
-    ERROR = auto()
+    ACTIVE = "ACTIVE"
+    PASSIVE = "PASSIVE"
+    ERROR = "ERROR"
 
 class SocketCANAdapter:
     config: CANConfig
@@ -101,24 +101,6 @@ class SocketCANAdapter:
             print(f"Error frame \n ID: {hex(msg.arbitration_id)}\n is_extended_id: {msg.is_extended_id}\n is_fd: {msg.is_fd}\n len(data): {len(msg.data)}\n data: {msg.data.hex()}")
             raise TransmissionError(msg.arbitration_id)
     
-    # def receive(self, timeout:float | None = None):
-    #     msg = self.bus.recv(timeout)
-    #     if msg is None:
-    #         return None
-        
-    #     self.stats.rx_frames += 1
-    #     if msg.is_error_frame:
-    #         self.stats.error_frames += 1
-
-    #     return CANFrame(
-    #         timestamp_ns=int(msg.timestamp * 1_000_000_000),
-    #         can_id=msg.arbitration_id,
-    #         dlc=msg.dlc,
-    #         data=msg.data,
-    #         is_extended=msg.is_extended_id,
-    #         is_fd=msg.is_fd,
-    #         is_error=msg.is_error_frame
-    #     )
     def clear_filter(self):
         self.bus.set_filters([])
 

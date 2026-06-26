@@ -1,5 +1,6 @@
+import time
+from simulator.DTC.DTC import DTC
 class DTCManager:
-
     def __init__(self):
         self.dtcs = {}
 
@@ -13,8 +14,8 @@ class DTCManager:
         )
     def get_snapshot(self, code):
         dtc = self.dtcs.get(code)
-        if(dtc) return dtc.snapshot
-        else return None
+        if(dtc): return dtc.snapshot
+        else: return None
 
     def clear_dtc(self, code):
         self.dtcs.pop(code, None)

@@ -9,6 +9,7 @@ import uds_client.uploadFirmware as handleUploadFirmware
 from uds_client.sessionControl import diagnostic_session_control
 from uds_client.IOControl import io_control
 from uds_client.securityAccess import security_access
+from uds_client.handleDTC import read_dtcs, clear_all_dtcs
 from uds_client.uds_crypto import encrypt_uds_payload, decrypt_uds_payload, UDSCryptoError
 from uds_client.uds_aes_key import UDS_AES_KEY
 from uds_client.UDSError import UDSError
@@ -33,12 +34,18 @@ def createUDSRequest(payload, timeout, priority = 10) -> TxRequest:
 class UDS:
     role: UDSRoles
     diagnostic_session_control = diagnostic_session_control
+    
     io_control = io_control
+
     security_access = security_access
+
+    read_dtcs = read_dtcs
+    clear_all_dtcs = clear_all_dtcs
 
     transfer_data_upload = handleUploadFirmware.transfer_data_upload
     transfer_exit_upload = handleUploadFirmware.transfer_exit_upload
     request_upload = handleUploadFirmware.request_upload
+
 
     def __init__(self, role):
         self.role = role

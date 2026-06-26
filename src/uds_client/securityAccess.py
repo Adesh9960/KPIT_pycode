@@ -1,7 +1,7 @@
 import zlib
 class SecurityAccessError(Exception):
     pass
-ALLOWED_LEVELS = [1, 2, 3]
+ALLOWED_LEVELS = [0, 1, 2, 3]
 def level1key(seed: bytes):
     return bytes(b ^ 0xA5 for b in seed)
 
@@ -34,7 +34,15 @@ def calculate_key( seed: bytes, level) -> bytes:
             
         return b"incorrectvalue"
     
-def security_access(self, level: int = 1):
+def security_access(self, level: int = 1): 
+        if level == 0:
+            response = self.send_and_wait(
+                  bytes([
+                       0x27,
+                       0x00
+                  ]), 5
+             )   
+            return True 
         request_seed_subfunction = (level * 2) - 1
         send_key_subfunction = level * 2
 

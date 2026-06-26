@@ -725,17 +725,41 @@
     </div>
 
     <!-- ── SECTION C: DTC Panel (0x19) ── -->
-    <div class="tech-section-label" style="margin-top:20px">DTC INFORMATION — 0x19</div>
-    <div class="tech-dtc-panel">
-      <div class="tech-dtc-header">
-        <span id="dtc-count-badge" class="dtc-count-badge ok">No Active DTCs</span>
-        <button class="tech-dtc-clear-btn" id="dtc-clear-btn" disabled onclick="clearDTCs()">Clear DTCs (0x14) —
-          Programming session required</button>
-      </div>
-      <div class="tech-dtc-list" id="tech-dtc-list">
-        <div class="tech-dtc-empty">No DTCs stored. All systems nominal.</div>
-      </div>
+    <div class="tech-section-label" style="margin-top:20px">
+    DTC INFORMATION — 0x19
+</div>
+
+<div class="tech-dtc-panel">
+
+    <div class="tech-dtc-header">
+
+        <span id="dtc-count-badge" class="dtc-count-badge ok">
+            No Active DTCs
+        </span>
+
+        <div class="tech-dtc-actions">
+            <button class="tech-dtc-load-btn"
+                    onclick="loadDTCs()">
+                Load DTCs (0x19)
+            </button>
+
+            <button class="tech-dtc-clear-btn"
+                    id="dtc-clear-btn"
+                    disabled
+                    onclick="clearDTCs()">
+                Clear DTCs (0x14) — Programming Session Required
+            </button>
+        </div>
+
     </div>
+
+    <div class="tech-dtc-list" id="tech-dtc-list">
+        <div class="tech-dtc-empty">
+            No DTCs stored. All systems nominal.
+        </div>
+    </div>
+
+</div>
 
     <!-- ── SECTION D: ECU Module Status ── -->
     <div class="tech-section-label" style="margin-top:20px">ECU MODULE STATUS</div>
@@ -903,15 +927,13 @@
     <div class="tech-section-label" style="margin-top:20px">CAN BUS NETWORK MONITOR</div>
     <div class="tech-can-grid">
       <div class="tech-can-stat"><span class="tech-can-lbl">BUS STATUS</span><span class="tech-can-val"
-          id="tech-can-load">35%</span></div>
+          id="tech-can-load">ACTIVE</span></div>
       <div class="tech-can-stat"><span class="tech-can-lbl">MSG RATE</span><span class="tech-can-val"
-          id="tech-can-msgrate">50 msg/s</span></div>
+          id="tech-can-msgrate">50 frames/s</span></div>
       <div class="tech-can-stat"><span class="tech-can-lbl">ERROR COUNT</span><span class="tech-can-val"
-          id="tech-can-errrate">0 err/s</span></div>
+          id="tech-can-errrate">0</span></div>
       <div class="tech-can-stat"><span class="tech-can-lbl">SCREEN REFRESH RATE</span><span class="tech-can-val"
-          id="tech-can-latency">&lt;10 ms</span></div>
-      <div class="tech-can-stat"><span class="tech-can-lbl">TERMINATION</span><span class="tech-can-val ok-text">120Ω
-          OK</span></div>
+          id="tech-can-latency">&lt;10 Hz</span></div>
       <div class="tech-can-stat"><span class="tech-can-lbl">SESSION</span><span class="tech-can-val ok-text"
           id="can-session-display">0x03 EXT</span></div>
     </div>
