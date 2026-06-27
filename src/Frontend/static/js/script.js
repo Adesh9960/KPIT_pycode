@@ -1583,10 +1583,18 @@ function pollLive() {
       updateTechnician(data);
       checkAlerts(data);
       setStatus(true);
+      updateWeatherDisplay(data);
     })
     .catch((err) => {
       console.error("Error : ", err);
     });
+}
+
+function updateWeatherDisplay(d) {
+  const tempEl = document.getElementById("weather-temp");
+  if (!tempEl) return;
+  if (d.ambient_temp === null || d.ambient_temp === undefined) return;
+  tempEl.textContent = Math.round(d.ambient_temp) + "°C";
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -2435,6 +2443,52 @@ function pgEditorClear() {
   if (editor) editor.value = "";
   if (status) status.textContent = "";
 }
+
+// ══════════════════════════════════════════════════
+// AMBIENT LIGHT-ON-CARD EFFECT — scroll + mouse driven
+// ══════════════════════════════════════════════════
+(function () {
+  const cards = () => document.querySelectorAll('.adv-white-card, .adv-car-card');
+
+  function updateScrollLight() {
+    const vh = window.innerHeight;
+    cards().forEach((card) => {
+      const r = card.getBoundingClientRect();
+      const centerY = r.top + r.height / 2;
+      // 0 = card center at top of viewport, 1 = at bottom
+      const progress = Math.min(Math.max(centerY / vh, 0), 1);
+      card.style.setProperty('--ly', (progress * 100).toFixed(1) + '%');
+      card.style.setProperty('--lt', ((progress - 0.5) * 10).toFixed(2) + 'deg');
+    });
+  }
+
+  function bindMouseLight(card) {
+    card.addEventListener('mousemove', (e) => {
+      const r = card.getBoundingClientRect();
+      const x = ((e.clientX - r.left) / r.width) * 100;
+      const y = ((e.clientY - r.top) / r.height) * 100;
+      card.style.setProperty('--lx', x.toFixed(1) + '%');
+      card.style.setProperty('--mx', x.toFixed(1) + '%');
+      card.style.setProperty('--my', y.toFixed(1) + '%');
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.setProperty('--lx', '50%');
+      card.style.setProperty('--mx', '50%');
+      card.style.setProperty('--my', '50%');
+    });
+  }
+
+  function init() {
+    cards().forEach(bindMouseLight);
+    updateScrollLight();
+  }
+
+  window.addEventListener('scroll', updateScrollLight, { passive: true });
+  window.addEventListener('resize', updateScrollLight);
+  document.addEventListener('DOMContentLoaded', init);
+  // In case Advanced tab content loads after DOMContentLoaded (mode switch), re-bind on tab click
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => setTimeout(init, 50)));
+})();
 
 // ══════════════════════════════════════════════════
 // INIT

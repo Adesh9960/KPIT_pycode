@@ -210,6 +210,7 @@ def live_data():
         latest_analytics["error_frames"] = stats.error_frames
         delta_time = time.monotonic() - start_time_flag
         latest_analytics["message_speed"] = (stats.rx_frames - prev_count) / delta_time
+        latest_analytics["ambient_temp"] = getattr(simulator.main, "ambient_temp", None)
         return jsonify(latest_analytics)
 
 
