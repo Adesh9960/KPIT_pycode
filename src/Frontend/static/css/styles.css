@@ -237,93 +237,18 @@ body.mode-programming .ambient-blob-c { background: var(--tech-amber); }
 
 
 /* ══════════════════════════════════════════════════
-   LIGHT-ON-CARD EFFECTS — pick ONE class per test
-   All read --lx, --ly, --mx, --my, --lt set by JS
+   LIGHT-ON-CARD EFFECTS — toggle via <body> class:
+   fx-mode-sheen | fx-mode-edge | fx-mode-spotlight | fx-mode-streak
 ══════════════════════════════════════════════════ */
-
-/* Common setup: every effect needs the card to clip its own glow/shine layer */
-.fx-sheen, .fx-edge, .fx-spotlight, .fx-streak {
-  position: relative;
-  overflow: hidden;
+.fx-card { position: relative; overflow: hidden; }
+body.fx-mode-tilt .fx-card {
+  transform-style: preserve-3d;
+  transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+  will-change: transform;
 }
-
-/* ── OPTION 1: Glossy sheen sweeping across the surface ── */
-.fx-sheen::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(
-    600px circle at var(--mx, 50%) var(--ly, 50%),
-    rgba(255,255,255,0.10),
-    transparent 60%
-  );
-  transition: background 0.15s ease-out;
+body.fx-mode-tilt .fx-card:hover {
+  box-shadow: 0 20px 50px rgba(0,0,0,0.4);
 }
-
-/* ── OPTION 2: Edge/border glows brighter on the side near the light ── */
-.fx-edge {
-  border-image: none;
-}
-.fx-edge::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(
-    calc(var(--lt, 0deg) + 90deg),
-    rgba(167,139,250,0.55),
-    transparent 40%,
-    transparent 60%,
-    rgba(124,58,237,0.45)
-  );
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  transition: background 0.2s ease-out;
-}
-
-/* ── OPTION 3: Radial spotlight brightening the whole card ── */
-.fx-spotlight::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(
-    900px circle at 50% var(--ly, 50%),
-    rgba(167,139,250,0.16),
-    transparent 65%
-  );
-  transition: background 0.15s ease-out;
-}
-
-/* ── OPTION 4: Diagonal shine streak, like sunlight on a car hood ── */
-.fx-streak::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  pointer-events: none;
-  background: linear-gradient(
-    115deg,
-    transparent 35%,
-    rgba(255,255,255,0.14) 48%,
-    rgba(255,255,255,0.22) 50%,
-    rgba(255,255,255,0.14) 52%,
-    transparent 65%
-  );
-  transform:
-    translateX(calc((var(--mx, 50%) - 50%) * 0.6))
-    translateY(calc((var(--ly, 50%) - 50%) * 0.6))
-    rotate(var(--lt, 0deg));
-  transition: transform 0.2s ease-out;
-}
-
-
 
 /* ═══════════════════════════════════
    HEADER

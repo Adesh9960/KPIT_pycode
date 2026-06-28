@@ -2444,55 +2444,34 @@ function pgEditorClear() {
   if (status) status.textContent = "";
 }
 
-// ══════════════════════════════════════════════════
-// AMBIENT LIGHT-ON-CARD EFFECT — scroll + mouse driven
-// ══════════════════════════════════════════════════
-(function () {
-  const cards = () => document.querySelectorAll('.adv-white-card, .adv-car-card');
-
-  function updateScrollLight() {
-    const vh = window.innerHeight;
-    cards().forEach((card) => {
-      const r = card.getBoundingClientRect();
-      const centerY = r.top + r.height / 2;
-      // 0 = card center at top of viewport, 1 = at bottom
-      const progress = Math.min(Math.max(centerY / vh, 0), 1);
-      card.style.setProperty('--ly', (progress * 100).toFixed(1) + '%');
-      card.style.setProperty('--lt', ((progress - 0.5) * 10).toFixed(2) + 'deg');
-    });
-  }
-
-  function bindMouseLight(card) {
-    card.addEventListener('mousemove', (e) => {
-      const r = card.getBoundingClientRect();
-      const x = ((e.clientX - r.left) / r.width) * 100;
-      const y = ((e.clientY - r.top) / r.height) * 100;
-      card.style.setProperty('--lx', x.toFixed(1) + '%');
-      card.style.setProperty('--mx', x.toFixed(1) + '%');
-      card.style.setProperty('--my', y.toFixed(1) + '%');
-    });
-    card.addEventListener('mouseleave', () => {
-      card.style.setProperty('--lx', '50%');
-      card.style.setProperty('--mx', '50%');
-      card.style.setProperty('--my', '50%');
-    });
-  }
-
-  function init() {
-    cards().forEach(bindMouseLight);
-    updateScrollLight();
-  }
-
-  window.addEventListener('scroll', updateScrollLight, { passive: true });
-  window.addEventListener('resize', updateScrollLight);
-  document.addEventListener('DOMContentLoaded', init);
-  // In case Advanced tab content loads after DOMContentLoaded (mode switch), re-bind on tab click
-  document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => setTimeout(init, 50)));
-})();
+// ── Tilt: rotateX/rotateY based on mouse position within card ──
+function bindTilt(card) {
+  card.addEventListener('mousemove', (e) => {
+    if (!document.body.classList.contains('fx-mode-tilt')) return;
+    const r = card.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width;   // 0 to 1
+    const py = (e.clientY - r.top) / r.height;   // 0 to 1
+    const rotateY = (px - 0.5) * 10;  // max 5deg either side
+    const rotateX = (0.5 - py) * 10;
+    card.style.transform = `perspective(800px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg)`;
+  });
+  card.addEventListener('mouseleave', () => {
+    if (document.body.classList.contains('fx-mode-tilt')) {
+      card.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg)';
+    }
+  });
+}
 
 // ══════════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════════
+function init() {
+  cards().forEach(bindMouseLight);
+  cards().forEach(bindTilt);
+  updateScrollLight();
+  updateMagneticGlowColor();
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   startClock();
   setMode("live");
