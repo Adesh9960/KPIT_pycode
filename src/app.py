@@ -261,14 +261,14 @@ def get_state():
     }
 
 if __name__ == "__main__":
-    # address = isotp.Address(
-    # isotp.AddressingMode.Normal_11bits,
-    # txid=0x22,
-    # rxid=0x62
-    # )
-    # uds_client = UDS(UDSRoles.USER)
-    # listener.start(address, uds_client.on_response)
-    # start_time_flag = time.monotonic()
-    # decoder.start(send_realtime_data)
-    # logger.start()
+    address = isotp.Address(
+    isotp.AddressingMode.Normal_11bits,
+    txid=0x22,
+    rxid=0x62
+    )
+    uds_client = UDS(UDSRoles.USER)
+    listener.start(address, uds_client.on_response)
+    start_time_flag = time.monotonic()
+    decoder.start(send_realtime_data)
+    logger.start()
     app.run()
