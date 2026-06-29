@@ -55,9 +55,9 @@
   --tech-bg:       #070a07;
   --tech-surface:  #0d120d;
   --tech-card:     #111811;
-  --tech-border:   rgba(0,255,100,0.12);
-  --tech-green:    #00e070;
-  --tech-green-dim:#00a050;
+  --tech-border:   rgba(15, 15, 15, 0.12);
+  --tech-green:    #018e47;
+  --tech-green-dim:#00552b;
   --tech-amber:    #ffd740;
   --tech-red:      #ff5252;
   --tech-text:     #c8ffda;

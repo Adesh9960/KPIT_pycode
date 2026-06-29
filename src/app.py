@@ -209,15 +209,17 @@ def IO_control():
 def live_data():
     stats = listener.get_stats()
     with analytics_lock:
+        global start_time_flag
+        global prev_count
         latest_analytics["error_frames"] = stats.error_frames
         delta_time = time.monotonic() - start_time_flag
         latest_analytics["message_speed"] = (stats.rx_frames - prev_count) / delta_time
+        prev_count = stats.rx_frames
+        start_time_flag = time.monotonic()
         return jsonify(latest_analytics)
 
 
-def send_realtime_data(frame):
-    frame["bus_status"] = listener.get_bus_status()
-    
+def send_realtime_data(frame):   
     analytics = build_analytics_packet(frame)
 
     if analytics:

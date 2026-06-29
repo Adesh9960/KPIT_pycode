@@ -95,7 +95,7 @@ class SocketCANAdapter:
         try:
             self.bus.send(msg)
             self.stats.tx_frames += 1
-            # print(self.stats.tx_frames)
+
         except can.CanError as e:
             self.stats.tx_error_frames += 1
             print(f"Error frame \n ID: {hex(msg.arbitration_id)}\n is_extended_id: {msg.is_extended_id}\n is_fd: {msg.is_fd}\n len(data): {len(msg.data)}\n data: {msg.data.hex()}")

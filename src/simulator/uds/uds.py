@@ -132,7 +132,7 @@ def handle_tester_request(wire_payload: bytearray):
             )
             if nrc is not None:
                 return send_to_tx_queue(createTXRequest(negative_response.create_negative_response(0x2F, nrc)))
-            response = handleDTC.handle_clear_dtc()
+            response = handleDTC.handle_clear_dtc(payload)
             send_response(response)
 
         case 0x19:

@@ -332,10 +332,13 @@ function updateCANStatus(data) {
 }
 async function loadDTCs() {
     try {
+        showUDSResponse("Sending 0x19 — Loading all DTCs ...");
         const res = await fetch("/DTC");
         const data = await res.json();
-        if(data.status === "success")
+        if(data.status === "success"){
           renderDTCs(data.dtcs);
+          showUDSResponse("0x59 — DTCs loaded successfully [Positive Response]")
+        }
         else 
           showToastMessage(data.message)
 
@@ -344,21 +347,17 @@ async function loadDTCs() {
     }
 }
 async function clearDTCs() {
-  // if (!progUnlocked) {
-  //   showUDSResponse("0x7F 0x14 0x33 — Security access denied");
-  //   return;
-  // }
   showUDSResponse("Sending 0x14 0xFF 0xFF 0xFF — Clear all DTCs ...");
 
-  is_cleared = await pgCmd_dtcClear()
-  if(is_cleared)
-    setTimeout(() => {
+  const res = await pgCmd_dtcClear()
+  if(res.status == "success"){
       document.getElementById("tech-dtc-list").innerHTML =
         '<div class="tech-dtc-empty">No DTCs stored. All systems nominal.</div>';
       setText("dtc-count-badge", "No Active DTCs");
       document.getElementById("dtc-count-badge").className = "dtc-count-badge ok";
       showUDSResponse("0x54 — DTCs cleared successfully [Positive Response]");
-    }, 600);
+  }
+  else showUDSResponse(res.message)
 }
 
 // ── Helper: show response in UDS response bar ──
@@ -2027,10 +2026,16 @@ async function pgCmd_dtcClear() {
   const data = await res.json();
   if (data.status === "success") {
     pgPrint("0x54 — DTCs cleared successfully [Positive Response]", "l-bold");
-    return true
+    return {
+      status: "success",
+      message: "0x54 — DTCs cleared successfully [Positive Response]"
+    }
   } else {
     pgPrint(`Error — ${data.message}`, "l-red");
-    return false
+    return {
+      status: "error",
+      message: data.message
+    }
   }
 
 }
@@ -2338,7 +2343,7 @@ async function pgRunCommand(raw) {
       case "dtc.clear":
         await pgCmd_dtcClear();
         break;
-      case "report":
+      case "report_dtcClear();":
         await pgCmd_report();
         break;
       case "exit":

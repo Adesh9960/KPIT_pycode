@@ -650,11 +650,11 @@
     <button class="tech-did-btn" onclick="readDID(0xF185,'did-f185','')">READ</button>
 </div>
 
-<div class="tech-did-row">
+<!-- <div class="tech-did-row">
     <span class="tech-did-lbl">Active Diagnostic Session (0xF186)</span>
     <span class="tech-did-val" id="did-f186">—</span>
     <button class="tech-did-btn" onclick="readDID(0xF186,'did-f186','')">READ</button>
-</div>
+</div> -->
 
 <div class="tech-did-row">
     <span class="tech-did-lbl">Repair Shop Code (0xF18E)</span>
@@ -742,8 +742,8 @@
             No Active DTCs
         </span>
 
-        <div class="tech-dtc-actions">
-            <button class="tech-dtc-load-btn"
+        <div class="tech-dtc-header">
+            <button class="dtc-count-badge ok"
                     onclick="loadDTCs()">
                 Load DTCs (0x19)
             </button>
@@ -791,9 +791,8 @@
           <div class="tech-param"><span class="tp-lbl">Engine State</span><span class="tp-val"
               id="tech-engstate">—</span></div>
         </div>
-        <div class="tech-dtc-row"><span class="tech-dtc-lbl">DTCs</span><span class="tech-dtc-val ok"
-            id="tech-ecm-dtc">None</span></div>
-      </div>
+        </div>
+
       <div class="tech-ecu-card">
         <div class="tech-ecu-name">TCM <span class="tech-ecu-id">0x7E1</span></div>
         <div class="tech-ecu-status ok">ONLINE</div>
@@ -809,7 +808,6 @@
           <div class="tech-param"><span class="tp-lbl">Shift Status</span><span class="tp-val">NORMAL</span></div>
           <div class="tech-param"><span class="tp-lbl">Lock Status</span><span class="tp-val">ENGAGED</span></div>
         </div>
-        <div class="tech-dtc-row"><span class="tech-dtc-lbl">DTCs</span><span class="tech-dtc-val ok">None</span></div>
       </div>
       <div class="tech-ecu-card">
         <div class="tech-ecu-name">ABS <span class="tech-ecu-id">0x7E2</span></div>
@@ -824,7 +822,6 @@
           <div class="tech-param"><span class="tp-lbl">Brake Pressure</span><span class="tp-val"
               id="tech-brakepct">—</span></div>
         </div>
-        <div class="tech-dtc-row"><span class="tech-dtc-lbl">DTCs</span><span class="tech-dtc-val ok">None</span></div>
       </div>
       <div class="tech-ecu-card">
         <div class="tech-ecu-name">BCM <span class="tech-ecu-id">0x7E3</span></div>
@@ -847,7 +844,6 @@
           <div class="tech-param"><span class="tp-lbl">Tyre RL</span><span class="tp-val" id="tech-trl">—</span></div>
           <div class="tech-param"><span class="tp-lbl">Tyre RR</span><span class="tp-val" id="tech-trr">—</span></div>
         </div>
-        <div class="tech-dtc-row"><span class="tech-dtc-lbl">DTCs</span><span class="tech-dtc-val ok">None</span></div>
       </div>
     </div>
 

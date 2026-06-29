@@ -74,7 +74,7 @@ def get_bus_status():
     return "OFF"
 
 def get_stats() -> BusStatistics:
-    return main.adapter.get_statistics()
+    return main.adapter.stats
 
 def stop():
     print("Stopping listener...")
