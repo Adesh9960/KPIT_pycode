@@ -742,7 +742,7 @@ function updateLive(d) {
   // Transmission
   const gn = d.gear_num || 0;
   setText("gear-display", gn === 0 ? "N" : String(gn));
-  setText("gear-name", d.gear || "Neutral");
+  setText("gear-name", gn === 0? "Neutral": "gear " + gn);
   const rpm = d.rpm || 0;
   const shiftHint = document.getElementById("shift-hint");
   if (shiftHint) {
@@ -760,13 +760,13 @@ function updateLive(d) {
 
   const clutchEl = document.getElementById("chip-clutch");
   const clutchVal = document.getElementById("clutch-val");
-  const clutchState = d.clutch_state? "DOWN" : "UP";
+  const clutchState = d.clutch_state == 1? "DOWN" : "UP";
   if (clutchVal) clutchVal.textContent = clutchState;
   if (clutchEl) clutchEl.classList.toggle("active", clutchState === "DOWN");
 
   const brakeEl = document.getElementById("chip-brake");
   const brakeVal = document.getElementById("brake-val");
-  const brakeState = d.brake_state? "DOWN" : "UP";
+  const brakeState = d.brake_state == 1? "DOWN" : "UP";
   if (brakeVal) brakeVal.textContent = brakeState;
   if (brakeEl) brakeEl.classList.toggle("active", brakeState === "PRESSED");
 
@@ -2094,7 +2094,8 @@ async function pgCmd_firmwareDownload(){
 async function pgCmd_logsDownload() {
   pgPrint("Requesting CAN log file from listener/logger...", "l-dim");
   try {
-    window.location.href = "/download/firmware"
+    window.location.href = "/download/logger"
+
     pgPrint("Download started — check your browser's downloads.", "l-bold");
     pgProgressLog("Log file download requested.");
   } catch (e) {

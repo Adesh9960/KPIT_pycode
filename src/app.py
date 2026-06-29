@@ -120,29 +120,49 @@ def download(file):
         print("sending logger...")
         zip_folder("../data/logger", "../data/all_logs")
         print("zip created!!")
-        @after_this_request
-        def cleanup(response):
-            delete_file(path)
-            return response
-        path =  "../data/logger/all_logs.csv"
-        return send_file(
-           path
+       
+        path = os.path.dirname(os.getcwd())
+        path =  os.path.join(path, 'data', 'all_logs.zip')
+        response = send_file(
+           path,
+           as_attachment=True,
+           conditional=False
         )
+        response.direct_passthrough = False
+        print(response.direct_passthrough)
+        print("registering cleanup")
+        @response.call_on_close
+        def cleanup():
+            try:
+                os.remove(path)
+                print("Zip deleted.")
+            except Exception as e:
+                print(f"Cleanup failed: {e}")
+        return response
     
     if file == "firmware":
-        path = '../data/firmware/firmware.bin'
+        path = os.path.join(os.path.dirname(os.getcwd()), 'data', 'firmware', 'firmware.bin')
         uds_client.firmwareUpload(path)
-        @after_this_request
-        def cleanup(response):
-            delete_file(path)
+  
+        try:
+            response = send_file(
+                path,
+                as_attachment=True,
+                conditional=False
+            )
+            response.direct_passthrough = False
+
+            @response.call_on_close
+            def cleanup():
+                try:
+                    os.remove(path)
+                    print("firmware duplicate deleted.")
+                except Exception as e:
+                    print(f"Cleanup failed: {e}")
             return response
         
-        try:
-            return send_file(
-                "../data/firmware/firmware.bin",
-                as_attachment=True
-        )
         except Exception as e:
+            print(e)
             return jsonify({
                 "status": "error",
                 "message": "Could not download firmware"
@@ -241,14 +261,14 @@ def get_state():
     }
 
 if __name__ == "__main__":
-    address = isotp.Address(
-    isotp.AddressingMode.Normal_11bits,
-    txid=0x22,
-    rxid=0x62
-    )
-    uds_client = UDS(UDSRoles.USER)
-    listener.start(address, uds_client.on_response)
-    start_time_flag = time.monotonic()
-    decoder.start(send_realtime_data)
-    logger.start()
+    # address = isotp.Address(
+    # isotp.AddressingMode.Normal_11bits,
+    # txid=0x22,
+    # rxid=0x62
+    # )
+    # uds_client = UDS(UDSRoles.USER)
+    # listener.start(address, uds_client.on_response)
+    # start_time_flag = time.monotonic()
+    # decoder.start(send_realtime_data)
+    # logger.start()
     app.run()

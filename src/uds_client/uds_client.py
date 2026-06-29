@@ -174,9 +174,7 @@ class UDS:
         return result 
 
     def firmwareUpload(self, output_file):
-        file_data = handleUploadFirmware.read_firmware_from_ecu(self, output_file)
-        with open(f"../data/firmware/firmware.bin", "wb") as f:
-            f.write(file_data)
+        handleUploadFirmware.read_firmware_from_ecu(self, output_file)
         return {
             "status": "success",
         }
