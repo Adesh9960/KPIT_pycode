@@ -40,10 +40,6 @@ def transmit(msg: TxRequest):
 
 def transmitter():
     while main.running:
-        # if main.adapter.get_bus_state() == BusState.ERROR: 
-            # print("CAN Bus is off")
-            # time.sleep(2)
-            # continue
         msg = main.tx_queue.get()
         if isinstance(msg, bytes):
             print(msg)

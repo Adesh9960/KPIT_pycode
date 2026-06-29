@@ -219,13 +219,12 @@ def live_data():
         return jsonify(latest_analytics)
 
 
-def send_realtime_data(frame):   
+def send_realtime_data(frame):
     analytics = build_analytics_packet(frame)
 
-    if analytics:
-        with analytics_lock:
-            update_history(analytics)
-            latest_analytics.update(analytics)
+    with analytics_lock:
+        update_history(analytics)
+        latest_analytics.update(analytics)
 
 
 @app.route("/history-data", methods = ["GET"])

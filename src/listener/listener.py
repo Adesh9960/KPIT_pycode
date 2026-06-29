@@ -62,16 +62,16 @@ def start(address, uds_response_event = None, channel = "can0", enable_logger = 
     print("Ready to receive and send messages")
 
 
-def get_bus_status():
-    state = main.adapter.get_bus_state()
-    match state:
-        case BusState.ACTIVE:
-            return "ACTIVE"
-        case BusState.PASSIVE:
-            return "PASSIVE"
-        case BusState.ERROR:
-            return "ERROR"
-    return "OFF"
+# def get_bus_status():
+#     state = main.adapter.get_bus_state()
+#     match state:
+#         case BusState.ACTIVE:
+#             return "ACTIVE"
+#         case BusState.PASSIVE:
+#             return "PASSIVE"
+#         case BusState.ERROR:
+#             return "ERROR"
+#     return "OFF"
 
 def get_stats() -> BusStatistics:
     return main.adapter.stats

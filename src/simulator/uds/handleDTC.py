@@ -19,18 +19,15 @@ def handle_clear_dtc(data):
     if main.security_level < 2:
         return negativeResponse.create_negative_response(0x14, 0x33)
 
-    if len(data) != 3:
-        return negativeResponse.create_negative_response(0x14, 0x13)   # IncorrectMessageLength
-
     group = int.from_bytes(data, "big")
-
+    print("Group: ", hex(group))
     # 0xFFFFFF means clear all DTCs
-    if group == 0xFFFFFF:
+    if group == 0x14FFFFFF:
         main.dtc_manager.clear_all()
     else:
         main.dtc_manager.clear_dtc(group)
 
-    return bytes([0x54]) + data
+    return bytes([0x54]) + data[1:]
 
 
 def get_snapshot(dtcCode):

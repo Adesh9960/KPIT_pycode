@@ -1,20 +1,21 @@
+from collections import deque
 MAX_HISTORY = 10000
 
 history = {
-    "time": [],
-    "speed": [],
-    "rpm": [],
-    "coolant": [],
-    "oil_temp": [],
-    "fuel_pct": [],
-    "fuel_rate": [],
-    "throttle": [],
-    "engine_load": [],
-    "accel": [],
-    "battery": [],
-    "gear_num": [],
-    "gear": [],
-    "engine_state": []
+    "time": deque(maxlen=MAX_HISTORY),
+    "speed": deque(maxlen=MAX_HISTORY),
+    "rpm": deque(maxlen=MAX_HISTORY),
+    "coolant": deque(maxlen=MAX_HISTORY),
+    "oil_temp": deque(maxlen=MAX_HISTORY),
+    "fuel_pct": deque(maxlen=MAX_HISTORY),
+    "fuel_rate": deque(maxlen=MAX_HISTORY),
+    "throttle": deque(maxlen=MAX_HISTORY),
+    "engine_load": deque(maxlen=MAX_HISTORY),
+    "accel": deque(maxlen=MAX_HISTORY),
+    "battery": deque(maxlen=MAX_HISTORY),
+    "gear_num": deque(maxlen=MAX_HISTORY),
+    "gear": deque(maxlen=MAX_HISTORY),
+    "engine_state": deque(maxlen=MAX_HISTORY)
 }
 
 def append_or_repeat(key, value):
@@ -36,7 +37,3 @@ def update_history(data):
     append_or_repeat("gear_num", data.get("gear_num"))
     append_or_repeat("gear", data.get("gear"))
     append_or_repeat("engine_state", data.get("engine_state"))
-    # keep fixed size
-    for key in history:
-        if len(history[key]) > MAX_HISTORY:
-            history[key].pop(0)
