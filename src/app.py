@@ -42,6 +42,8 @@ werkzeug_logger.addFilter(RouteFilter())
 @app.route("/")
 def home():
     try:
+        uds_client.diagnostic_session_control(1)
+        uds_client.security_access(0)
         return render_template('index.html')
     except Exception as e:
         print(e)
