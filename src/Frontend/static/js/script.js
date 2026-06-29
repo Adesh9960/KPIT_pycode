@@ -1582,10 +1582,18 @@ function pollLive() {
       updateTechnician(data);
       checkAlerts(data);
       setStatus(true);
+      updateWeatherDisplay(data);
     })
     .catch((err) => {
       console.error("Error : ", err);
     });
+}
+
+function updateWeatherDisplay(d) {
+  const tempEl = document.getElementById("weather-temp");
+  if (!tempEl) return;
+  if (d.ambient_temp === null || d.ambient_temp === undefined) return;
+  tempEl.textContent = Math.round(d.ambient_temp) + "°C";
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -2441,9 +2449,34 @@ function pgEditorClear() {
   if (status) status.textContent = "";
 }
 
+// ── Tilt: rotateX/rotateY based on mouse position within card ──
+function bindTilt(card) {
+  card.addEventListener('mousemove', (e) => {
+    if (!document.body.classList.contains('fx-mode-tilt')) return;
+    const r = card.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width;   // 0 to 1
+    const py = (e.clientY - r.top) / r.height;   // 0 to 1
+    const rotateY = (px - 0.5) * 10;  // max 5deg either side
+    const rotateX = (0.5 - py) * 10;
+    card.style.transform = `perspective(800px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg)`;
+  });
+  card.addEventListener('mouseleave', () => {
+    if (document.body.classList.contains('fx-mode-tilt')) {
+      card.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg)';
+    }
+  });
+}
+
 // ══════════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════════
+function init() {
+  cards().forEach(bindMouseLight);
+  cards().forEach(bindTilt);
+  updateScrollLight();
+  updateMagneticGlowColor();
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   startClock();
   setMode("live");
