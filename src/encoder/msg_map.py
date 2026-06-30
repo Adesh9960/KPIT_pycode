@@ -81,44 +81,6 @@ MESSAGE_MAP = {
             "Fuel_Pump":    "Fuel_Pump",
         },
     },
-
-    "EngineDiagnostics": {
-        "can_id": 0x300,
-        "is_extended": False,
-        "is_fd": False,
-        "dlc": 8,
-        "signals": {
-            "MAF_g_s":        "MAF_g_s",
-            "MAP_kPa":        "MAP_kPa",
-            "IAT_C":          "IAT_C",
-            "Ign_Timing_deg": "Ign_Timing_deg",
-        },
-    },
-
-    "FuelInjectionStatus": {
-        "can_id": 0x301,
-        "is_extended": False,
-        "is_fd": False,
-        "dlc": 8,
-        "signals": {
-            "Fuel_Pressure_bar": "Fuel_Pressure_bar",
-            "Fuel_Trim_Pct":     "Fuel_Trim_Pct",
-            "Injector_PW_ms":    "Injector_PW_ms",
-            "Knock_Count":       "Knock_Count",
-        },
-    },
-
-    "EmissionsThermal": {
-        "can_id": 0x302,
-        "is_extended": False,
-        "is_fd": False,
-        "dlc": 4,
-        "signals": {
-            "Catalyst_Temp_C":    "Catalyst_Temp_C",
-            "Trans_Fluid_Temp_C": "Trans_Fluid_Temp_C",
-        },
-    },
-
     "DriverInputs": {
         "can_id": 0x303,
         "is_extended": False,
@@ -132,40 +94,6 @@ MESSAGE_MAP = {
         },
     },
 
-    "BatteryCharging": {
-        "can_id": 0x304,
-        "is_extended": False,
-        "is_fd": False,
-        "dlc": 6,
-        "signals": {
-            "Battery_SOC_Pct":      "Battery_SOC_Pct",
-            "Alternator_V":         "Alternator_V",
-            "Idle_Speed_Adapt_RPM": "Idle_Speed_Adapt_RPM",
-        },
-    },
-
-    "UDSStatus": {
-        "can_id": 0x305,
-        "is_extended": False,
-        "is_fd": False,
-        "dlc": 1,
-        "signals": {
-            "UDS_Session": "UDS_Session",
-        },
-    },
-
-    "WheelSpeeds": {
-        "can_id": 0x18ff0010,
-        "is_extended": True,
-        "is_fd": False,
-        "dlc": 8,
-        "signals": {
-            "Wheel_Speed_FL_kmh": "Wheel_Speed_FL_kmh",
-            "Wheel_Speed_FR_kmh": "Wheel_Speed_FR_kmh",
-            "Wheel_Speed_RL_kmh": "Wheel_Speed_RL_kmh",
-            "Wheel_Speed_RR_kmh": "Wheel_Speed_RR_kmh",
-        },
-    },
     "ChassisDynamics": {
     "can_id": 0x306,        # Use the CAN ID you've assigned in your DBC
     "is_extended": False,

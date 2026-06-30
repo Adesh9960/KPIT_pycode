@@ -234,7 +234,7 @@ def live_data():
         global prev_count
         latest_analytics["error_frames"] = stats.error_frames
         delta_time = time.monotonic() - start_time_flag
-        latest_analytics["message_speed"] = (stats.rx_frames - prev_count) / delta_time
+        latest_analytics["message_speed"] = round((stats.rx_frames - prev_count) / delta_time, 2)
         prev_count = stats.rx_frames
         start_time_flag = time.monotonic()
         return jsonify(latest_analytics)

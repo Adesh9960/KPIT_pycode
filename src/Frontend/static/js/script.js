@@ -760,7 +760,7 @@ function updateLive(d) {
 
   const clutchEl = document.getElementById("chip-clutch");
   const clutchVal = document.getElementById("clutch-val");
-  console.log("Clutch state: ", d.clutch_state)
+ 
   const clutchState = d.clutch_state == 1? "DOWN" : "UP";
   if (clutchVal) clutchVal.textContent = clutchState;
   if (clutchEl) clutchEl.classList.toggle("active", clutchState === "DOWN");
@@ -768,6 +768,7 @@ function updateLive(d) {
   const brakeEl = document.getElementById("chip-brake");
   const brakeVal = document.getElementById("brake-val");
   const brakeState = d.brake_state == 1? "DOWN" : "UP";
+
   if (brakeVal) brakeVal.textContent = brakeState;
   if (brakeEl) brakeEl.classList.toggle("active", brakeState === "PRESSED");
 
@@ -1715,22 +1716,21 @@ function showProgPanel() {
 // Way B — backdoor entry. Skips the seed/key exchange but still
 // notifies the backend so /prog/* routes treat the session as unlocked.
 async function enterProgrammingSessionBackdoor() {
-  showProgPanel();
-  pgPrint(
-    "⚠ Alternate access path used — bypassing Security Access (0x27)",
-    "l-amber",
-  );
   try {
     const res = await fetch("/diagnostics_session_control/2");
-    const seedData = await res.json();
-    const seedHex = seedData.message;
-    const seedInt = parseInt(seedHex, 16);
-    const keyHex = "0x" + (seedInt ^ 0x5aa5).toString(16).toUpperCase();
-    await pgCmd_securityKey(keyHex);
-  } catch (_) {
+    const data = await res.json()
+    showToastMessage(data.status, true);
+    
+    if (data.status == "success") {
+      updateSessionDisplay("PROG 0x02");
+      showProgPanel();
+    }
+    showToastMessage("Programming session entered", true);
+  } catch (e) {
+    console.log(e)
+    showToastMessage("Could not enter programming session", false);
     pgPrint("Backdoor auth failed — backend unreachable.", "l-red");
   }
-  showToastMessage("Programming session entered via alternate access.", false);
 }
 
 async function exitProgrammingSession() {

@@ -738,7 +738,7 @@ body {
 }
 .lv-bottom-row { display:flex; gap:14px; }
 .lv-chart-col { flex:1 1 50%; min-width:0; }
-.lv-infotainment-col { flex:1 1 50%; display:flex; flex-direction:column; gap:14px; }
+.lv-infotainment-col { flex:1 1 50%; display:flex; flex-direction:column;align-items: center; justify-content: center ; gap:14px; }
 
 /* Bottom row: chart card + infotainment card, side by side */
 .lv-bottom-row {
@@ -758,6 +758,7 @@ body {
   background:var(--lv-card); border:1px solid var(--lv-border);
   border-radius:var(--radius); padding:18px;
   display:flex; align-items:center; gap:16px;
+  justify-content: center;
 }
 .lv-chart-card .lv-chart-label { margin-bottom:8px; }
 .lv-chart-card .lv-chart-box {
@@ -769,7 +770,7 @@ body {
   display:flex; flex-direction:column; align-items:center; gap:6px;
   flex-shrink:0;
 }
-.lv-weather-emoji { font-size:64px; line-height:1; }
+.lv-weather-emoji { font-size:80px; line-height:1; }
 .lv-weather-label {
   font-family:var(--mono); font-size:13px; font-weight:600;
   color:var(--lv-text);
@@ -850,6 +851,9 @@ body {
   border-radius:var(--radius); padding:20px;
   position:relative; overflow:hidden;
   display:flex; flex-direction:column; gap:14px;
+}
+.blueprint-img{
+  width: 100%;
 }
 .adv-car-card::before {
   content:''; position:absolute; top:-40px; right:-40px;

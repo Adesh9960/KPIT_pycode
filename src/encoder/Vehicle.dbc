@@ -60,21 +60,7 @@ BO_ 771 DriverInputs: 4 ECU10
  SG_ Clutch_State : 0|1@1+ (1,0) [0|1] "" ECU10
  SG_ Brake_State : 1|1@1+ (1,0) [0|1] "" ECU10
  SG_ Rev_Limiter : 2|1@1+ (1,0) [0|1] "" ECU10
- SG_ Brake_Pedal_Pct : 8|8@1+ (1,0) [0|100] "pct" ECU10
-
-BO_ 772 BatteryCharging: 6 ECU11
- SG_ Battery_SOC_Pct : 0|16@1+ (0.1,0) [0|100] "pct" ECU11
- SG_ Alternator_V : 16|8@1+ (0.1,0) [0|15] "V" ECU11
- SG_ Idle_Speed_Adapt_RPM : 24|16@1+ (1,0) [500|1500] "rpm" ECU11
-
-BO_ 773 UDSStatus: 1 ECU12
- SG_ UDS_Session : 0|8@1+ (1,0) [0|3] "" ECU12
-
-BO_ 2566848528 WheelSpeeds: 8 ECU13
- SG_ Wheel_Speed_FL_kmh : 0|16@1+ (1,0) [0|300] "kmph" ECU13
- SG_ Wheel_Speed_FR_kmh : 16|16@1+ (1,0) [0|300] "kmph" ECU13
- SG_ Wheel_Speed_RL_kmh : 32|16@1+ (1,0) [0|300] "kmph" ECU13
- SG_ Wheel_Speed_RR_kmh : 48|16@1+ (1,0) [0|300] "kmph" ECU13
+ SG_ Brake_Pedal_Pct : 3|8@1+ (1,0) [0|100] "pct" ECU10
 
 BO_ 1536 ActuatorData: 3 ECU8
  SG_ Head_Lamp     : 0|8@1+  (1,0) [0|1] "" ECU8

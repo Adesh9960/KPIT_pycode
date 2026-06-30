@@ -310,12 +310,6 @@
           <span class="lv-weather-emoji">🌤️</span>
           <span class="lv-weather-label" id="weather-temp">28°C</span>
         </div>
-        <div class="lv-infotainment-buttons">
-          <button class="lv-info-btn" id="btn-mobile">📱 Mobile Connect</button>
-          <button class="lv-info-btn" id="btn-music">🎵 Music</button>
-          <button class="lv-info-btn" id="btn-camera">📷 Camera</button>
-          <button class="lv-info-btn" id="btn-others">⚙️ Others</button>
-        </div>
       </div>
 
     </div>
@@ -356,15 +350,7 @@
                 class="adv-cs-lbl">THROTTLE</span></div>
           </div>
           <div class="adv-car-svg-wrap">
-            <svg viewBox="0 0 246 90" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:240px">
-              <rect x="20" y="45" width="206" height="30" rx="8" fill="#3b1fa8" opacity="0.7" />
-              <rect x="35" y="28" width="176" height="30" rx="6" fill="#4c2db5" opacity="0.8" />
-              <rect x="93" y="30" width="60" height="18" rx="5" fill="#5b21b6" opacity="0.5" />
-              <circle cx="70" cy="74" r="15" fill="#2d1b69" stroke="white" stroke-width="2" />
-              <circle cx="70" cy="74" r="6" fill="#1a0f3d" />
-              <circle cx="176" cy="74" r="15" fill="#2d1b69" stroke="white" stroke-width="2" />
-              <circle cx="176" cy="74" r="6" fill="#1a0f3d" />
-            </svg>
+            <img src="{{ url_for('static', filename='img/blueprint-white.png') }}" alt="blueprint" class="blueprint-img" />
           </div>
           <div class="adv-state-chips">
             <span class="adv-sch" id="adv-engine-state-chip">IDLE</span>
@@ -934,16 +920,6 @@
       <div class="tech-can-stat"><span class="tech-can-lbl">SESSION</span><span class="tech-can-val ok-text"
           id="can-session-display">0x03 EXT</span></div>
     </div>
-
-    <!-- ── CAN Sniffer ── -->
-    <div class="tech-section-label" style="margin-top:20px">CAN MESSAGE SNIFFER (LIVE)</div>
-    <div class="tech-sniffer-wrap">
-      <div class="tech-sniffer-head">
-        <span>TIMESTAMP</span><span>CAN ID</span><span>DATA (HEX)</span><span>SIGNAL</span><span>VALUE</span>
-      </div>
-      <div class="tech-sniffer-body" id="tech-sniffer-body"></div>
-    </div>
-
     
     <!-- ── Firmware & File  +  Programming Progress (side by side, full width) ── -->
     <!-- <div class="pg-main-row">

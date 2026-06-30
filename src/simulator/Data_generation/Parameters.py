@@ -170,6 +170,7 @@ def handle_fuel_physics(is_clutch_down, is_accelerating, physics):
 
 
 def handle_speed(is_clutch_down, is_accelerating, physics, is_braking):
+    global brake_force
     drag_deceleration = (main.current_speed * 0.05) * main.refresh_rate
 
     if is_braking:
@@ -526,7 +527,7 @@ def get_telemetry_entry(is_clutch_down, physics, is_braking: bool = False) -> di
         "Gear_Num":             0 if main.current_gear == 'n' else int(main.current_gear),
         "Trans_Fluid_Temp_C":   trans_fluid_c,       # Transmission fluid temperature
         "Clutch_State":         "DOWN" if is_clutch_down else "UP",
-        "Brake_State":          "PRESSED" if is_braking else "OFF",
+        "Brake_State":          "DOWN" if is_braking else "UP",
 
         # ══ 3. ELECTRICAL & BATTERY ═════════════════════════════
         "Battery_V":            round(main.battery_voltage, 2),
@@ -539,7 +540,7 @@ def get_telemetry_entry(is_clutch_down, physics, is_braking: bool = False) -> di
         "Wheel_Speed_FR_kmh":   int(main.current_speed),
         "Wheel_Speed_RL_kmh":   int(main.current_speed),
         "Wheel_Speed_RR_kmh":   int(main.current_speed),
-        "Brake_Pedal_Pct":      brake_pedal_pct,     # 0% or 100%
+        "Brake_Pedal_Pct":      int(brake_pedal_pct),     # 0% or 100%
         "Tyre_P_FL":            32.1,
         "Tyre_P_FR":            32.0,
         "Tyre_P_RL":            31.8,
@@ -681,10 +682,9 @@ def run_vehicle_simulator():
             "Engine_Load_Pct": float(telemetry_row.get("Engine_Load_Pct", 0)),
             "Throttle_Pct": float(telemetry_row.get("Throttle_Pct", 0)),
             "Rev_Limiter": int(telemetry_row.get("Rev_Limiter", 0)),
-            # "engine_state": engine_state, # Extracted from local variable
             "Stall_Risk": int(telemetry_row.get("Stall_Risk", 0)),
-            "Clutch_State": telemetry_row.get("Clutch_State", "UP"),
-            "Brake_State": telemetry_row.get("Brake_State", "UP"),
+            "Clutch_State": 1 if telemetry_row.get("Clutch_State", "UP") == "DOWN" else 0,
+            "Brake_State": 1 if telemetry_row.get("Brake_State", "UP") == "DOWN" else 0,
             "Battery_V": float(telemetry_row.get("Battery_V", 0)),
             "Head_Lamp": int(main.head_lamp.state),
             "Radiator_Fan": int(main.radiator_fan.state),
@@ -694,8 +694,15 @@ def run_vehicle_simulator():
             "Tyre_P_FR" :tyre_pressure[1],
             "Tyre_P_RL" : tyre_pressure[2],
             "Tyre_P_RR": tyre_pressure[3],
+            "Brake_Pedal_Pct": calc_brake_pedal_pct(is_braking),  
+            "MAF_g_s": telemetry_row.get("MAF_g_s", 0),
+            "Wheel_Speed_FL_kmh": telemetry_row.get("Wheel_Speed_FL_kmh", 0),
+            "Catalyst_Temp_C": telemetry_row.get("Catalyst_Temp_C", 25),
+            "Battery_SOC_Pct": telemetry_row.get("Battery_SOC_Pct", 0), 
+            "Fuel_Pressure_bar": telemetry_row.get("Fuel_Pressure_bar", 1),
+
             #ChassisDynamics
-            "Brake_Force_Pct": brake_force,
+            "Brake_Force_Pct": calc_brake_pedal_pct(is_braking),  
             "Steering_Angle_deg": main.steering_angle,
             "Lateral_Accel_ms2": main.lateral_accel,
             "Steering_Direction": main.steering_direction,

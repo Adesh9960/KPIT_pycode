@@ -12,8 +12,8 @@ CAN_FD_Mask = 0x80000000
 
 
 def encode_frame(telemetry_row: dict):
+    
     global sequence_number
-
     for msg_name, msg_config in MESSAGE_MAP.items():
         try:
             raw_id = msg_config["can_id"]
@@ -23,14 +23,15 @@ def encode_frame(telemetry_row: dict):
             # add of 0x80000000
             lookup_id = raw_id | CAN_FD_Mask if is_extended else raw_id
 
-            # If Id not found in dbc
             try:
                 msg_def = db.get_message_by_frame_id(lookup_id)
-            except KeyError:
+
+            # If Id not found in dbc
+            except KeyError:    
                 print(f"[SKIP] {msg_name} not found in DBC.")
                 continue
 
-            # map telemetry CSV columns to DBC signal names
+            # map telemetry entries to DBC signal names
             signals = {
                 dbc_signal: float(telemetry_row[csv_col])
                 for dbc_signal, csv_col in msg_config["signals"].items()
@@ -74,5 +75,5 @@ def encode_frame(telemetry_row: dict):
             # print(f"[SEQ #{sequence_number}] [{msg_name}] {frame}")
 
         except Exception as e:
-            # print(f"[ROW ERROR] {msg_name}: {e} — skipping")
+            print(f"[ROW ERROR] {msg_name}: {e} — skipping")
             continue
