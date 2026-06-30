@@ -14,7 +14,8 @@ def encrypt_uds_payload(key: bytes, uds_payload: bytes) -> bytes:
     if len(key) != KEY_SIZE:
         raise ValueError(f"AES-128 key must be {KEY_SIZE} bytes, got {len(key)}")
 
-    nonce = os.urandom(NONCE_SIZE)
+    # nonce = os.urandom(NONCE_SIZE)
+    nonce = b"\x00" * 12
     aesgcm = AESGCM(key)
     ciphertext_and_tag = aesgcm.encrypt(nonce, uds_payload, associated_data=None)
 

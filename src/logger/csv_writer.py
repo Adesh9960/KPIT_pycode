@@ -17,6 +17,8 @@ def inc_file_count():
     file_count += 1 
 
 def frames_to_logs(frames: list[CANFrame])-> list[str]:
+    if type(frames) == "list[str]":
+        print("error : ", frames)
     logs = [f"{frame.timestamp_ns}, {hex(frame.can_id)}, {frame.dlc}, {frame.data.hex()}, {frame.details}\n" for frame in frames]
     return logs
 

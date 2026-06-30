@@ -39,6 +39,7 @@ class RawReceiver(can.Listener):
             monitor = main.message_monitor_list.get(frame.can_id)
             if monitor is not None:
                 monitor.last_rx_time = time.monotonic()
-            main.can_queue.put(frame)
+            if main.can_queue is not None:
+                main.can_queue.put(frame)
 
   

@@ -1,5 +1,5 @@
 from uds_client.UDSError import UDSError
-
+import os
 def request_upload(self):
     """
     Request firmware from ECU.
@@ -125,7 +125,7 @@ def read_firmware_from_ecu(
             block_counter = 1
 
     self.transfer_exit_upload()
-
+    os.makedirs(os.path.dirname(output_file), exist_ok=True)
     with open(output_file, "wb") as f:
         f.write(firmware)
 

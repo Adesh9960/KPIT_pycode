@@ -13,6 +13,7 @@ from flask import Flask, request, jsonify, render_template, send_file, after_thi
 import os
 import logging
 import time
+import json
 
 latest_analytics = {}
 analytics_lock = Lock()
@@ -250,7 +251,11 @@ def send_realtime_data(frame):
 @app.route("/history-data", methods = ["GET"])
 def history_data():
     with analytics_lock:
-        return jsonify(history)
+        history_json = json.dumps(
+            {key: list(value) for key, value in history.items()},
+            indent=4
+        )
+        return history_json
 
 @app.route("/state", methods= ["GET"])
 def get_state():

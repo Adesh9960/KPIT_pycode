@@ -53,16 +53,7 @@ def encode_frame(telemetry_row: dict):
                 is_extended_id=is_extended,
                 is_fd=is_fd
             )
-            # frame = CANFrame(
-            #     timestamp_ns= time.time_ns(),
-            #     can_id = raw_id,
-            #     dlc = msg_config["dlc"],
-            #     data=payload,
-            #     is_extended=is_extended,
-            #     is_fd=is_fd,
-            #     is_error=False
-            # )
-            # if raw_id == 0x100 or raw_id == 0x200 or raw_id == 0x400 or raw_id == 0x101 or raw_id == 0x18FF0500:
+            
                 # To send to queue
             request = TxRequest(
                 priority=1,

@@ -10,11 +10,7 @@ from uds_client.sessionControl import diagnostic_session_control
 from uds_client.IOControl import io_control
 from uds_client.securityAccess import security_access
 from uds_client.handleDTC import read_dtcs, clear_all_dtcs
-from uds_client.uds_crypto import encrypt_uds_payload, decrypt_uds_payload, UDSCryptoError
-from uds_client.uds_aes_key import UDS_AES_KEY
 from uds_client.UDSError import UDSError
-
-import hashlib
 
 class UDSRoles(Enum):
     USER = "user"
@@ -54,14 +50,12 @@ class UDS:
 
     def on_response(self, payload):
         print(f"[RAW-RX] {payload}")
-        # print(f"[KEY-CHECK-TESTER] using key fingerprint: {hashlib.sha256(UDS_AES_KEY).hexdigest()[:16]}")
-        # print(f"[AES-RX-TESTER] wire={bytes(payload).hex()} len={len(payload)}")
+        print("received:", payload.hex())
+        print("received len:", len(payload))
+
         try:
-            # self._response = decrypt_uds_payload(UDS_AES_KEY, bytes(payload))
             self._response = payload
-        except UDSCryptoError as e:
-            print(f"UDS response decryption failed: {e}")
-            self._response = bytes([0x7F, 0x00, 0x22])
+
         except ValueError as e:
             print(f"UDS response malformed: {e}")
             self._response = bytes([0x7F, 0x00, 0x13])
@@ -71,12 +65,7 @@ class UDS:
     def send_and_wait(self, payload, timeout):
         self._event.clear()
         self._response = None
-
-        # encrypted_payload = encrypt_uds_payload(UDS_AES_KEY, bytes(payload))
-        # print(f"[AES-TX] plaintext={bytes(payload).hex()} -> ciphertext={encrypted_payload.hex()}")
-        # print("TX HEX:", encrypted_payload.hex())
-        # print("TX LEN:", len(encrypted_payload))
-        # uds_req = createUDSRequest(encrypted_payload, timeout) 
+ 
         uds_req = createUDSRequest(payload, timeout)
         send_to_tx_queue(uds_req)
 

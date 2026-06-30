@@ -7,8 +7,9 @@ from utils.sendFrameToCANFrame import sendFrameToCANFrame
 from listener.driver.SocketCANAdapter import BusState
 import heapq
 
-
+iso_count = 0
 def transmit(msg: TxRequest):
+    global iso_count
     try:
         if(msg.request_type == TxRequestType.RAWCAN):
             main.adapter.send(msg.payload)
@@ -20,7 +21,10 @@ def transmit(msg: TxRequest):
                     print("ISO-TP stuck for too long please restart...")
             if main.isotpTXCallback is not None:
                 main.isotpTXCallback()
+            print("Tx Count: ", bytes([iso_count & 0xff]) )
+            print("STACK SEND:",msg.payload)
             main.stack.send(msg.payload)
+            iso_count =+ 1
             print("transmitted istop successfully")
 
     except TransmissionError as e:

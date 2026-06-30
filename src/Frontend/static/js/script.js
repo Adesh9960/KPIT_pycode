@@ -760,6 +760,7 @@ function updateLive(d) {
 
   const clutchEl = document.getElementById("chip-clutch");
   const clutchVal = document.getElementById("clutch-val");
+  console.log("Clutch state: ", d.clutch_state)
   const clutchState = d.clutch_state == 1? "DOWN" : "UP";
   if (clutchVal) clutchVal.textContent = clutchState;
   if (clutchEl) clutchEl.classList.toggle("active", clutchState === "DOWN");
@@ -1153,7 +1154,7 @@ function updateTechnician(d) {
   setText("tech-engstate", d.engine_state || "IDLE");
 
   // TCM
-  setText("tech-gear", d.gear || "Neutral");
+  setText("tech-gear", d.gear_num == 0? "Neutral": d.gear_num);
   setText("tech-gearnum", (d.gear_num || 0) === 0 ? "N" : String(d.gear_num));
   setText("tech-clutch", d.clutch_state? "DOWN": "UP");
   setText("tech-brake", d.brake_state? "DOWN" : "UP");
@@ -2142,7 +2143,7 @@ async function pgCmd_historySummary(field) {
   const res = await fetch("/history-data");
   const data = await res.json();
   if (!field) {
-    pgPrint("usage: history.summary <field>", "l-dim");
+    pgPrint("usage: firmware.download ", "l-dim");
     pgPrint(`available fields: ${Object.keys(HISTORY_FIELDS).join(", ")}`, "l-dim");
     return;
   }
@@ -2221,7 +2222,7 @@ function pgCmd_help() {
     "logs.download                download CAN log file from listener",
     "report.download              download session report as .txt",
     "security.key <level>         grant security access 1/2/3 (0x27)",
-    "history.summary <field>      min/max/avg for a logged signal",
+    "firmware.download            download bin file of ECU firmware",
     "io.set <actuator> on|off|ecu force or release an actuator (0x2F)",
     "sysinfo                       show ECU identity + session/security state",
     "file.select <tag>            load a modified/tuned file (e.g. stage2)",
@@ -2283,8 +2284,8 @@ async function pgRunCommand(raw) {
       case "report.download":
         await pgCmd_reportDownload();
         break;
-      case "history.summary":
-        await pgCmd_historySummary(args[0]);
+      case "firmware.download":
+        await pgCmd_firmwareDownload();
         break;
       case "io.set":
         await pgCmd_ioSet(args[0], args[1]);
