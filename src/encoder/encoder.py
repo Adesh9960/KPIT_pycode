@@ -57,7 +57,7 @@ def encode_frame(telemetry_row: dict):
             
                 # To send to queue
             request = TxRequest(
-                priority=1,
+                priority=10,
                 enqueue_timestamp_ns=time.time_ns(),
                 request_id=int(time.time_ns()),
                 request_type=TxRequestType.RAWCAN,

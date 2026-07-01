@@ -16,7 +16,7 @@ import simulator.uds.uploadFirmware as uploadFirmware
 
 def createTXRequest(payload: bytes):
     return TxRequest(
-        priority=10,
+        priority=1,
         enqueue_timestamp_ns=time.time_ns(),
         request_type=TxRequestType.UDS,
         payload=payload,

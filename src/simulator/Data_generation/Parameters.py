@@ -11,6 +11,7 @@ import random
 from encoder.encoder import encode_frame
 from simulator.Data_generation.steering import update_steering, calculate_lateral_accel
 from simulator.Data_generation.tyres import calculate_tire_pressures
+from simulator.gameController.vibration import set_engine_rumble
 try:
     import keyboard
 except ImportError:
@@ -96,7 +97,28 @@ def clear_screen():
 # ═══════════════════════════════════════════════════════════════
 # GEAR CHANGE
 # ═══════════════════════════════════════════════════════════════
+prev_u = False
+prev_d = False
 def check_gear(is_clutch_down):
+    global prev_u, prev_d
+    u = keyboard.is_pressed('u')
+    d = keyboard.is_pressed('d')
+
+    if u and not prev_u and is_clutch_down:
+        if main.current_gear == 'n':
+            main.current_gear = '1'
+        else:
+            main.current_gear = str(min(int(main.current_gear) + 1, 5))
+
+    if d and not prev_d and is_clutch_down:
+        if main.current_gear != 'n':
+            main.current_gear = str(int(main.current_gear) - 1)
+
+        if main.current_gear == '0':
+            main.current_gear = 'n'
+
+    prev_u = u
+    prev_d = d
     for g in ['n', '1', '2', '3', '4', '5']:
         if keyboard.is_pressed(g) and main.current_gear != g:
             if is_clutch_down:
@@ -108,7 +130,6 @@ def check_gear(is_clutch_down):
                 main.gear_grind_warning = False
             else:
                 main.gear_grind_warning = True
-
 
 # ═══════════════════════════════════════════════════════════════
 # PHYSICS HANDLERS (unchanged from before)
@@ -620,6 +641,7 @@ def run_vehicle_simulator():
         calculate_lateral_accel()
         main.distance_km += (main.current_speed / 3600.0) * main.refresh_rate
         handle_rpm_physics(is_clutch_down, is_accelerating, physics)
+        set_engine_rumble(main.current_rpm)
         handle_fuel_physics(is_clutch_down, is_accelerating, physics)
         handle_battery_and_temp(is_clutch_down, is_accelerating, physics)
 
