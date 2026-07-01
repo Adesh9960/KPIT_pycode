@@ -1922,6 +1922,20 @@ async function pgCmd_didWrite(hexStr, value) {
   if (data.status === "success") pgPrint(`0x6E ${hexStr} — write acknowledged`, "l-bold");
   else pgPrint(`0x7F 0x2E — SID 0x${data.sid?.toString(16)} NRC 0x${data.nrc?.toString(16)}`, "l-red");
 }
+function pgCmd_didLS() {
+  try{
+    const res = await fetch('/DID')
+    const DID_namelist = await res.json()
+    for(const [hex_key, name] of Object.entries(DID_namelist)){
+      pgPrint(name + ": " + hex_key)
+    }
+  }
+  catch(err){
+    pgPrint("Could not fetch DID list", "l-red")
+    console.error(err)
+  }
+
+}
 
 async function pgCmd_fileSelect(tag) {
   pgPrint("⚠ not implemented — backend route for this command does not exist yet", "l-amber");
@@ -2028,7 +2042,20 @@ async function pgCmd_bench(step, tool) {
   pgPrint("⚠ not implemented — backend route for this command does not exist yet", "l-amber");
   return;
 }
+function createDTCListItem(){
+  <div class="tech-dtc-item">
 
+    <div class="tech-dtc-codes">
+        <span class="dtc-code">P0301</span>
+        <span class="dtc-code uds-code">0x123456</span>
+    </div>
+
+    <div class="tech-dtc-description">
+        Cylinder 1 Misfire Detected
+    </div>
+
+</div>
+}
 async function pgCmd_dtcClear() {
   pgPrint("Sending 0x14 0xFF 0xFF 0xFF — Clear all DTCs...", "l-dim");
   const res = await fetch("/DTC", { method: "DELETE" });
@@ -2298,6 +2325,8 @@ async function pgRunCommand(raw) {
       case "did.write":
         await pgCmd_didWrite(args[0], args[1]);
         break;
+      case "did.ls":
+        await pgCmd_didLS()
       case "logs.download":
         await pgCmd_logsDownload();
         break;

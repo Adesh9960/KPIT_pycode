@@ -1,5 +1,5 @@
 from enum import Enum
-from simulator.dids.didConfig import didconfig
+from dids.didConfig import didconfig
 from udsoncan.services import ReadDataByIdentifier, WriteDataByIdentifier
 from listener.TxRequest import TxRequest, TxRequestType
 from listener.listener import send_to_tx_queue

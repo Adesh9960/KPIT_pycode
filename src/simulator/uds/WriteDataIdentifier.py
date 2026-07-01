@@ -1,4 +1,4 @@
-from simulator.dids.didList import DID_DATABASE, DID_LENGTHS
+from dids.didList import DID_DATABASE, DID_LENGTHS
 import simulator.uds.negativeResponse as negative_response
 import simulator.main as main
 

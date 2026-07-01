@@ -5,7 +5,7 @@ import sys
 import requests
 import simulator.Data_generation.actuators as actuators
 from simulator.Data_generation.display_data import display_stats
-from simulator.dids.didList import DID_DATABASE
+from dids.didList import DID_DATABASE
 import random
 # from simulator.Data_generation.UDSHandler import UDSHandler
 from encoder.encoder import encode_frame
@@ -52,9 +52,6 @@ wheel_rl = 0
 wheel_rr = 0
 # Module-level UDS handler — single instance shared via import
 # uds_handler = UDSHandler()
-
-headlamp_switch_timeout = time.time()
-
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -587,9 +584,9 @@ def get_telemetry_entry(is_clutch_down, physics, is_braking: bool = False) -> di
 # ═══════════════════════════════════════════════════════════════
 # MAIN SIMULATOR LOOP
 # ═══════════════════════════════════════════════════════════════
+prev_o_pressed = False
 def run_vehicle_simulator():
-    global headlamp_switch_timeout
-
+    global prev_o_pressed
     main.remaining_fuel_ml = load_fuel_state()
     main.ambient_temp      = get_live_ambient_temp()
     main.coolant_temp      = main.ambient_temp
@@ -624,9 +621,12 @@ def run_vehicle_simulator():
         is_braking      = keyboard.is_pressed('b')
         is_clutch_down  = keyboard.is_pressed('c')
 
-        if keyboard.is_pressed('o') and time.time() - headlamp_switch_timeout > 0.1:
-            main.headlamp_switch    = not main.headlamp_switch
-            headlamp_switch_timeout = time.time()
+        o_pressed = keyboard.is_pressed('o')
+        if o_pressed and not prev_o_pressed:
+            main.headlamp_switch = not main.headlamp_switch
+            
+        prev_o_pressed = o_pressed
+
 
         check_gear(is_clutch_down)
         physics = gear_physics[main.current_gear]

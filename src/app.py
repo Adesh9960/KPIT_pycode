@@ -6,9 +6,10 @@ from uds_client.uds_client import UDS, UDSRoles
 import Decoder.decoder_thread as decoder
 import isotp
 from uds_client.UDSError import UDSError
-from utils.files import zip_folder, delete_file
+from utils.files import zip_folder
 from utils.updateHistory import history, update_history
-from flask import Flask, request, jsonify, render_template, send_file, after_this_request
+from flask import Flask, request, jsonify, render_template, send_file
+from dids.didList import DID_NAMES
 import os
 import logging
 import time
@@ -71,7 +72,11 @@ def home():
             "message": "Session Access Failed"
         })
     
-
+@app.route("/DID",methods=["GET"])
+def get_all_DID():
+    return jsonify(
+        DID_NAMES
+        )
 @app.route("/DID/<int:DID>", methods=["GET"])
 def get_DID(DID: int):
     """

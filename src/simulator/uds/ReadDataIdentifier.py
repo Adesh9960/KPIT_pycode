@@ -1,4 +1,4 @@
-from simulator.dids.didList import DID_DATABASE
+from dids.didList import DID_DATABASE
 
 def get_DID(did: int) -> bytes | None:
     """
