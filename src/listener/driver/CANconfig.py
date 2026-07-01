@@ -2,7 +2,7 @@ from dataclasses import dataclass
 @dataclass
 class CANConfig:
 	interface: str # socketcan, pcan, kvaser
-	channel: str # can0, PCAN_USBBUS1
+	channel: str # can0
 	bitrate: int
 	restart_ms: int
 	fd_enabled: bool = False

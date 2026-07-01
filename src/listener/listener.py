@@ -1,12 +1,12 @@
 import listener.main as main
-from .driver.SocketCANAdapter import SocketCANAdapter, BusState
+from .driver.SocketCANAdapter import SocketCANAdapter
 from .driver.CANconfig import CANConfig
 from .tranmitter import transmitter
 from .iso_receiver import iso_receiver
 from .raw_can_receiver import RawReceiver
 from .timeout import monitor_timeouts
 import threading
-from .TxRequest import TxRequest, TxRequestType
+from .TxRequest import TxRequest
 import logger.logger as logger 
 import queue
 import can
@@ -16,12 +16,28 @@ from listener.iso_tp_error_decoder import IsoTpErrorHandler
 from data_structures.BusStatistics import BusStatistics
 
 def start(address, uds_response_event = None, channel = "can0", enable_logger = True):
+    """
+    Initializes and boots up the complete CAN network subsystem.
+
+    This configures and opens the SocketCAN adapter interface, spins up the 
+    ISO-TP network transport layer, prepares message transmission/reception 
+    queues, and launches background thread workers to handle network processing.
+
+    Args:
+        address (isotp.Address): The ISO-TP addressing scheme (tx/rx IDs) used for 
+            segmented network messaging.
+        uds_response_event (threading.Event, optional): A synchronization primitive 
+            passed to the receiver loop to signal the arrival of an expected UDS frame.
+        channel (str, optional): The name of the Linux network interface to bind to. 
+            Defaults to "can0".
+        enable_logger (bool, optional): Determines if frame logging should be activated 
+            globally within the manager state. Defaults to True.
+    """
     adapter_config = CANConfig(
     "socketcan",
     channel,
     500_000,
     restart_ms=100,
-    # fd_enabled=True
     )
     main.listener_enabled = enable_logger
     main.raw_can_receiver = RawReceiver()
@@ -62,21 +78,25 @@ def start(address, uds_response_event = None, channel = "can0", enable_logger = 
     print("Ready to receive and send messages")
 
 
-# def get_bus_status():
-#     state = main.adapter.get_bus_state()
-#     match state:
-#         case BusState.ACTIVE:
-#             return "ACTIVE"
-#         case BusState.PASSIVE:
-#             return "PASSIVE"
-#         case BusState.ERROR:
-#             return "ERROR"
-#     return "OFF"
-
 def get_stats() -> BusStatistics:
+    """
+    Retrieves the current physical layer bus performance metadata.
+
+    Returns:
+        BusStatistics: An object tracking error metrics, total frame counts, 
+                       dropped frames, and network statistics.
+    """
     return main.adapter.stats
 
+
 def stop():
+    """
+    Gracefully halts network activity and releases physical interface bindings.
+
+    Signaled by lowering the module execution flag, letting all background 
+    workers (transmitters, receivers, and monitors) unwind and terminate before 
+    closing the hardware abstraction adapter layer safely.
+    """
     print("Stopping listener...")
     main.running = False
     main.tx_thread.join()
@@ -86,10 +106,29 @@ def stop():
     main.adapter.close()
     print("Listener Stopped")
 
+
 def send_to_tx_queue(request: TxRequest):
+    """
+    Schedules an outbound frame request for network delivery.
+
+    Appends the target transaction into the system priority queue where the 
+    transmitter thread handles it based on its defined sequence order.
+
+    Args:
+        request (TxRequest): The structured encapsulation container holding the payload 
+                             and transaction metadata to be broadcasted.
+    """
     main.tx_queue.put(request)
 
+
 def test_transmission():
+    """
+    Runs a diagnostic simulation pipeline to verify CAN physical and transport loops.
+
+    Asynchronously pushes several raw standard CAN frame transmission requests onto the 
+    scheduling queue spaced by short delay parameters, followed by an ISO-TP encoded 
+    UDS request payload, before systematically winding down system subsystems.
+    """
     test_frame = can.Message(
         arbitration_id=102,      # ← still use the raw ID here
         data=b'\x01\x02\x03',
@@ -131,6 +170,3 @@ def test_transmission():
     send_to_tx_queue(iso_test)
     logger.stop()
     stop()
-
-# start()
-# test_transmission()
