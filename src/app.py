@@ -143,9 +143,8 @@ def download(file):
     
     if file == "firmware":
         path = os.path.join(os.path.dirname(os.getcwd()), 'data', 'firmware', 'firmware.bin')
-        uds_client.firmwareUpload(path)
-  
         try:
+            uds_client.firmwareUpload(path)
             response = send_file(
                 path,
                 as_attachment=True,
@@ -161,7 +160,12 @@ def download(file):
                 except Exception as e:
                     print(f"Cleanup failed: {e}")
             return response
-        
+        except UDSError as e:
+            print(e)
+            return jsonify({
+                "status": "error",
+                "message": e.message
+            })
         except Exception as e:
             print(e)
             return jsonify({

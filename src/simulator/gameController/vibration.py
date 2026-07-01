@@ -1,13 +1,23 @@
-from evdev import InputDevice, ecodes, ff
+from evdev import InputDevice, ecodes, ff, list_devices
 
 controller = None
+
+for path in list_devices():
+    dev = InputDevice(path)
+
+    if "Sony" in dev.name:
+        controller = dev
+        break
+
 try:
-    controller = InputDevice("/dev/input/event10")
-    print("Controller connected.")
+    if controller is not None:
+        controller = InputDevice(controller)
+        print("Controller connected.")
 except (FileNotFoundError, OSError):
     print("No controller detected. Continuing without controller.")
 MAX_RPM = 7000
 current_effect = None
+
 
 
 def set_engine_rumble(rpm):
@@ -40,6 +50,6 @@ def set_engine_rumble(rpm):
             controller.erase_effect(current_effect)
         except OSError:
             pass
-
-    current_effect = controller.upload_effect(effect)
-    controller.write(ecodes.EV_FF, current_effect, 1)
+    if controller is not None:
+        current_effect = controller.upload_effect(effect)
+        controller.write(ecodes.EV_FF, current_effect, 1)

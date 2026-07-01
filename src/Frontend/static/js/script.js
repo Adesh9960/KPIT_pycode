@@ -2074,34 +2074,54 @@ async function pgCmd_report() {
   pgPrint("══════════════════════════════════════════", "l-bold");
 }
 
-function pgTriggerDownload(url, filename) {
-  const a = document.createElement("a");
-  a.href = url;
-  if (filename) a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
+async function pgDownloadFile(url, filename) {
+  pgPrint("Requesting firmware bin file from ECU...", "l-dim");
+
+try {
+    const response = await fetch(`/download/${url}`);
+
+    // Server returned an error (e.g. 400, 500)
+    if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.message || "Download failed");
+    }
+
+    const contentType = response.headers.get("Content-Type");
+
+    // ECU returned NRC as JSON
+    if (contentType.includes("application/json")) {
+        const data = await response.json();
+        pgPrint(data.message, "l-red");
+        return
+    }
+
+    // Firmware received
+    const blob = await response.blob();
+
+    const download_url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = download_url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    window.URL.revokeObjectURL(download_url);
+
+    pgPrint("Download started — check your browser's downloads.", "l-bold");
+    pgProgressLog(`${filename} file download requested.`);
+
+} catch (e) {
+    pgPrint(`Error: ${e.message}`, "l-red");
+}
 }
 async function pgCmd_firmwareDownload(){
   pgPrint("Requesting firmware bin file from ECU...", "l-dim");
-  try {
-    window.location.href = "/download/firmware"
-    pgPrint("Download started — check your browser's downloads.", "l-bold");
-    pgProgressLog("firmware file download requested.");
-  } catch (e) {
-    pgPrint(`Error: ${e.message}`, "l-red");
-  }
+  await pgDownloadFile("firmware", "firmware.bin")
 }
 async function pgCmd_logsDownload() {
   pgPrint("Requesting CAN log file from listener/logger...", "l-dim");
-  try {
-    window.location.href = "/download/logger"
-
-    pgPrint("Download started — check your browser's downloads.", "l-bold");
-    pgProgressLog("Log file download requested.");
-  } catch (e) {
-    pgPrint(`Error: ${e.message}`, "l-red");
-  }
+  await pgDownloadFile("logger", "all_logs.zip")
 }
 
 async function pgCmd_sysinfo() {
