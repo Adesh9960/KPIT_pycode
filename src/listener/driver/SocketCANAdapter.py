@@ -56,13 +56,16 @@ class SocketCANAdapter:
         """
         print("SocketCAN opening started")
         # Step 1: Force interface down before applying changes
-        subprocess.run(
-            ["ip", "link", "set", self.config.channel, "down"],
-            check=True,
-        ) 
+        if "vcan" not in self.config.channel:
+            subprocess.run(
+                ["ip", "link", "set", self.config.channel, "down"],
+                check=True,
+            ) 
+        if "vcan" in self.config.channel:
+            pass
         
         # Step 2: Configure interface type and characteristics based on FD capability
-        if self.config.fd_enabled:
+        elif self.config.fd_enabled:
             subprocess.run([
                 "ip", "link", "set", self.config.channel, "up",
                 "type", "can",

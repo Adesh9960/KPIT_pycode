@@ -1550,24 +1550,9 @@ function renderDTCs(dtcs) {
     clearBtn.disabled = false;
 
     dtcs.forEach(dtc => {
-
         const code = dtc.code.toString(16).toUpperCase().padStart(6, "0");
         const status = "0x" + dtc.status.toString(16).toUpperCase().padStart(2, "0");
-
-        const row = document.createElement("div");
-        row.className = "tech-dtc-item";
-
-        row.innerHTML = `
-            <div class="tech-dtc-main">
-                <div class="tech-dtc-code">${code}</div>
-            </div>
-
-            <div class="tech-dtc-status">
-                ${status}
-            </div>
-        `;
-
-        list.appendChild(row);
+        createDTCItem(status, code, "RPM Value Out Of Range")
     });
 }
 
@@ -1922,7 +1907,7 @@ async function pgCmd_didWrite(hexStr, value) {
   if (data.status === "success") pgPrint(`0x6E ${hexStr} — write acknowledged`, "l-bold");
   else pgPrint(`0x7F 0x2E — SID 0x${data.sid?.toString(16)} NRC 0x${data.nrc?.toString(16)}`, "l-red");
 }
-function pgCmd_didLS() {
+async function pgCmd_didLS() {
   try{
     const res = await fetch('/DID')
     const DID_namelist = await res.json()
@@ -2042,20 +2027,35 @@ async function pgCmd_bench(step, tool) {
   pgPrint("⚠ not implemented — backend route for this command does not exist yet", "l-amber");
   return;
 }
-function createDTCListItem(){
-  <div class="tech-dtc-item">
 
-    <div class="tech-dtc-codes">
-        <span class="dtc-code">P0301</span>
-        <span class="dtc-code uds-code">0x123456</span>
-    </div>
+function createDTCItem(code, udsCode, description) {
+    const item = document.createElement("div");
+    item.className = "tech-dtc-item";
 
-    <div class="tech-dtc-description">
-        Cylinder 1 Misfire Detected
-    </div>
+    const codes = document.createElement("div");
+    codes.className = "tech-dtc-codes";
 
-</div>
+    const dtcCode = document.createElement("span");
+    dtcCode.className = "dtc-code";
+    dtcCode.textContent = code;
+
+    const udsCodeSpan = document.createElement("span");
+    udsCodeSpan.className = "dtc-code uds-code";
+    udsCodeSpan.textContent = udsCode;
+
+    codes.appendChild(dtcCode);
+    codes.appendChild(udsCodeSpan);
+
+    const desc = document.createElement("div");
+    desc.className = "tech-dtc-description";
+    desc.textContent = description;
+
+    item.appendChild(codes);
+    item.appendChild(desc);
+
+    return item;
 }
+
 async function pgCmd_dtcClear() {
   pgPrint("Sending 0x14 0xFF 0xFF 0xFF — Clear all DTCs...", "l-dim");
   const res = await fetch("/DTC", { method: "DELETE" });
