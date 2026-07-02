@@ -7,7 +7,7 @@
 - CAN interface configured (`can0`, `vcan0`, etc.)
 
 ---
-````markdown
+
 ## Note for using a Virtual CAN (`vcan0`)
 
 If you do not have physical CAN hardware, the tester and ECU simulator can communicate over Linux's virtual CAN interface.
