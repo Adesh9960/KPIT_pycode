@@ -363,7 +363,7 @@ if __name__ == "__main__":
     uds_client = UDS(UDSRoles.USER)
     
     # Spin up background async notifier frameworks and thread worker contexts
-    listener.start(address, uds_client.on_response, channel="vcan0")
+    listener.start(address, uds_client.on_response, channel="can0")
     start_time_flag = time.monotonic()
     
     decoder.start(send_realtime_data)

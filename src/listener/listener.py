@@ -7,10 +7,7 @@ from .raw_can_receiver import RawReceiver
 from .timeout import monitor_timeouts
 import threading
 from .TxRequest import TxRequest
-import logger.logger as logger 
 import queue
-import can
-import time
 import isotp
 from listener.iso_tp_error_decoder import IsoTpErrorHandler
 from data_structures.BusStatistics import BusStatistics
@@ -55,7 +52,7 @@ def start(address, uds_response_event = None, channel = "can0", enable_logger = 
     'rx_flowcontrol_timeout': 5000,        # N_Bs: Wait up to 5s for Flow Control frame (Default: 1000)
     'rx_consecutive_frame_timeout': 5000,  # N_Cs: Wait up to 5s for the next Consecutive Frame (Default: 1000)
     'wftmax': 10,                          # Max number of Wait Flow Control frames allowed (Default: 0/4)
-    'stmin': 10,                           # Separation Time (ms) to tell the sender to slow down
+    'stmin': 50,                           # Separation Time (ms) to tell the sender to slow down
     'tx_data_length': 8,                   # Standard 8-byte CAN frame data length
 }
     )
@@ -119,54 +116,3 @@ def send_to_tx_queue(request: TxRequest):
                              and transaction metadata to be broadcasted.
     """
     main.tx_queue.put(request)
-
-
-def test_transmission():
-    """
-    Runs a diagnostic simulation pipeline to verify CAN physical and transport loops.
-
-    Asynchronously pushes several raw standard CAN frame transmission requests onto the 
-    scheduling queue spaced by short delay parameters, followed by an ISO-TP encoded 
-    UDS request payload, before systematically winding down system subsystems.
-    """
-    test_frame = can.Message(
-        arbitration_id=102,      # ← still use the raw ID here
-        data=b'\x01\x02\x03',
-        dlc=3,
-        is_extended_id=False,
-        is_fd=False
-    )
-    iso_test_frame = can.Message(
-        arbitration_id=0x7E0,
-        data = b"\x62\xF1\x90\x12\x34\x56",
-        dlc = 8,
-        is_extended_id= False,
-        is_fd = False
-    )
-    count = 1
-   
-    while(count < 10):
-        test_request = TxRequest(
-            priority=1,
-            enqueue_timestamp_ns=time.time_ns(),
-            request_type="raw_can",
-            request_id=count,
-            payload=test_frame,
-            max_retries=0,
-            timeout_ms=100,
-        )
-        send_to_tx_queue(test_request)
-        count+= 1
-        time.sleep(3)
-    iso_test = TxRequest(
-        priority=1,
-        enqueue_timestamp_ns=time.time_ns(),
-        request_type="uds",
-        request_id=count,
-        payload=iso_test_frame,
-        max_retries=0,
-        timeout_ms=100
-    )
-    send_to_tx_queue(iso_test)
-    logger.stop()
-    stop()
