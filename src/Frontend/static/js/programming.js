@@ -381,10 +381,10 @@ async function pgCmd_didWrite(hexStr, value) {
         );
 }
 // pgterm command: list all known DIDs with their required security levels.
-function pgCmd_didLS() {
+async function pgCmd_didLS() {
   try{
-    const res = await fetch('/DID')
-    const DID_namelist = await res.json()
+    const response = await fetch('/DID')
+    const DID_namelist = await response.json()
     for(const [hex_key, name] of Object.entries(DID_namelist)){
       pgPrint(name + ": " + hex_key)
     }

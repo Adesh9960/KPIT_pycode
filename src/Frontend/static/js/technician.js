@@ -246,7 +246,33 @@ function addSnifferRow(d) {
     body.insertBefore(row, body.firstChild);
     while (body.children.length > 30) body.removeChild(body.lastChild);
 }
+function createDTCItem(code, udsCode, description) {
+    const item = document.createElement("div");
+    item.className = "tech-dtc-item";
 
+    const codes = document.createElement("div");
+    codes.className = "tech-dtc-codes";
+
+    const dtcCode = document.createElement("span");
+    dtcCode.className = "dtc-code";
+    dtcCode.textContent = code;
+
+    const udsCodeSpan = document.createElement("span");
+    udsCodeSpan.className = "dtc-code uds-code";
+    udsCodeSpan.textContent = udsCode;
+
+    codes.appendChild(dtcCode);
+    codes.appendChild(udsCodeSpan);
+
+    const desc = document.createElement("div");
+    desc.className = "tech-dtc-description";
+    desc.textContent = description;
+
+    item.appendChild(codes);
+    item.appendChild(desc);
+
+    return item;
+}
 // Render the DTC list panel: empty state, count badge, and one row per active DTC.
 export function renderDTCs(dtcs) {
     const list = document.getElementById("tech-dtc-list");
@@ -273,45 +299,12 @@ export function renderDTCs(dtcs) {
     badge.className = "dtc-count-badge fault";
 
     clearBtn.disabled = false;
-
-    dtcs.forEach((dtc) => {
+    
+    dtcs.forEach(dtc => {
         const code = dtc.code.toString(16).toUpperCase().padStart(6, "0");
-        const status =
-            "0x" + dtc.status.toString(16).toUpperCase().padStart(2, "0");
-
-        const row = document.createElement("div");
-        row.className = "tech-dtc-item";
-
-        row.innerHTML = `
-            <div class="tech-dtc-main">
-                <div class="tech-dtc-code">${code}</div>
-            </div>
-
-            <div class="tech-dtc-status">
-                ${status}
-            </div>
-        `;
-
-        list.appendChild(row);
+        const status = "0x" + dtc.status.toString(16).toUpperCase().padStart(2, "0");
+        const ele = createDTCItem(status, code, "RPM Value Out Of Range")
+        list.append(ele)
     });
 }
 
-// ══════════════════════════════════════════════════
-// POLLING
-// ══════════════════════════════════════════════════
-
-// Build a single DTC list-item DOM node with formatted code/status text.
-function createDTCListItem(){
-  <div class="tech-dtc-item">
-
-    <div class="tech-dtc-codes">
-        <span class="dtc-code">P0301</span>
-        <span class="dtc-code uds-code">0x123456</span>
-    </div>
-
-    <div class="tech-dtc-description">
-        Cylinder 1 Misfire Detected
-    </div>
-
-</div>
-}

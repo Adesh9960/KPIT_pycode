@@ -106,6 +106,7 @@ def handle_tester_request(wire_payload: bytearray):
     """
     try:
         payload = wire_payload
+
     except ValueError as e:
         print(f"UDS request malformed: {e}")
         return send_response(negative_response.create_negative_response(

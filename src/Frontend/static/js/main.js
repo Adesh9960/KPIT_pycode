@@ -8,7 +8,7 @@ import { updateAdvanced } from "./advanced.js";
 import { loadHistory } from "./history.js";
 import { updateLive, updateLiveChart, updateWeatherDisplay } from "./live.js";
 import { setMode } from "./navigation.js";
-import { toggleTheme } from "./theme.js";
+
 import {
     initProgTerminal,
     pgRunCommand,

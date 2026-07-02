@@ -83,19 +83,10 @@ class UDS:
         Args:
             payload (bytes): The raw, reassembled response payload bytes arriving from the network layer.
         """
-        print(f"[RAW-RX] {payload}")
-        print("received:", payload.hex())
-        print("received len:", len(payload))
+        self._response = payload
 
-        try:
-            self._response = payload
-        except ValueError as e:
-            print(f"UDS response malformed: {e}")
-            # Fallback block mapping to a standard 0x7F Negative Response with an IncorrectMessageLength (0x13) NRC
-            self._response = bytes([0x7F, 0x00, 0x13])
-        finally:
-            # Wake up the blocked application thread waiting inside the timeout loop
-            self._event.set()
+        # Wake up the blocked application thread waiting inside the timeout loop
+        self._event.set()
     
     def send_and_wait(self, payload: bytes, timeout: float) -> bytes:
         """
@@ -117,7 +108,6 @@ class UDS:
         """
         self._event.clear()
         self._response = None
- 
         uds_req = createUDSRequest(payload, timeout)
         send_to_tx_queue(uds_req)
 

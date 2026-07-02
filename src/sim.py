@@ -8,5 +8,5 @@ address = isotp.Address(
         txid=0x62,
         rxid=0x22
 )
-listener.start(address, handle_tester_request, "can1", enable_logger=False)
+listener.start(address, handle_tester_request, "vcan0", enable_logger=False)
 parameters.run_vehicle_simulator()
