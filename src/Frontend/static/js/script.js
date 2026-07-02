@@ -1548,11 +1548,12 @@ function renderDTCs(dtcs) {
     badge.className = "dtc-count-badge fault";
 
     clearBtn.disabled = false;
-
+    
     dtcs.forEach(dtc => {
         const code = dtc.code.toString(16).toUpperCase().padStart(6, "0");
         const status = "0x" + dtc.status.toString(16).toUpperCase().padStart(2, "0");
-        createDTCItem(status, code, "RPM Value Out Of Range")
+        const ele = createDTCItem(status, code, "RPM Value Out Of Range")
+        list.append(ele)
     });
 }
 

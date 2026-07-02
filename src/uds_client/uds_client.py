@@ -12,10 +12,6 @@ from uds_client.securityAccess import security_access
 from uds_client.handleDTC import read_dtcs, clear_all_dtcs
 from uds_client.UDSError import UDSError
 
-from encryption.uds_crypto import encrypt_uds_payload, decrypt_uds_payload, UDSCryptoError
-from encryption.uds_aes_key import UDS_AES_KEY
-import hashlib
-
 class UDSRoles(Enum):
     """Enumeration defining authorization access roles for the UDS Client session."""
     USER = "user"
@@ -87,24 +83,10 @@ class UDS:
         Args:
             payload (bytes): The raw, reassembled response payload bytes arriving from the network layer.
         """
-        print(f"[RAW-RX] {payload}")
-        print("received:", payload.hex())
-        print("received len:", len(payload))
-        print(f"[KEY-CHECK-TESTER] using key fingerprint: {hashlib.sha256(UDS_AES_KEY).hexdigest()[:16]}")
-        print(f"[AES-RX-TESTER] wire={bytes(payload).hex()} len={len(payload)}")
-        try:
-            self._response = decrypt_uds_payload(UDS_AES_KEY, bytes(payload))
-        except UDSCryptoError as e:
-            print(f"UDS response decryption failed: {e}")
-            self._response = bytes([0x7F, 0x00, 0x22])
+        self._response = payload
 
-        except ValueError as e:
-            print(f"UDS response malformed: {e}")
-            # Fallback block mapping to a standard 0x7F Negative Response with an IncorrectMessageLength (0x13) NRC
-            self._response = bytes([0x7F, 0x00, 0x13])
-        finally:
-            # Wake up the blocked application thread waiting inside the timeout loop
-            self._event.set()
+        # Wake up the blocked application thread waiting inside the timeout loop
+        self._event.set()
     
     def send_and_wait(self, payload: bytes, timeout: float) -> bytes:
         """
@@ -126,12 +108,7 @@ class UDS:
         """
         self._event.clear()
         self._response = None
-        encrypted_payload = encrypt_uds_payload(UDS_AES_KEY, bytes(payload))
-        print(f"[AES-TX] plaintext={bytes(payload).hex()} -> ciphertext={encrypted_payload.hex()}")
-        print("TX HEX:", encrypted_payload.hex())
-        print("TX LEN:", len(encrypted_payload))
-        uds_req = createUDSRequest(encrypted_payload, timeout) 
-        # uds_req = createUDSRequest(payload, timeout)
+        uds_req = createUDSRequest(payload, timeout)
         send_to_tx_queue(uds_req)
 
         # Block current execution thread context up to the timeout threshold limit

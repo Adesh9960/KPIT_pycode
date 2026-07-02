@@ -14,10 +14,6 @@ import simulator.uds.handleDTC as handleDTC
 import simulator.uds.Session as Session
 import simulator.uds.uploadFirmware as uploadFirmware
 
-from encryption.uds_crypto import encrypt_uds_payload, decrypt_uds_payload, UDSCryptoError
-from encryption.uds_aes_key import UDS_AES_KEY
-import hashlib
-
 def createTXRequest(payload: bytes) -> TxRequest:
     """
     Wraps an outbound diagnostic server response payload into a standardized TxRequest.
@@ -45,14 +41,7 @@ def send_response(payload: bytes | bytearray):
     Args:
         payload (bytes | bytearray): The response stream to send back to the diagnostic tester.
     """
-    print("Actual Payload", payload)
-    print(f"[KEY-CHECK-ECU] using key fingerprint: {hashlib.sha256(UDS_AES_KEY).hexdigest()[:16]}")
-    encrypted_payload = encrypt_uds_payload(UDS_AES_KEY, bytes(payload))
-    print("TX HEX:", encrypted_payload.hex())
-    print("TX LEN:", len(encrypted_payload))
-    print(f"[AES-TX-ECU] plaintext={bytes(payload).hex()} -> ciphertext={encrypted_payload.hex()} len={len(encrypted_payload)}")
-    return send_to_tx_queue(createTXRequest(encrypted_payload))
-    # return send_to_tx_queue(createTXRequest(payload))
+    return send_to_tx_queue(createTXRequest(payload))
     
 
 def validate_programming_session():
@@ -116,14 +105,8 @@ def handle_tester_request(wire_payload: bytearray):
         wire_payload (bytearray): The raw message buffer arriving directly from the CAN interface layers.
     """
     try:
-        payload = decrypt_uds_payload(UDS_AES_KEY, bytes(wire_payload))
-        print(f"[AES-RX] wire={bytes(wire_payload).hex()} -> decrypted={payload.hex()}")
-        # payload = wire_payload
-    except UDSCryptoError as e:
-        print(f"UDS request decryption failed: {e}")
-        return send_response(negative_response.create_negative_response(
-            0x00, negative_response.NRC_GENERAL_REJECT
-        ))
+        payload = wire_payload
+
     except ValueError as e:
         print(f"UDS request malformed: {e}")
         return send_response(negative_response.create_negative_response(
