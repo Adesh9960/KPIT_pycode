@@ -1,0 +1,62 @@
+/* live.css - Live Dashboard tab styles (mode-live / #live-mode) */
+
+/* Background adapts per active page */
+body.mode-live {
+    background: var(--lv-bg);
+    color: var(--lv-text);
+}
+body.mode-live .brand-logo {
+    background: rgba(59, 158, 255, 0.15);
+    color: var(--lv-blue);
+    border: 1px solid rgba(59, 158, 255, 0.3);
+}
+
+/* Per-mode color sets — all blobs stay within that page's own hue family */
+body.mode-live .ambient-blob-a {
+    background: var(--lv-blue);
+}
+body.mode-live .ambient-blob-b {
+    background: #1e5fcc;
+}
+body.mode-live .ambient-blob-c {
+    background: var(--lv-blue);
+}
+[data-theme="light"] body.mode-live #app-header {
+    background: rgba(240, 244, 252, 0.6); /* was 0.96 */
+    border-bottom-color: rgba(0, 0, 0, 0.08);
+}
+body.mode-live .brand-logo {
+    background: rgba(59, 158, 255, 0.15);
+    color: var(--lv-blue);
+    border: 1px solid rgba(59, 158, 255, 0.3);
+}
+
+/* Active states per theme */
+body.mode-live .tab-btn[data-mode="live"].active,
+body.mode-live .tab-btn.active {
+    background: rgba(59, 158, 255, 0.18);
+    border-color: rgba(59, 158, 255, 0.4);
+    color: var(--lv-blue);
+}
+
+[data-theme="dark"] body.mode-live {
+    --lv-card: rgba(20, 24, 36, 0.78);
+    --lv-card2: rgba(26, 32, 48, 0.78);
+    --lv-border: rgba(255, 255, 255, 0.08);
+    --lv-text: #e8edf5;
+    --lv-muted: #5a6478;
+}
+
+/*  LIVE PAGE — electric blue / amber */
+/* Mesh grid background overlay */
+#live-mode {
+    background-image:
+        linear-gradient(rgba(59, 158, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59, 158, 255, 0.025) 1px, transparent 1px);
+    background-size: 48px 48px;
+}
+[data-theme="light"] #live-mode {
+    background-image:
+        linear-gradient(rgba(59, 158, 255, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59, 158, 255, 0.06) 1px, transparent 1px);
+}

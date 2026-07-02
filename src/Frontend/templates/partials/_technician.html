@@ -1,0 +1,449 @@
+<!-- _technician.html — Technician tab (UDS Extended Session 0x03): ReadDataByIdentifier, IOControl, DTC panel, ECU module status -->
+<!-- ══════════════════════════════════════════════════
+     TECHNICIAN PAGE — UDS Extended Session (0x03)
+══════════════════════════════════════════════════ -->
+<section class="page" id="technician-mode">
+    <div class="tech-header-strip">
+        <div class="tech-session-badge">
+            <span class="tech-dot"></span>
+            <span>EXTENDED DIAGNOSTIC SESSION — 0x10 0x03</span>
+        </div>
+        <div class="tech-header-right">
+            <!-- Pre-condition status bar -->
+            <div class="tech-precond-bar" id="tech-precond-bar">
+                <span class="precond-item" id="pc-speed">
+                    <span class="pc-dot pc-bad"></span> Speed: MOVING
+                </span>
+                <span class="precond-item" id="pc-session">
+                    <span class="pc-dot pc-ok"></span> Session: EXT
+                </span>
+                <span class="precond-item" id="pc-security">
+                    <span class="pc-dot pc-bad"></span> Security: LOCKED
+                </span>
+            </div>
+            <button class="tech-exit-btn" onclick="exitTechMode()">
+                ✕ Exit Session
+            </button>
+        </div>
+    </div>
+
+    <!-- ── SECTION A: Read Data by Identifier (0x22) ── -->
+    <div class="tech-section-label">READ DATA BY IDENTIFIER — 0x22</div>
+    <div class="tech-did-grid">
+        <!-- These match DIDs from your ECU simulator telemetry -->
+        <div class="tech-did-row">
+            <span class="tech-did-lbl">Boot Software Version (0xF180)</span>
+            <span class="tech-did-val" id="did-f180">—</span>
+            <button
+                class="tech-did-btn"
+                onclick="readDID(0xf180, 'did-f180', '')"
+            >
+                READ
+            </button>
+        </div>
+
+        <div class="tech-did-row">
+            <span class="tech-did-lbl"
+                >Application Software Version (0xF181)</span
+            >
+            <span class="tech-did-val" id="did-f181">—</span>
+            <button
+                class="tech-did-btn"
+                onclick="readDID(0xf181, 'did-f181', '')"
+            >
+                READ
+            </button>
+        </div>
+
+        <div class="tech-did-row">
+            <span class="tech-did-lbl"
+                >Application Software Fingerprint (0xF184)</span
+            >
+            <span class="tech-did-val" id="did-f184">—</span>
+            <button
+                class="tech-did-btn"
+                onclick="readDID(0xf184, 'did-f184', '')"
+            >
+                READ
+            </button>
+        </div>
+
+        <div class="tech-did-row">
+            <span class="tech-did-lbl"
+                >Application Data Fingerprint (0xF185)</span
+            >
+            <span class="tech-did-val" id="did-f185">—</span>
+            <button
+                class="tech-did-btn"
+                onclick="readDID(0xf185, 'did-f185', '')"
+            >
+                READ
+            </button>
+        </div>
+
+        <!-- <div class="tech-did-row">
+    <span class="tech-did-lbl">Active Diagnostic Session (0xF186)</span>
+    <span class="tech-did-val" id="did-f186">—</span>
+    <button class="tech-did-btn" onclick="readDID(0xF186,'did-f186','')">READ</button>
+</div> -->
+
+        <div class="tech-did-row">
+            <span class="tech-did-lbl">Repair Shop Code (0xF18E)</span>
+            <span class="tech-did-val" id="did-f18e">—</span>
+            <button
+                class="tech-did-btn"
+                onclick="readDID(0xf18e, 'did-f18e', '')"
+            >
+                READ
+            </button>
+        </div>
+
+        <div class="tech-did-row">
+            <span class="tech-did-lbl">ECU Serial Number (0xF18C)</span>
+            <span class="tech-did-val" id="did-f18c">—</span>
+            <button
+                class="tech-did-btn"
+                onclick="readDID(0xf18c, 'did-f18c', '')"
+            >
+                READ
+            </button>
+        </div>
+
+        <div class="tech-did-row">
+            <span class="tech-did-lbl"
+                >Vehicle Identification Number (0xF190)</span
+            >
+            <span class="tech-did-val" id="did-f190">—</span>
+            <button
+                class="tech-did-btn"
+                onclick="readDID(0xf190, 'did-f190', '')"
+            >
+                READ
+            </button>
+        </div>
+
+        <div class="tech-did-row">
+            <span class="tech-did-lbl">Workshop Data (0xF197)</span>
+            <span class="tech-did-val" id="did-f197">—</span>
+            <button
+                class="tech-did-btn"
+                onclick="readDID(0xf197, 'did-f197', '')"
+            >
+                READ
+            </button>
+        </div>
+
+        <div class="tech-did-row">
+            <span class="tech-did-lbl">ECU Programming Date (0xF19D)</span>
+            <span class="tech-did-val" id="did-f19d">—</span>
+            <button
+                class="tech-did-btn"
+                onclick="readDID(0xf19d, 'did-f19d', '')"
+            >
+                READ
+            </button>
+        </div>
+    </div>
+
+    <!-- UDS response log -->
+    <div class="tech-uds-response" id="tech-uds-response">
+        <span class="tech-uds-response-lbl">UDS Response:</span>
+        <span id="uds-response-text">—</span>
+    </div>
+
+    <!-- ── SECTION B: Input Output Control (0x2F) — Actuator Tests ── -->
+    <div class="tech-section-label" style="margin-top: 20px">
+        INPUT OUTPUT CONTROL — 0x2F (ACTUATOR TESTS)
+    </div>
+    <div class="tech-io-grid">
+        <div class="tech-io-card">
+            <div class="tech-io-name">
+                HEAD LAMP <span class="tech-io-did">0x1003</span>
+            </div>
+            <div class="tech-io-state" id="io-headlamp-state">ECU CONTROL</div>
+            <div class="tech-io-btns">
+                <button
+                    class="tech-io-btn tech-io-on"
+                    onclick="ioControl(0x1003, 3, 1)"
+                >
+                    FORCE ON
+                </button>
+                <button
+                    class="tech-io-btn tech-io-off"
+                    onclick="ioControl(0x1003, 3, 0)"
+                >
+                    FORCE OFF
+                </button>
+                <button
+                    class="tech-io-btn tech-io-ecu"
+                    onclick="ioControl(0x1003, 0, 0)"
+                >
+                    RETURN TO ECU
+                </button>
+            </div>
+        </div>
+
+        <div class="tech-io-card">
+            <div class="tech-io-name">
+                RADIATOR FAN <span class="tech-io-did">0x1001</span>
+            </div>
+            <div class="tech-io-state" id="io-radfan-state">ECU CONTROL</div>
+            <div class="tech-io-btns">
+                <button
+                    class="tech-io-btn tech-io-on"
+                    onclick="ioControl(0x1001, 3, 1)"
+                >
+                    FORCE ON
+                </button>
+                <button
+                    class="tech-io-btn tech-io-off"
+                    onclick="ioControl(0x1001, 3, 0)"
+                >
+                    FORCE OFF
+                </button>
+                <button
+                    class="tech-io-btn tech-io-ecu"
+                    onclick="ioControl(0x1001, 0, 0)"
+                >
+                    RETURN TO ECU
+                </button>
+            </div>
+        </div>
+
+        <div class="tech-io-card">
+            <div class="tech-io-name">
+                FUEL PUMP <span class="tech-io-did">0x1002</span>
+            </div>
+            <div class="tech-io-state" id="io-fuelpump-state">ECU CONTROL</div>
+            <div class="tech-io-btns">
+                <button
+                    class="tech-io-btn tech-io-on"
+                    onclick="ioControl(0x1002, 3, 1)"
+                >
+                    FORCE ON
+                </button>
+                <button
+                    class="tech-io-btn tech-io-off"
+                    onclick="ioControl(0x1002, 3, 0)"
+                >
+                    FORCE OFF
+                </button>
+                <button
+                    class="tech-io-btn tech-io-ecu"
+                    onclick="ioControl(0x1002, 0, 0)"
+                >
+                    RETURN TO ECU
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── SECTION C: DTC Panel (0x19) ── -->
+    <div class="tech-section-label" style="margin-top: 20px">
+        DTC INFORMATION — 0x19
+    </div>
+
+    <div class="tech-dtc-panel">
+        <div class="tech-dtc-header">
+            <span id="dtc-count-badge" class="dtc-count-badge ok">
+                No Active DTCs
+            </span>
+
+            <div class="tech-dtc-header">
+                <button class="dtc-count-badge ok" onclick="loadDTCs()">
+                    Load DTCs (0x19)
+                </button>
+
+                <button
+                    class="tech-dtc-clear-btn"
+                    id="dtc-clear-btn"
+                    disabled
+                    onclick="clearDTCs()"
+                >
+                    Clear DTCs (0x14) — Programming Session Required
+                </button>
+            </div>
+        </div>
+
+        <div class="tech-dtc-list" id="tech-dtc-list">
+            <div class="tech-dtc-empty">
+                No DTCs stored. All systems nominal.
+            </div>
+        </div>
+    </div>
+
+    <!-- ── SECTION D: ECU Module Status ── -->
+    <div class="tech-section-label" style="margin-top: 20px">
+        ECU MODULE STATUS
+    </div>
+    <div class="tech-ecu-grid">
+        <div class="tech-ecu-card">
+            <div class="tech-ecu-name">
+                ECM <span class="tech-ecu-id">0x7E0</span>
+            </div>
+            <div class="tech-ecu-status ok">ONLINE</div>
+            <div class="tech-ecu-params">
+                <div class="tech-param">
+                    <span class="tp-lbl">RPM</span
+                    ><span class="tp-val" id="tech-rpm">—</span>
+                </div>
+                <div class="tech-param">
+                    <span class="tp-lbl">Engine Load</span
+                    ><span class="tp-val" id="tech-load">—</span>
+                </div>
+                <div class="tech-param">
+                    <span class="tp-lbl">Throttle %</span
+                    ><span class="tp-val" id="tech-throttle">—</span>
+                </div>
+                <div class="tech-param">
+                    <span class="tp-lbl">Coolant</span
+                    ><span class="tp-val" id="tech-coolant">—</span>
+                </div>
+                <div class="tech-param">
+                    <span class="tp-lbl">Oil Temp</span
+                    ><span class="tp-val" id="tech-oiltemp">—</span>
+                </div>
+                <div class="tech-param">
+                    <span class="tp-lbl">Fuel Rate</span
+                    ><span class="tp-val" id="tech-fuelrate">—</span>
+                </div>
+                <div class="tech-param">
+                    <span class="tp-lbl">Accel m/s²</span
+                    ><span class="tp-val" id="tech-accel">—</span>
+                </div>
+                <div class="tech-param">
+                    <span class="tp-lbl">Stall Risk</span
+                    ><span class="tp-val" id="tech-stall">—</span>
+                </div>
+                <div class="tech-param">
+                    <span class="tp-lbl">Engine State</span
+                    ><span class="tp-val" id="tech-engstate">—</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="tech-ecu-card">
+            <div class="tech-ecu-name">
+                TCM <span class="tech-ecu-id">0x7E1</span>
+            </div>
+            <div class="tech-ecu-status ok">ONLINE</div>
+            <div class="tech-ecu-params">
+                <div class="tech-param">
+                    <span class="tp-lbl">Gear</span
+                    ><span class="tp-val" id="tech-gear">—</span>
+                </div>
+                <div class="tech-param">
+                    <span class="tp-lbl">Gear Num</span
+                    ><span class="tp-val" id="tech-gearnum">—</span>
+                </div>
+                <div class="tech-param">
+                    <span class="tp-lbl">Clutch</span
+                    ><span class="tp-val" id="tech-clutch">—</span>
+                </div>
+                <div class="tech-param">
+                    <span class="tp-lbl">Brake State</span
+                    ><span class="tp-val" id="tech-brake">—</span>
+                </div>
+                <div class="tech-param">
+                    <span class="tp-lbl">Fluid Temp</span
+                    ><span class="tp-val" id="tech-transtemp">—</span>
+                </div>
+                <div class="tech-param">
+                    <span class="tp-lbl">Shift Status</span
+                    ><span class="tp-val">NORMAL</span>
+                </div>
+                <div class="tech-param">
+                    <span class="tp-lbl">Lock Status</span
+                    ><span class="tp-val">ENGAGED</span>
+                </div>
+            </div>
+        </div>
+        <div class="tech-ecu-card">
+            <div class="tech-ecu-name">
+                ABS <span class="tech-ecu-id">0x7E2</span>
+            </div>
+            <div class="tech-ecu-status ok">ONLINE</div>
+            <div class="tech-ecu-params">
+                <div class="tech-param">
+                    <span class="tp-lbl">Speed</span
+                    ><span class="tp-val" id="tech-speed">—</span>
+                </div>
+                <div class="tech-param">
+                    <span class="tp-lbl">Wheel FL</span
+                    ><span class="tp-val" id="tech-wfl">—</span>
+                </div>
+                <div class="tech-param">
+                    <span class="tp-lbl">Wheel FR</span
+                    ><span class="tp-val" id="tech-wfr">—</span>
+                </div>
+                <div class="tech-param">
+                    <span class="tp-lbl">Wheel RL</span
+                    ><span class="tp-val" id="tech-wrl">—</span>
+                </div>
+                <div class="tech-param">
+                    <span class="tp-lbl">Wheel RR</span
+                    ><span class="tp-val" id="tech-wrr">—</span>
+                </div>
+                <div class="tech-param">
+                    <span class="tp-lbl">ABS Pump</span
+                    ><span class="tp-val">STANDBY</span>
+                </div>
+                <div class="tech-param">
+                    <span class="tp-lbl">Brake Pressure</span
+                    ><span class="tp-val" id="tech-brakepct">—</span>
+                </div>
+            </div>
+        </div>
+        <div class="tech-ecu-card">
+            <div class="tech-ecu-name">
+                BCM <span class="tech-ecu-id">0x7E3</span>
+            </div>
+            <div class="tech-ecu-status ok">ONLINE</div>
+            <div class="tech-ecu-params">
+                <div class="tech-param">
+                    <span class="tp-lbl">Battery V</span
+                    ><span class="tp-val" id="tech-batt">—</span>
+                </div>
+                <div class="tech-param">
+                    <span class="tp-lbl">Battery SOC</span
+                    ><span class="tp-val" id="tech-soc">—</span>
+                </div>
+                <div class="tech-param">
+                    <span class="tp-lbl">Alternator</span
+                    ><span class="tp-val" id="tech-alt">—</span>
+                </div>
+                <div class="tech-param">
+                    <span class="tp-lbl">Head Lamp</span
+                    ><span class="tp-val" id="tech-headlamp">—</span>
+                </div>
+                <div class="tech-param">
+                    <span class="tp-lbl">Radiator Fan</span
+                    ><span class="tp-val" id="tech-radfan">—</span>
+                </div>
+                <div class="tech-param">
+                    <span class="tp-lbl">Fuel Pump</span
+                    ><span class="tp-val" id="tech-fuelpump">—</span>
+                </div>
+                <div class="tech-param">
+                    <span class="tp-lbl">Tyre FL</span
+                    ><span class="tp-val" id="tech-tfl">—</span>
+                </div>
+                <div class="tech-param">
+                    <span class="tp-lbl">Tyre FR</span
+                    ><span class="tp-val" id="tech-tfr">—</span>
+                </div>
+                <div class="tech-param">
+                    <span class="tp-lbl">Tyre RL</span
+                    ><span class="tp-val" id="tech-trl">—</span>
+                </div>
+                <div class="tech-param">
+                    <span class="tp-lbl">Tyre RR</span
+                    ><span class="tp-val" id="tech-trr">—</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security access lives on the dedicated Programming tab now -->
+</section>
+<!-- End of Technician Section -->

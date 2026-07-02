@@ -1,0 +1,168 @@
+<!-- _programming.html — Programming tab (Security Access granted): pgterm terminal, CAN bus monitor/sniffer, flash/programming workflow -->
+<!-- ══════════════════════════════════════════════════
+     PROGRAMMING PAGE — Dedicated Tab
+     Linux-terminal aesthetic: black bg, monospace,
+     phosphor-green text, no cards/boxes — just a
+     scrolling session log + minimal inline prompts.
+══════════════════════════════════════════════════ -->
+<section class="page" id="programming-mode">
+    <!-- Session banner strip -->
+    <div class="pg-session-banner">
+        <div class="pg-session-left">
+            <span class="pg-session-title"
+                >PROGRAMMING SESSION — 0x10 0x02</span
+            >
+            <span class="pg-session-meta">
+                BAUD RATE: <strong>500 kbps</strong> &nbsp;|&nbsp; LATENCY:
+                <strong>&lt; 8 ms</strong> &nbsp;|&nbsp; BLOCK SIZE:
+                <strong>4096 Bytes</strong>
+            </span>
+        </div>
+        <button class="pg-exit-btn" onclick="exitProgrammingSession()">
+            ✕ Exit Session
+        </button>
+    </div>
+
+    <!-- ── TERMINAL ── -->
+    <div class="pgterm-titlebar">
+        <span class="pgterm-tb-title"
+            >programmer@ecu-bench: ~/session — UDS 0x10 0x02</span
+        >
+    </div>
+
+    <div class="pgterm-screen" id="pgterm-screen">
+        <div class="pgterm-line pgterm-boot" id="pgterm-boot"></div>
+        <div class="pgterm-cursor-row" id="pgterm-prompt-row">
+            <span class="pgterm-prompt">prog&gt;</span>
+            <input
+                class="pgterm-input"
+                id="pgterm-input"
+                type="text"
+                autocomplete="off"
+                spellcheck="false"
+                placeholder="type a command — try: help"
+            />
+        </div>
+    </div>
+
+    <!-- Quick command strip -->
+    <div class="pgterm-quickbar" id="pgterm-quickbar">
+        <button class="pgterm-qbtn" data-cmd="ecu.id" data-run="1">
+            ecu.id
+        </button>
+        <!-- <button class="pgterm-qbtn" data-cmd="security.seed" data-run="1">security.seed</button>
+      <button class="pgterm-qbtn" data-cmd="security.key ">security.key &lt;hex&gt;</button>
+      <button class="pgterm-qbtn" data-cmd="read.ecu" data-run="1">read.ecu</button>
+      <button class="pgterm-qbtn" data-cmd="file.select stage2" data-run="1">file.select stage2</button>
+      <button class="pgterm-qbtn" data-cmd="flash.start" data-run="1">flash.start</button>
+      <button class="pgterm-qbtn" data-cmd="flash.status" data-run="1">flash.status</button>
+      <button class="pgterm-qbtn" data-cmd="feature.list" data-run="1">feature.list</button>
+      <button class="pgterm-qbtn" data-cmd="feature.set launch_control on" data-run="1">feature.set launch_control
+        on</button>
+      <button class="pgterm-qbtn" data-cmd="immo.off" data-run="1">immo.off</button>
+      <button class="pgterm-qbtn" data-cmd="cp.remove" data-run="1">cp.remove</button>
+      <button class="pgterm-qbtn" data-cmd="key.program" data-run="1">key.program</button>
+      <button class="pgterm-qbtn" data-cmd="bench.remove" data-run="1">bench.remove</button>
+      <button class="pgterm-qbtn" data-cmd="bench.power" data-run="1">bench.power</button>
+      <button class="pgterm-qbtn" data-cmd="bench.tool kess" data-run="1">bench.tool kess</button> -->
+        <!-- <button class="pgterm-qbtn" data-cmd="dtc.clear" data-run="1">dtc.clear</button> -->
+        <button class="pgterm-qbtn" data-cmd="report" data-run="1">
+            report
+        </button>
+        <button class="pgterm-qbtn" data-cmd="clear" data-run="1">clear</button>
+    </div>
+
+    <!-- Status bar -->
+    <div class="pgterm-statusbar">
+        <span>SESSION: <strong id="pg-stat-session">DEFAULT</strong></span>
+        <span>SECURITY: <strong id="pg-stat-security">LOCKED</strong></span>
+        <span>FILE: <strong id="pg-stat-file">none</strong></span>
+        <span>FLASH: <strong id="pg-stat-flash">idle</strong></span>
+        <span>VBAT: <strong id="pg-stat-vbat">13.8V</strong></span>
+    </div>
+
+    <div class="pgterm-titlebar"></div>
+
+    <!-- ── SECTION E: CAN Bus Monitor ── -->
+    <div class="tech-section-label" style="margin-top: 20px">
+        CAN BUS NETWORK MONITOR
+    </div>
+    <div class="tech-can-grid">
+        <div class="tech-can-stat">
+            <span class="tech-can-lbl">BUS STATUS</span
+            ><span class="tech-can-val" id="tech-can-load">ACTIVE</span>
+        </div>
+        <div class="tech-can-stat">
+            <span class="tech-can-lbl">MSG RATE</span
+            ><span class="tech-can-val" id="tech-can-msgrate">50 frames/s</span>
+        </div>
+        <div class="tech-can-stat">
+            <span class="tech-can-lbl">ERROR COUNT</span
+            ><span class="tech-can-val" id="tech-can-errrate">0</span>
+        </div>
+        <div class="tech-can-stat">
+            <span class="tech-can-lbl">SCREEN REFRESH RATE</span
+            ><span class="tech-can-val" id="tech-can-latency">&lt;10 Hz</span>
+        </div>
+        <div class="tech-can-stat">
+            <span class="tech-can-lbl">SESSION</span
+            ><span class="tech-can-val ok-text" id="can-session-display"
+                >0x03 EXT</span
+            >
+        </div>
+    </div>
+
+    <!-- ── Firmware & File  +  Programming Progress (side by side, full width) ── -->
+    <!-- <div class="pg-main-row">
+
+      <div class="pg-firmware-card">
+        <div class="pg-card-title">Firmware &amp; File</div>
+        <div class="pg-fw-rows">
+          <div class="pg-fw-row">
+            <span class="pg-fw-lbl">ORIGINAL FILE (READ)</span>
+            <span class="pg-fw-val" id="pg-fw-original">— not read yet —</span>
+          </div>
+          <div class="pg-fw-row">
+            <span class="pg-fw-lbl">MODIFIED FILE (WRITE)</span>
+            <span class="pg-fw-val pg-fw-highlight" id="pg-fw-modified">EDC17C46_Stage2.bin</span>
+          </div>
+          <div class="pg-fw-row">
+            <span class="pg-fw-lbl">COMPATIBILITY LIST</span>
+            <span class="pg-fw-val pg-fw-highlight" id="pg-fw-compat">VW Golf MK7 2.0 TDI (2015-2020)</span>
+          </div>
+          <div class="pg-fw-row">
+            <span class="pg-fw-lbl">TUNING MAP DETAILS</span>
+            <span class="pg-fw-val pg-fw-highlight" id="pg-fw-tuning">+20% fuel, +0.5 bar boost</span>
+          </div>
+        </div>
+        <div class="pg-fw-actions">
+          <button class="pg-fw-btn" onclick="pgRunCommand('read.ecu')">[ Read ECU ]</button>
+          <button class="pg-fw-btn" onclick="pgRunCommand('file.select stage2')">[ Write ECU ]</button>
+          <button class="pg-fw-btn" onclick="pgRunCommand('read.ecu')">[ Backup ]</button>
+          <button class="pg-fw-btn" onclick="pgRunCommand('feature.list')">[ Coding ]</button>
+          <button class="pg-fw-btn" onclick="pgRunCommand('immo.off')">[ Immo Off ]</button>
+          <button class="pg-fw-btn pg-fw-btn-exit" onclick="exitProgrammingSession()">[ Exit ]</button>
+        </div>
+      </div>
+
+      <div class="pg-progress-card">
+        <div class="pg-card-title">ECU Code Editor
+          <span class="pg-editor-lock" id="pg-editor-lock">🔒 Locked — run security.seed / security.key in terminal
+            first</span>
+        </div>
+        <div class="pg-editor-locked-overlay" id="pg-editor-overlay">
+          <span class="pg-editor-lock-msg">Security Access Required</span>
+          <span class="pg-editor-lock-sub">Unlock via terminal: <code>security.seed</code> →
+            <code>security.key &lt;hex&gt;</code></span>
+        </div>
+        <textarea class="pg-code-editor" id="pg-code-editor" disabled spellcheck="false" placeholder="// ECU code editor — unlocked after Security Access (0x27)
+// Use the terminal below to authenticate first."></textarea>
+        <div class="pg-editor-actions" id="pg-editor-actions" style="display:none">
+          <button class="pg-fw-btn" onclick="pgEditorWrite()">[ Write to ECU (0x2E) ]</button>
+          <button class="pg-fw-btn" onclick="pgEditorClear()">[ Clear ]</button>
+          <span class="pg-editor-status" id="pg-editor-status"></span>
+        </div>
+      </div>
+
+    </div> -->
+</section>

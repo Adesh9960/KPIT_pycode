@@ -1,0 +1,234 @@
+<!-- _live.html — Live Dashboard tab: real-time gauges, status strip, live chart -->
+
+<!-- ══════════════════════════════════════════════════
+     LIVE PAGE
+══════════════════════════════════════════════════ -->
+<section class="page active" id="live-mode">
+    <div class="lv-status-row">
+        <span id="connection-status" class="status-pill ok">● LIVE</span>
+        <span id="engine-state-badge" class="eng-state">IDLE</span>
+
+        <span
+            class="lv-timestamp"
+            style="
+                display: flex;
+                gap: 12px;
+                font-weight: 600;
+                letter-spacing: 1px;
+                margin-left: auto;
+            "
+        >
+            <span
+                >MODE:
+                <strong style="color: var(--lv-green)">DYNAMIC</strong></span
+            >
+            <span style="opacity: 0.4">|</span>
+            <span
+                >DATE:
+                <strong style="color: var(--lv-blue)" id="live-date-display"
+                    >--/--/----</strong
+                ></span
+            >
+        </span>
+    </div>
+
+    <div class="lv-primary-grid">
+        <div class="lv-primary-card lv-speed-card">
+            <div class="lv-card-label">SPEED</div>
+            <div class="gauge-wrap" id="speed-gauge"></div>
+        </div>
+        <div class="lv-primary-card lv-rpm-card">
+            <div class="lv-card-label">ENGINE RPM</div>
+            <div class="gauge-wrap" id="rpm-gauge"></div>
+        </div>
+        <div class="lv-primary-card lv-fuel-card">
+            <div class="lv-card-label">FUEL LEVEL</div>
+            <div class="gauge-wrap" id="fuel-gauge"></div>
+        </div>
+        <div class="lv-primary-card lv-dist-card">
+            <div class="lv-card-label">TRIP DISTANCE</div>
+            <div class="lv-dist-inner">
+                <span class="lv-dist-num" id="distance-main-val">0.00</span>
+                <span class="lv-dist-unit">KM</span>
+            </div>
+            <div class="lv-dist-sub-row">
+                <div class="lv-dist-sub">
+                    <span class="lv-ds-lbl">EST. RANGE</span>
+                    <span class="lv-ds-val" id="est-range">-- km</span>
+                </div>
+                <div class="lv-dist-sub">
+                    <span class="lv-ds-lbl">ECONOMY</span>
+                    <span class="lv-ds-val" id="fuel-economy">-- km/L</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="lv-secondary-grid">
+        <div class="lv-sec-panel lv-transmission">
+            <div class="lv-sec-title">TRANSMISSION</div>
+            <div class="lv-gear-block">
+                <span class="lv-gear-num" id="gear-display">N</span>
+                <div class="lv-gear-right">
+                    <span class="lv-gear-name" id="gear-name">Neutral</span>
+                    <span class="lv-shift-hint" id="shift-hint">—</span>
+                </div>
+            </div>
+            <div class="lv-control-chips">
+                <div class="lv-ctrl-chip" id="chip-clutch">
+                    <span class="chip-dot"></span>
+                    <span class="chip-lbl">CLUTCH</span>
+                    <span class="chip-val" id="clutch-val">UP</span>
+                </div>
+                <div class="lv-ctrl-chip" id="chip-brake">
+                    <span class="chip-dot"></span>
+                    <span class="chip-lbl">BRAKE</span>
+                    <span class="chip-val" id="brake-val">OFF</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="lv-sec-panel lv-thermals">
+            <div class="lv-sec-title">ENGINE THERMALS</div>
+            <div class="lv-thermal-grid">
+                <div class="lv-th-item">
+                    <span class="lv-th-label">Coolant</span>
+                    <span class="lv-th-val" id="coolantTemp">--</span>
+                    <span class="lv-th-unit">°C</span>
+                    <div class="lv-th-bar-bg">
+                        <div class="lv-th-bar-fill" id="bar-coolant"></div>
+                    </div>
+                </div>
+                <div class="lv-th-item">
+                    <span class="lv-th-label">Warmup</span>
+                    <span class="lv-th-val" id="warmup-pct">--</span>
+                    <span class="lv-th-unit">%</span>
+                    <div class="lv-th-bar-bg">
+                        <div
+                            class="lv-th-bar-fill lv-warmup-bar"
+                            id="bar-warmup"
+                        ></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="lv-sec-panel lv-lights-panel">
+            <div class="lv-lights-half lv-headlamp-half">
+                <div class="lv-sec-title">HEADLIGHTS</div>
+                <div class="lv-headlamp-row">
+                    <div class="lv-headlamp-chip" id="chip-lowbeam">
+                        <span class="lv-hl-dot"></span>
+                        <span class="lv-hl-lbl">LOW</span>
+                    </div>
+                    <div class="lv-headlamp-chip" id="chip-highbeam">
+                        <span class="lv-hl-dot"></span>
+                        <span class="lv-hl-lbl">HIGH</span>
+                    </div>
+                </div>
+            </div>
+            <div class="lv-lights-half lv-indicator-half">
+                <div class="lv-sec-title">INDICATORS</div>
+                <div class="lv-indicator-row">
+                    <div class="lv-arrow-icon lv-arrow-left" id="ind-left">
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <path
+                                d="M14 6L8 12L14 18"
+                                stroke="currentColor"
+                                stroke-width="2.4"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            />
+                        </svg>
+                    </div>
+                    <div class="lv-hazard-icon" id="ind-hazard" title="Hazard">
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <path
+                                d="M12 3L4 18H20L12 3Z"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linejoin="round"
+                            />
+                            <line
+                                x1="12"
+                                y1="9.5"
+                                x2="12"
+                                y2="13.5"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                            />
+                            <circle
+                                cx="12"
+                                cy="16"
+                                r="0.9"
+                                fill="currentColor"
+                            />
+                        </svg>
+                    </div>
+                    <div class="lv-arrow-icon lv-arrow-right" id="ind-right">
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <path
+                                d="M10 6L16 12L10 18"
+                                stroke="currentColor"
+                                stroke-width="2.4"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="lv-sec-panel lv-electrical">
+            <div class="lv-sec-title">ELECTRICAL</div>
+            <div class="lv-thermal-grid">
+                <div class="lv-th-item">
+                    <span class="lv-th-label">Battery</span>
+                    <span class="lv-th-val" id="batteryVoltage">--</span>
+                    <span class="lv-th-unit">V</span>
+                    <div class="lv-th-bar-bg">
+                        <div class="lv-th-bar-fill" id="bar-batt"></div>
+                    </div>
+                </div>
+                <div class="lv-th-item">
+                    <span class="lv-th-label">Rev Limiter</span>
+                    <span class="lv-th-val" id="revlim-val">OK</span>
+                    <span class="lv-th-unit"> </span>
+                </div>
+                <div class="lv-th-item">
+                    <span class="lv-th-label">Stall Risk</span>
+                    <span class="lv-th-val" id="stall-live">OK</span>
+                    <span class="lv-th-unit"> </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="lv-bottom-row">
+        <div class="lv-chart-card">
+            <div class="lv-chart-label">LIVE SPEED &amp; RPM TREND</div>
+            <div id="live-chart" class="lv-chart-box"></div>
+        </div>
+
+        <div class="lv-infotainment-card">
+            <div class="lv-weather-block">
+                <span class="lv-weather-emoji">🌤️</span>
+                <span class="lv-weather-label" id="weather-temp">28°C</span>
+            </div>
+        </div>
+    </div>
+</section>

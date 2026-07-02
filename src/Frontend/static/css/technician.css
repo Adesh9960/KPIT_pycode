@@ -1,0 +1,55 @@
+/* technician.css - Technician tab styles (mode-technician / #technician-mode) */
+
+body.mode-technician {
+    background: var(--tech-bg);
+    color: var(--tech-text);
+}
+body.mode-technician .brand-logo {
+    background: rgba(0, 224, 112, 0.1);
+    color: var(--tech-green);
+    border: 1px solid var(--tech-border);
+}
+
+body.mode-technician .ambient-blob-a {
+    background: var(--tech-green);
+}
+body.mode-technician .ambient-blob-b {
+    background: var(--tech-green-dim);
+}
+body.mode-technician .ambient-blob-c {
+    background: var(--tech-green);
+}
+
+body.mode-technician #app-header {
+    background: rgba(7, 10, 7, 0.5); /* was 0.95 */
+    border-bottom-color: var(--tech-border);
+}
+body.mode-technician .brand-logo {
+    background: rgba(0, 224, 112, 0.1);
+    color: var(--tech-green);
+    border: 1px solid var(--tech-border);
+}
+body.mode-technician .brand-name {
+    color: var(--tech-green);
+}
+body.mode-technician .tab-btn[data-mode="technician"].active,
+body.mode-technician .tab-btn.active {
+    background: rgba(0, 224, 112, 0.1);
+    border-color: rgba(0, 224, 112, 0.3);
+    color: var(--tech-green);
+}
+
+[data-theme="dark"] body.mode-technician {
+    background: transparent;
+}
+
+/* ══════════════════════════════════════════════
+   ██  TECHNICIAN PAGE — phosphor green terminal
+══════════════════════════════════════════════ */
+#technician-mode {
+    min-height: calc(100vh - 58px);
+}
+
+[data-theme="dark"] body.mode-technician {
+    background: transparent;
+}

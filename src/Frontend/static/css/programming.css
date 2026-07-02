@@ -1,0 +1,46 @@
+/* programming.css - Programming tab styles (mode-programming / #programming-mode) */
+
+body.mode-programming .ambient-blob-a {
+    background: var(--tech-amber);
+}
+body.mode-programming .ambient-blob-b {
+    background: #c9a227;
+}
+body.mode-programming .ambient-blob-c {
+    background: var(--tech-amber);
+}
+
+/* Programming tab nav button active state — terminal green, not amber */
+body.mode-programming #app-header {
+    background: rgba(2, 4, 2, 0.97);
+    border-bottom-color: var(--tech-border);
+}
+body.mode-programming .brand-name {
+    color: var(--tech-green);
+}
+body.mode-programming .brand-logo {
+    background: rgba(0, 224, 112, 0.1);
+    color: var(--tech-green);
+    border: 1px solid var(--tech-border);
+}
+body.mode-programming .tab-btn[data-mode="programming"].active {
+    background: rgba(0, 224, 112, 0.1);
+    border-color: var(--tech-border);
+    color: var(--tech-green);
+}
+
+/* ══════════════════════════════════════════════
+   PROGRAMMING SESSION — LINUX TERMINAL UI
+   No cards, no rounded boxes. Black screen,
+   monospace, phosphor green, blinking cursor.
+══════════════════════════════════════════════ */
+
+#programming-mode {
+    background: #000000;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    min-height: calc(100vh - 64px);
+    box-sizing: border-box;
+    overflow-x: hidden;
+}

@@ -1,0 +1,43 @@
+/* history.css - Signal History tab styles (mode-history / #history-mode) */
+
+body.mode-history {
+    background: var(--hs-bg);
+    color: var(--hs-text);
+}
+body.mode-history .brand-logo {
+    background: rgba(249, 115, 22, 0.12);
+    color: var(--hs-orange);
+    border: 1px solid rgba(249, 115, 22, 0.25);
+}
+
+body.mode-history .ambient-blob-a {
+    background: var(--hs-orange);
+}
+body.mode-history .ambient-blob-b {
+    background: #c2530f;
+}
+body.mode-history .ambient-blob-c {
+    background: var(--hs-orange);
+}
+body.mode-history .brand-logo {
+    background: rgba(249, 115, 22, 0.12);
+    color: var(--hs-orange);
+    border: 1px solid rgba(249, 115, 22, 0.25);
+}
+body.mode-history .brand-name {
+    color: var(--hs-orange);
+}
+body.mode-history .tab-btn[data-mode="history"].active,
+body.mode-history .tab-btn.active {
+    background: rgba(249, 115, 22, 0.14);
+    border-color: rgba(249, 115, 22, 0.35);
+    color: var(--hs-orange);
+}
+
+[data-theme="dark"] body.mode-history {
+    --hs-surface: rgba(13, 17, 32, 0.78);
+    --hs-card: rgba(18, 24, 40, 0.78);
+    --hs-border: rgba(255, 255, 255, 0.07);
+    --hs-text: #e0e8f0;
+    --hs-muted: #4a5568;
+}

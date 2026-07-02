@@ -1,0 +1,88 @@
+<!-- _history.html — Signal History tab: historical chart and data table -->
+<!-- ══════════════════════════════════════════════════
+     HISTORY PAGE
+══════════════════════════════════════════════════ -->
+<section class="page" id="history-mode">
+    <div class="hs-header-row">
+        <div>
+            <div class="hs-title">Signal Explorer</div>
+            <div class="hs-subtitle">ECU telemetry log — rolling buffer</div>
+        </div>
+    </div>
+
+    <div class="hs-controls">
+        <div class="hs-ctrl-group">
+            <label class="hs-ctrl-label">SIGNAL</label>
+            <select class="hs-select" id="signal-select">
+                <option value="speed">Speed (km/h)</option>
+                <option value="rpm">Engine RPM</option>
+                <option value="coolant">Coolant Temp (°C)</option>
+                <option value="oil_temp">Oil Temp (°C)</option>
+                <option value="fuel_pct">Fuel Level (%)</option>
+                <option value="fuel_rate">Fuel Rate (mL/s)</option>
+                <option value="throttle">Throttle (%)</option>
+                <option value="engine_load">Engine Load (%)</option>
+                <option value="accel">Acceleration (m/s²)</option>
+                <option value="battery">Battery Voltage (V)</option>
+                <option value="gear_num">Gear Number</option>
+            </select>
+        </div>
+        <div class="hs-ctrl-group">
+            <label class="hs-ctrl-label">RANGE</label>
+            <select class="hs-select" id="range-select">
+                <option value="50">Last 50 records</option>
+                <option value="100" selected>Last 100 records</option>
+                <option value="200">Last 200 records</option>
+                <option value="all">All records</option>
+            </select>
+        </div>
+        <button class="hs-refresh-btn" onclick="loadHistory()">
+            ↺ Refresh
+        </button>
+    </div>
+
+    <div id="history-chart" class="hs-chart-box"></div>
+
+    <div class="hs-kpi-strip">
+        <div class="hs-kpi">
+            <div class="hs-kpi-lbl">MIN</div>
+            <div class="hs-kpi-val" id="hs-min">—</div>
+        </div>
+        <div class="hs-kpi">
+            <div class="hs-kpi-lbl">MAX</div>
+            <div class="hs-kpi-val" id="hs-max">—</div>
+        </div>
+        <div class="hs-kpi">
+            <div class="hs-kpi-lbl">AVG</div>
+            <div class="hs-kpi-val" id="hs-avg">—</div>
+        </div>
+        <div class="hs-kpi">
+            <div class="hs-kpi-lbl">CURRENT</div>
+            <div class="hs-kpi-val" id="hs-cur">—</div>
+        </div>
+        <div class="hs-kpi">
+            <div class="hs-kpi-lbl">SAMPLES</div>
+            <div class="hs-kpi-val" id="hs-count">—</div>
+        </div>
+    </div>
+
+    <div class="hs-table-title">RECENT RECORDS</div>
+    <div class="hs-table-wrap">
+        <table class="hs-table">
+            <thead>
+                <tr>
+                    <th>TIME</th>
+                    <th>GEAR</th>
+                    <th>SPEED</th>
+                    <th>RPM</th>
+                    <th>COOLANT °C</th>
+                    <th>OIL °C</th>
+                    <th>FUEL %</th>
+                    <th>THROTTLE %</th>
+                    <th>STATE</th>
+                </tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+        </table>
+    </div>
+</section>

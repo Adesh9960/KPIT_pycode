@@ -1,0 +1,91 @@
+/* advanced.css - Advanced User Mode tab styles (mode-advanced / #advanced-mode) */
+
+body.mode-advanced {
+    background: var(--adv-bg);
+    color: var(--adv-text);
+}
+body.mode-advanced .brand-logo {
+    background: rgba(109, 40, 217, 0.12);
+    color: var(--adv-purple);
+    border: 1px solid rgba(109, 40, 217, 0.25);
+}
+
+body.mode-advanced .ambient-blob-a {
+    background: var(--adv-purple);
+}
+body.mode-advanced .ambient-blob-b {
+    background: var(--adv-purple-lt);
+}
+body.mode-advanced .ambient-blob-c {
+    background: #4c1d95;
+}
+
+[data-theme="light"] body.mode-advanced #app-header {
+    background: rgba(255, 255, 255, 0.55); /* was 0.96 */
+    border-bottom-color: var(--adv-border);
+}
+[data-theme="dark"] body.mode-advanced #app-header {
+    background: rgba(10, 12, 16, 0.55);
+    border-bottom-color: var(--adv-border);
+}
+body.mode-advanced .brand-logo {
+    background: rgba(109, 40, 217, 0.12);
+    color: var(--adv-purple);
+    border: 1px solid rgba(109, 40, 217, 0.25);
+}
+body.mode-advanced .brand-name {
+    color: var(--adv-purple);
+}
+body.mode-advanced .tab-btn[data-mode="advanced"].active,
+body.mode-advanced .tab-btn.active {
+    background: rgba(109, 40, 217, 0.12);
+    border-color: rgba(109, 40, 217, 0.35);
+    color: var(--adv-purple);
+}
+body.mode-advanced .theme-toggle {
+    border-color: var(--adv-border);
+    color: var(--adv-muted);
+}
+body.mode-advanced .theme-toggle:hover {
+    color: var(--adv-text);
+}
+
+[data-theme="dark"] body.mode-advanced {
+    background: transparent;
+    --adv-bg: #0d1117;
+    --adv-surface: rgba(22, 27, 38, 0.78);
+    --adv-card: rgba(26, 31, 46, 0.78);
+    --adv-border: rgba(255, 255, 255, 0.08);
+    --adv-text: #e0e8f0;
+    --adv-muted: #6a7890;
+}
+
+[data-theme="light"] body.mode-advanced {
+    --adv-bg: #f3f4f8;
+    --adv-surface: #ffffff;
+    --adv-card: #ffffff;
+    --adv-border: #e4e6ed;
+    --adv-text: #0f1117;
+    --adv-muted: #6b7280;
+}
+
+/* ══════════════════════════════════════════════
+   ██  ADVANCED PAGE — deep purple on white
+══════════════════════════════════════════════ */
+#advanced-mode {
+    background: transparent;
+}
+body.mode-advanced .alert-toast {
+    background: rgba(30, 18, 51, 0.55);
+    backdrop-filter: blur(18px) saturate(1.5);
+    -webkit-backdrop-filter: blur(18px) saturate(1.5);
+    border-color: rgba(167, 139, 250, 0.18);
+    border-left-color: var(--adv-amber);
+    color: var(--adv-text);
+}
+body.mode-advanced .alert-toast.crit {
+    border-left-color: var(--adv-red);
+}
+body.mode-advanced .alert-toast-body {
+    color: var(--adv-text);
+}

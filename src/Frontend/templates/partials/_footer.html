@@ -1,0 +1,22 @@
+<!-- _footer.html — UDS session unlock modal overlay, alert toast stack, and page script include -->
+  <!-- UDS Session overlay -->
+  <div class="uds-overlay" id="uds-overlay">
+    <div class="uds-modal">
+      <div class="uds-modal-icon">🔓</div>
+      <div class="uds-modal-title">Extended Diagnostic Session</div>
+      <div class="uds-modal-body">UDS Service 0x10 — Session Control<br><code>0x10 0x03</code> received<br>Technician
+        mode is now unlocked.</div>
+      <button class="uds-modal-btn" onclick="confirmTechUnlock()">Enter Technician Mode</button>
+      <button class="uds-modal-cancel" onclick="cancelTechUnlock()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Alert toasts -->
+  <div id="alert-toast-stack"></div>
+  <!-- main.js is an ES module; it imports every other js/*.js module
+       and attaches the handful of functions used by inline onclick=""
+       attributes above onto window (see main.js header comment) -->
+  <script type="module" src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+
+</html>
