@@ -1,131 +1,147 @@
-# CAN Monitor and Simulation
-
-## Overview
-
-CAN Monitor and Simulation is a Python-based project for monitoring, simulating, and logging CAN (Controller Area Network) traffic. It provides utilities for generating CAN frames, processing incoming messages, and recording communication for debugging and analysis.
-
-## Features
-
-* CAN frame simulation
-* CAN message monitoring
-* Logging of CAN traffic
-* Thread-safe data handling
-* Modular project structure for easy extension and testing
-
-## Project Structure
-
-```text
-.
-├── src/
-│   ├── logger/
-│   ├── data_structures/
-│   ├── listener/
-│   ├── simulator/
-│   └── ...
-├── tests/
-├── requirements.txt
-└── README.md
-```
+# Usage
 
 ## Prerequisites
 
-* Python 3.10 or later
-* `pip` package manager
+- Linux system with SocketCAN support
+- Python virtual environment created with all dependencies installed
+- CAN interface configured (`can0`, `vcan0`, etc.)
 
-## Installation
+---
+````markdown
+## Note for using a Virtual CAN (`vcan0`)
 
-Clone the repository:
+If you do not have physical CAN hardware, the tester and ECU simulator can communicate over Linux's virtual CAN interface.
 
-```bash
-git clone <repository-url>
-cd <repository-folder>
-```
+### 1. Configure the Virtual CAN Interface
 
-(Optional) Create and activate a virtual environment.
-
-**Windows**
+Before starting either application, create and enable the `vcan0` interface:
 
 ```bash
-python -m venv venv
-venv\Scripts\activate
+sudo ip link add dev vcan0 type vcan
+sudo ip link set vcan0 up
+````
+
+### 2. Update the Tester
+
+In `app.py`, change:
+
+```python
+listener.start(address, uds_client.on_response)
 ```
 
-**Linux/macOS**
+to:
+
+```python
+listener.start(address, uds_client.on_response, channel="vcan0")
+```
+
+### 3. Update the ECU Simulator
+
+In `sim.py`, change:
+
+```python
+listener.start(address, handle_tester_request, enable_logger=False)
+```
+
+to:
+
+```python
+listener.start(address, handle_tester_request, "vcan0", enable_logger=False)
+```
+
+### 4. Run the Applications
+
+Start the ECU simulator:
 
 ```bash
-python3 -m venv venv
-source venv/bin/activate
+pyadmin sim.py
 ```
 
-Install dependencies:
+In a separate terminal, start the tester:
 
 ```bash
-pip install -r requirements.txt
+pyadmin app.py
 ```
 
-## Execution Instructions
-### Setting `PYTHONPATH`
+Both applications will now communicate over the `vcan0` virtual CAN interface.
 
-Before running the project or tests, set `PYTHONPATH` to the `src` directory.
-
-#### Windows PowerShell
-
-From the project root directory:
-
-```powershell
-$env:PYTHONPATH = (Resolve-Path .\src).Path
+```
 ```
 
-#### Windows Command Prompt (`cmd`)
 
-From the project root directory:
+## Create a Convenient Alias (Recommended)
 
-```cmd
-set PYTHONPATH=%CD%\src
-```
+Instead of typing the full path to your virtual environment every time, create an alias.
 
-#### Verify the setting
-
-PowerShell:
-
-```powershell
-echo $env:PYTHONPATH
-```
-
-Command Prompt:
-
-```cmd
-echo %PYTHONPATH%
-```
-
-Run the application from the project root directory:
+Open your shell configuration:
 
 ```bash
-python src/main.py
+nano ~/.bashrc
 ```
 
-If your entry point is different, replace `src/main.py` with the appropriate script.
-
-## Running Unit Tests
-
-Execute all tests using:
+Add the following line (replace the path with your own virtual environment):
 
 ```bash
-python -m unittest discover -s tests
+alias pyadmin='sudo /path/to/your/venv/bin/python'
 ```
 
-Or run an individual test file:
+Example:
 
 ```bash
-python -m unittest tests.test_logger
+alias pyadmin='sudo /home/user/uds_tester/.venv/bin/python'
 ```
+
+Reload your shell:
+
+```bash
+source ~/.bashrc
+```
+
+Now you can execute Python scripts inside the virtual environment with root privileges using the `pyadmin` command.
+
+---
+
+## Running the UDS Tester
+
+Start the tester application:
+
+```bash
+pyadmin app.py
+```
+
+---
+
+## Running the ECU Simulator
+
+Start the ECU simulator:
+
+```bash
+pyadmin sim.py
+```
+
+---
+
+## Typical Workflow
+
+1. Configure and bring up your CAN interface.
+2. Start the ECU simulator:
+
+```bash
+pyadmin sim.py
+```
+
+3. In another terminal, start the UDS tester:
+
+```bash
+pyadmin app.py
+```
+
+4. Open the tester UI and begin communicating with the simulated ECU.
+
+---
 
 ## Notes
 
-* Run commands from the project root directory.
-* Ensure all required dependencies are installed before execution.
-* If using hardware-specific CAN interfaces, verify that the required drivers and libraries are properly configured.
-
-## License
-
-Add your preferred license information here.
+- Both applications should use the same CAN interface and bitrate.
+- Ensure the CAN interface is already up before launching either application.
+- Running through the `pyadmin` alias guarantees the correct Python environment is used while preserving the required administrative privileges.
