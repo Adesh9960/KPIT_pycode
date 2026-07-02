@@ -21,7 +21,7 @@ class TestFramesToLogs(unittest.TestCase):
 
         self.assertEqual(len(logs), 1)
         self.assertIn("123456789", logs[0])
-        self.assertIn("291", logs[0])  # 0x123 == 291
+        self.assertIn("0x123", logs[0]) 
 
 
 if __name__ == "__main__":
