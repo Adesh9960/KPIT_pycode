@@ -321,9 +321,6 @@ async function ecuReset() {
   }
 }
 function updateCANStatus(data) {
-    document.getElementById("tech-can-load").textContent =
-        data.bus_status ?? "UNKNOWN";
-
     document.getElementById("tech-can-msgrate").textContent =
         `${data.message_speed ?? 0} frames/s`;
 
@@ -1677,7 +1674,7 @@ function pgBootBanner() {
   const lines = [
     ["ECU PROGRAMMING INTERFACE  v2.1.0  (UDS ISO 14229-1)", "l-bold"],
     [
-      "Target: Bosch EDC17C46  |  Link: CAN 500 kbps  |  Session: DEFAULT (0x01)",
+      "Link: CAN 500 kbps  |  Session: Programming (0x02)",
       "l-dim",
     ],
     ["Type 'help' for the command list, or use the buttons below.", "l-dim"],
