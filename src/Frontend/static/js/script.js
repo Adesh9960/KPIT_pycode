@@ -1730,45 +1730,45 @@ async function exitProgrammingSession() {
   setMode("technician");
 }
 
-async function pgRefreshStatusBar() {
-  try {
-    const res = await fetch("/prog/state");
-    const data = await res.json();
-    if (data.status !== "success") return;
-    const s = data.data;
-    setText(
-      "pg-stat-session",
-      s.session === 2 ? "PROGRAMMING (0x02)" : "DEFAULT (0x01)",
-    );
-    const secEl = document.getElementById("pg-stat-security");
-    if (secEl) {
-      secEl.textContent = s.security.level >= 2 ? "UNLOCKED" : "LOCKED";
-      secEl.className = s.security.level >= 2 ? "" : "warn";
-    }
-    const fileEl = document.getElementById("pg-stat-file");
-    if (fileEl)
-      fileEl.textContent = s.files.modified
-        ? s.files.modified.name
-        : s.files.original
-          ? s.files.original.name + " (read only)"
-          : "none";
-    const flashEl = document.getElementById("pg-stat-flash");
-    if (flashEl) {
-      flashEl.textContent =
-        s.flash.status +
-        (s.flash.status !== "idle" && s.flash.status !== "success"
-          ? ` ${s.flash.progress}%`
-          : "");
-      flashEl.className =
-        s.flash.status === "error"
-          ? "err"
-          : s.flash.status === "success"
-            ? ""
-            : "warn";
-    }
-    setText("pg-stat-vbat", s.flash.voltage.toFixed(1) + "V");
-  } catch (_) {}
-}
+// async function pgRefreshStatusBar() {
+//   try {
+//     const res = await fetch("/prog/state");
+//     const data = await res.json();
+//     if (data.status !== "success") return;
+//     const s = data.data;
+//     setText(
+//       "pg-stat-session",
+//       s.session === 2 ? "PROGRAMMING (0x02)" : "DEFAULT (0x01)",
+//     );
+//     const secEl = document.getElementById("pg-stat-security");
+//     if (secEl) {
+//       secEl.textContent = s.security.level >= 2 ? "UNLOCKED" : "LOCKED";
+//       secEl.className = s.security.level >= 2 ? "" : "warn";
+//     }
+//     const fileEl = document.getElementById("pg-stat-file");
+//     if (fileEl)
+//       fileEl.textContent = s.files.modified
+//         ? s.files.modified.name
+//         : s.files.original
+//           ? s.files.original.name + " (read only)"
+//           : "none";
+//     const flashEl = document.getElementById("pg-stat-flash");
+//     if (flashEl) {
+//       flashEl.textContent =
+//         s.flash.status +
+//         (s.flash.status !== "idle" && s.flash.status !== "success"
+//           ? ` ${s.flash.progress}%`
+//           : "");
+//       flashEl.className =
+//         s.flash.status === "error"
+//           ? "err"
+//           : s.flash.status === "success"
+//             ? ""
+//             : "warn";
+//     }
+//     setText("pg-stat-vbat", s.flash.voltage.toFixed(1) + "V");
+//   } catch (_) {}
+// }
 
 // ── Command implementations ──
 async function pgCmd_ecuId() {

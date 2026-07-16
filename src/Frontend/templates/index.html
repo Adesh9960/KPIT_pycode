@@ -847,8 +847,6 @@
         <span class="pg-session-title">PROGRAMMING SESSION — 0x10 0x02</span>
         <span class="pg-session-meta">
           BAUD RATE: <strong>500 kbps</strong>
-          &nbsp;|&nbsp; LATENCY: <strong>&lt; 8 ms</strong>
-          &nbsp;|&nbsp; BLOCK SIZE: <strong>4096 Bytes</strong>
         </span>
       </div>
       <button class="pg-exit-btn" onclick="exitProgrammingSession()">✕ Exit Session</button>
@@ -872,35 +870,17 @@
 
     <!-- Quick command strip -->
     <div class="pgterm-quickbar" id="pgterm-quickbar">
-      <button class="pgterm-qbtn" data-cmd="ecu.id" data-run="1">ecu.id</button>
-      <!-- <button class="pgterm-qbtn" data-cmd="security.seed" data-run="1">security.seed</button>
-      <button class="pgterm-qbtn" data-cmd="security.key ">security.key &lt;hex&gt;</button>
-      <button class="pgterm-qbtn" data-cmd="read.ecu" data-run="1">read.ecu</button>
-      <button class="pgterm-qbtn" data-cmd="file.select stage2" data-run="1">file.select stage2</button>
-      <button class="pgterm-qbtn" data-cmd="flash.start" data-run="1">flash.start</button>
-      <button class="pgterm-qbtn" data-cmd="flash.status" data-run="1">flash.status</button>
-      <button class="pgterm-qbtn" data-cmd="feature.list" data-run="1">feature.list</button>
-      <button class="pgterm-qbtn" data-cmd="feature.set launch_control on" data-run="1">feature.set launch_control
-        on</button>
-      <button class="pgterm-qbtn" data-cmd="immo.off" data-run="1">immo.off</button>
-      <button class="pgterm-qbtn" data-cmd="cp.remove" data-run="1">cp.remove</button>
-      <button class="pgterm-qbtn" data-cmd="key.program" data-run="1">key.program</button>
-      <button class="pgterm-qbtn" data-cmd="bench.remove" data-run="1">bench.remove</button>
-      <button class="pgterm-qbtn" data-cmd="bench.power" data-run="1">bench.power</button>
-      <button class="pgterm-qbtn" data-cmd="bench.tool kess" data-run="1">bench.tool kess</button> -->
-      <!-- <button class="pgterm-qbtn" data-cmd="dtc.clear" data-run="1">dtc.clear</button> -->
-      <button class="pgterm-qbtn" data-cmd="report" data-run="1">report</button>
       <button class="pgterm-qbtn" data-cmd="clear" data-run="1">clear</button>
     </div>
 
     <!-- Status bar -->
-    <div class="pgterm-statusbar">
+    <!-- <div class="pgterm-statusbar">
       <span>SESSION: <strong id="pg-stat-session">DEFAULT</strong></span>
       <span>SECURITY: <strong id="pg-stat-security">LOCKED</strong></span>
       <span>FILE: <strong id="pg-stat-file">none</strong></span>
       <span>FLASH: <strong id="pg-stat-flash">idle</strong></span>
       <span>VBAT: <strong id="pg-stat-vbat">13.8V</strong></span>
-    </div>
+    </div> -->
 
     <div class="pgterm-titlebar">
     </div>
@@ -916,7 +896,7 @@
       <div class="tech-can-stat"><span class="tech-can-lbl">ERROR COUNT</span><span class="tech-can-val"
           id="tech-can-errrate">0</span></div>
       <div class="tech-can-stat"><span class="tech-can-lbl">SCREEN REFRESH RATE</span><span class="tech-can-val"
-          id="tech-can-latency">&lt;10 Hz</span></div>
+          id="tech-can-latency">10 Hz</span></div>
       <div class="tech-can-stat"><span class="tech-can-lbl">SESSION</span><span class="tech-can-val ok-text"
           id="can-session-display">0x03 EXT</span></div>
     </div>

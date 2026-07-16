@@ -135,7 +135,7 @@ body.mode-history     { background: var(--hs-bg);   color: var(--hs-text); }
 
 .brand-logo {
   width: auto;
-  height: 32px;
+  height: 36px;
   border-radius: 8px;
   display: flex;
   align-items: center;
