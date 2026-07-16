@@ -17,7 +17,6 @@ let progUnlocked = false; // Programming session security granted
 let currentSecurityLevel = 0;
 let secAttemptsLeft = 3;
 let secLockout = false;
-let tpInterval = null; // TesterPresent (0x3E) heartbeat timer
 let lastSpeed = 0; // used for pre-condition checks
 
 // ── Theme ──
@@ -101,8 +100,6 @@ function confirmTechUnlock() {
   if (udsLabel) udsLabel.textContent = "EXT 0x03";
   const hint = document.getElementById("adv-uds-hint");
   if (hint) hint.textContent = "✓ Technician mode unlocked";
-  // Start TesterPresent heartbeat
-  startTesterPresent();
   // Switch to technician tab
   setMode("technician");
   // Notify backend — session 3 = extended
@@ -117,7 +114,6 @@ function exitTechMode() {
   // If in programming, exit that first
   if (progUnlocked) exitProgrammingSession();
   techUnlocked = false;
-  stopTesterPresent();
   const techBtn = document.getElementById("tech-tab-btn");
   if (techBtn) techBtn.classList.add("hidden");
   const udsStatus = document.getElementById("uds-status");
@@ -131,55 +127,6 @@ function exitTechMode() {
   sendSessionControl(1);
   setMode("advanced");
 }
-
-// ══════════════════════════════════════════════════
-// TESTER PRESENT (0x3E) — Heartbeat every 4s
-// Must fire while in Extended or Programming session
-// S3 timeout on ECU side is 5s — we send every 4s to stay safe
-// Stopped immediately on session exit or page hide
-// ══════════════════════════════════════════════════
-// function startTesterPresent() {
-//   if (tpInterval) return;
-//   const tpIndicator = document.getElementById("tp-indicator");
-//   if (tpIndicator) tpIndicator.classList.remove("hidden");
-//   tpInterval = setInterval(() => {
-//     sendTesterPresent();
-//   }, 4000);
-// }
-
-function stopTesterPresent() {
-  if (tpInterval) {
-    clearInterval(tpInterval);
-    tpInterval = null;
-  }
-  const tpIndicator = document.getElementById("tp-indicator");
-  if (tpIndicator) tpIndicator.classList.add("hidden");
-}
-
-async function sendTesterPresent() {
-  // Sends 0x3E 0x00 to backend (suppressPosRspMsgIndicationBit set)
-  try {
-    await fetch("/diagnostics_session_control/3", { method: "GET" });
-    // Flash TP dot
-    const dot = document.querySelector(".tp-dot");
-    if (dot) {
-      dot.classList.add("tp-flash");
-      setTimeout(() => dot.classList.remove("tp-flash"), 200);
-    }
-  } catch (_) {
-    /* silent — ECU will detect S3 timeout on its own */
-  }
-}
-
-// Stop TesterPresent if tab is hidden (browser backgrounded)
-document.addEventListener("visibilitychange", () => {
-  if (document.hidden && techUnlocked) {
-    showToastMessage(
-      "⚠ Tab hidden — TesterPresent paused. Session may drop.",
-      false,
-    );
-  }
-});
 
 // ══════════════════════════════════════════════════
 // PROGRAMMING SESSION — see pgterm engine near EOF
@@ -1405,7 +1352,6 @@ async function loadHistory() {
       setStatus(false, data.error);
       return;
     }
-    // console.log(data)
     renderHistoryChart(data);
     renderTable(data);
     const sig = document.getElementById("signal-select").value;
@@ -1696,8 +1642,6 @@ function showProgPanel() {
   pgBootBanner();
 }
 
-// Way B — backdoor entry. Skips the seed/key exchange but still
-// notifies the backend so /prog/* routes treat the session as unlocked.
 async function enterProgrammingSessionBackdoor() {
   try {
     const res = await fetch("/diagnostics_session_control/2");
@@ -1729,46 +1673,6 @@ async function exitProgrammingSession() {
   if (progBtn) progBtn.classList.add("hidden");
   setMode("technician");
 }
-
-// async function pgRefreshStatusBar() {
-//   try {
-//     const res = await fetch("/prog/state");
-//     const data = await res.json();
-//     if (data.status !== "success") return;
-//     const s = data.data;
-//     setText(
-//       "pg-stat-session",
-//       s.session === 2 ? "PROGRAMMING (0x02)" : "DEFAULT (0x01)",
-//     );
-//     const secEl = document.getElementById("pg-stat-security");
-//     if (secEl) {
-//       secEl.textContent = s.security.level >= 2 ? "UNLOCKED" : "LOCKED";
-//       secEl.className = s.security.level >= 2 ? "" : "warn";
-//     }
-//     const fileEl = document.getElementById("pg-stat-file");
-//     if (fileEl)
-//       fileEl.textContent = s.files.modified
-//         ? s.files.modified.name
-//         : s.files.original
-//           ? s.files.original.name + " (read only)"
-//           : "none";
-//     const flashEl = document.getElementById("pg-stat-flash");
-//     if (flashEl) {
-//       flashEl.textContent =
-//         s.flash.status +
-//         (s.flash.status !== "idle" && s.flash.status !== "success"
-//           ? ` ${s.flash.progress}%`
-//           : "");
-//       flashEl.className =
-//         s.flash.status === "error"
-//           ? "err"
-//           : s.flash.status === "success"
-//             ? ""
-//             : "warn";
-//     }
-//     setText("pg-stat-vbat", s.flash.voltage.toFixed(1) + "V");
-//   } catch (_) {}
-// }
 
 // ── Command implementations ──
 async function pgCmd_ecuId() {
